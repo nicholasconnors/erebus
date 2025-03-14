@@ -39,10 +39,10 @@ class WrappedFits(H5Serializable):
         if not force_clear_cache and os.path.isfile(self.cache_file):
             self.load_from_path(self.cache_file)
         else:
-            self.load_from_calints_file()
+            self.__load_from_calints_file()
             self.save_to_path(self.cache_file)
     
-    def load_from_calints_file(self):
+    def __load_from_calints_file(self):
         '''
         Loads a calints file and wraps it taking only 127x127 pixels around the star and the time series
         '''

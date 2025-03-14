@@ -89,3 +89,43 @@ def clean_frames(raw_frames : np.ndarray, outlier_threshold : float) -> np.ndarr
     print(f"{outlier_count} values were outliers out of {total_pixels}")
     
     return frames
+
+def is_point_in_disk(x : int, y : int, center_x : int, center_y : int,
+                     inner_radius : int, outer_radius : int) -> bool:
+    '''
+    Reports if a given x, y coordinate is within a disk defined by the other parameters
+    '''
+    r2 = (x - center_x)**2 + (y - center_y)**2
+    return outer_radius ** 2 > r2 >= inner_radius ** 2
+
+
+def get_points_in_disk(center_x : int, center_y : int, inner_radius : int,
+                       outer_radius : int) -> np.ndarray:
+    '''
+    Returns an array of integer points contained within the defined disk
+    '''
+    x_start = center_x - outer_radius
+    x_end = center_x + outer_radius
+    y_start = center_y - outer_radius
+    y_end = center_y + outer_radius
+    xs = np.arange(x_start, x_end)
+    ys = np.arange(y_start, y_end)
+
+    # Points within the square
+    points = np.array([[(x, y) for x in xs]
+                      for y in ys]).reshape((outer_radius * 2)**2, 2)
+
+    # Points within the disk
+    indices_in_disk = [is_point_in_disk(x, y, center_x, center_y, inner_radius,
+                               outer_radius) for (x, y) in points]
+    filtered_points = points[indices_in_disk]
+    return filtered_points
+
+def average_values_over_disk(center_x : int, center_y : int, inner_radius : int,
+                             outer_radius : int, data : np.ndarray) -> np.ndarray:
+    '''
+    Returns the average value in the disk
+    '''
+    points = get_points_in_disk(center_x, center_y, inner_radius, outer_radius)
+    means = np.array([np.mean([datum[point[0],[point[1]]] for point in points]) for datum in data])
+    return means
