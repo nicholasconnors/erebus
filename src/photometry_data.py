@@ -1,9 +1,9 @@
 import os
 import hashlib
 import numpy as np
-import src.aperture_photometry_utils as ap_utils
+import src.utility.aperture_photometry_utils as ap_utils
 from src.wrapped_fits import WrappedFits
-from src.h5_serializable_file import H5Serializable
+from src.utility.h5_serializable_file import H5Serializable
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -11,6 +11,8 @@ class PhotometryData(H5Serializable):
     '''
     A class representing the photometric data from a single visit loaded from a calints fits file
     with a specific aperture and annulus
+    
+    Acts as Stage 3/4 of the Erebus pipeline
     '''
     def __init__(self, fits_file : WrappedFits, radius : int, annulus : tuple[int, int],
                  force_clear_cache : bool = False):  

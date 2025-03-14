@@ -1,10 +1,10 @@
 import numpy as np
 import os
 import hashlib
-import src.fits_file_utils as f_utils
-import src.aperture_photometry_utils as ap_utils
-import src.utils as utils
-from src.h5_serializable_file import H5Serializable
+import src.utility.fits_file_utils as f_utils
+import src.utility.aperture_photometry_utils as ap_utils
+import src.utility.utils as utils
+from src.utility.h5_serializable_file import H5Serializable
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -14,6 +14,8 @@ class WrappedFits(H5Serializable):
     If the star pixel position is not provided we will fit for it
     Contains the flux in a 127x127 pixel region centered around the star
     Performs outerlier rejection and interpolation of bad pixels
+    
+    Acts as the Stage 2 input to the Erebus pipeline
     '''
     def __init__(self, source_folder : str, visit_name : str, force_clear_cache : bool = False,
                  cache_path_override : str = None, star_pixel_position : tuple[int, int] = None):       
