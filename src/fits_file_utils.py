@@ -13,6 +13,8 @@ def get_fits_files_visits_in_folder(folder : str):
     file_names = [os.path.basename(path) for path in all_files] 
     # First 13 characters are the visit ID
     visits = np.unique([file_name[:13] for file_name in file_names])
+    if len(visits) == 0:
+        print("No visits were found in that folder. Is the directory mounted?")
     return visits
 
 def get_fits_files_in_folder(folder : str, visit_name : str, calibrated : bool):
@@ -31,7 +33,7 @@ def load_all_calints_for_visit(folder : str, visit_name : str):
     Pixels marked DO_NOT_USE are set to -1
     '''
 
-    print("Loading data from calints in " + folder)
+    print(f"Loading data from calints in {folder}")
     calints_file_names = get_fits_files_in_folder(folder, visit_name, True)
     
     combined_data = []
