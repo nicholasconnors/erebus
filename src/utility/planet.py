@@ -16,6 +16,7 @@ class Planet:
     Class which represents known planet values with uncertainties
     Loaded from a yaml file validated against a schema
     '''
+    name : str
     t0 : UFloat | float
     a_rstar : UFloat | float
     p : UFloat | float
@@ -32,6 +33,7 @@ class Planet:
         1 float = no uncertainty, 2 floats = symmetric error, 3 floats = asymmetric error
         
         Attributes:
+            name        Name of the planet
             t0          Midpoint time of reference transit
             a_rstar     Semi-major axis in units of stellar radii
             p           Orbital period in days
@@ -43,6 +45,7 @@ class Planet:
         def __make_title(field_name: str, _: FieldInfo) -> str:
             return field_name
         
+        name : str
         t0 : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
         a_rstar : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
         p : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
@@ -60,6 +63,7 @@ class Planet:
             return ufloat(l[0], np.max(np.abs(l[1:])))
 
     def __load_from_yaml(self, yaml : __PlanetYAML):
+        self.name = yaml.name
         self.t0 = self.__ufloat_from_list(yaml.t0)
         self.a_rstar = self.__ufloat_from_list(yaml.a_rstar)
         self.p = self.__ufloat_from_list(yaml.p)

@@ -1,5 +1,6 @@
-# yaml-language-server: $schema=../schema/planet_schema.json
+# yaml-language-server: $schema=../../src/schema/planet_schema.json
 
+name: TRAPPIST-1c
 t0: [2459779.210475, 0.000025]
 p: [2.421937, 0.000018]
 rp_rstar: [0.08440, 0.00038]

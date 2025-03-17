@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.special import gamma
+from uncertainties.core import Variable as UFloat
+from uncertainties import ufloat
 
 class Parameter:
     '''
@@ -35,7 +37,14 @@ class Parameter:
             if self.type == 'uniform':
                 # Update the initial guess so that the walkers don't get stuck in impossible areas
                 self.initial_guess_variation = np.min([value - self.minimum, self.maximum - value]) / 4
-
+    
+    @classmethod
+    def prior_from_ufloat(cls, parameter : float | UFloat):
+        if isinstance(parameter, float):
+            return Parameter.fixed(parameter)
+        else:
+            return Parameter.gaussian_prior(parameter.nominal_value, parameter.std_dev)
+        
     @classmethod
     def uniform_prior(cls, initial_guess: float, minimum: float, maximum: float) -> "Parameter":
         '''

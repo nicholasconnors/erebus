@@ -1,0 +1,102 @@
+{
+  "description": "Settings for running through the entire pipeline\nSerializable to YAML",
+  "properties": {
+    "fit_fnpca": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false,
+      "title": "Fit Fnpca"
+    },
+    "fit_exponential": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false,
+      "title": "Fit Exponential"
+    },
+    "fit_linear": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false,
+      "title": "Fit Linear"
+    },
+    "perform_joint_fit": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false,
+      "title": "Perform Joint Fit"
+    },
+    "perform_individual_fits": {
+      "title": "Perform Individual Fits",
+      "type": "boolean"
+    },
+    "calints_path": {
+      "title": "Calints Path",
+      "type": "string"
+    },
+    "planet_path": {
+      "title": "Planet Path",
+      "type": "string"
+    },
+    "aperture_radius": {
+      "title": "Aperture Radius",
+      "type": "integer"
+    },
+    "annulus_start": {
+      "title": "Annulus Start",
+      "type": "integer"
+    },
+    "annulus_end": {
+      "title": "Annulus End",
+      "type": "integer"
+    },
+    "skip_visits": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Skip Visits"
+    }
+  },
+  "required": [
+    "perform_individual_fits",
+    "calints_path",
+    "planet_path",
+    "aperture_radius",
+    "annulus_start",
+    "annulus_end"
+  ],
+  "title": "ErebusRunConfig",
+  "type": "object"
+}

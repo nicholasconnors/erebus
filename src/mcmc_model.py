@@ -8,6 +8,7 @@ from uncertainties import ufloat
 import corner
 import matplotlib.pyplot as plt
 
+# TODO: Save/load using emcee.backends.HDFBackend + H5Serializable
 class WrappedMCMC:
     '''
     Wrapper class for emcee
@@ -46,9 +47,6 @@ class WrappedMCMC:
         if method_params != defined_params:
             raise Exception("Defined parameters don't match given method! Method:", method_params, "Defined", defined_params)
         self.model_function = method
-        
-    def get_results(self) -> float:
-        return [p.value for p in self.params if self.params[p].type != "fixed"]
 
     def get_free_params(self) -> list[Parameter]:
         '''

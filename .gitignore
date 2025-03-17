@@ -172,3 +172,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Erebus cache files can get too large to commit without LFS
+erebus_cache
