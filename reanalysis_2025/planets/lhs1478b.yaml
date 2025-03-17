@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=../schema/planet_schema.json
+
+t0: [2458786.75425, 0.00042]
+p: [1.9495378, 0.0000041]
+rp_rstar: [0.0462, 0.0011]
+a_rstar: [16.119, 0.094]
+inc: [87.452, 0.052]
+ecc: [0]
+w: [0]

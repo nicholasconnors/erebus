@@ -1,0 +1,72 @@
+{
+  "description": "Serialized YAML representation of a Planet for the Erebus pipeline\n\nPlanet parameters with optional uncertainties are represented as lists of up to 3 floats\n1 float = no uncertainty, 2 floats = symmetric error, 3 floats = asymmetric error\n\nAttributes:\n    t0          Midpoint time of reference transit\n    a_rstar     Semi-major axis in units of stellar radii\n    p           Orbital period in days\n    rp_rstar    Radius of the exoplanet in units of stellar radii\n    inc         Inclination in degrees\n    ecc         Eccentricity\n    w           Argument of periastron in degrees   ",
+  "properties": {
+    "t0": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 3,
+      "title": "t0",
+      "type": "array"
+    },
+    "a_rstar": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 3,
+      "title": "a_rstar",
+      "type": "array"
+    },
+    "p": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 3,
+      "title": "p",
+      "type": "array"
+    },
+    "rp_rstar": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 3,
+      "title": "rp_rstar",
+      "type": "array"
+    },
+    "inc": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 3,
+      "title": "inc",
+      "type": "array"
+    },
+    "ecc": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 3,
+      "title": "ecc",
+      "type": "array"
+    },
+    "w": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 3,
+      "title": "w",
+      "type": "array"
+    }
+  },
+  "required": [
+    "t0",
+    "a_rstar",
+    "p",
+    "rp_rstar",
+    "inc",
+    "ecc",
+    "w"
+  ],
+  "title": "__PlanetYAML",
+  "type": "object"
+}

@@ -1,0 +1,79 @@
+import json
+
+from typing import Annotated, List
+
+from pydantic import BaseModel, Field
+from pydantic.fields import FieldInfo
+from uncertainties import ufloat
+from uncertainties.core import Variable as UFloat
+
+from pydantic_yaml import parse_yaml_file_as
+
+import numpy as np
+
+class Planet:
+    '''
+    Class which represents known planet values with uncertainties
+    Loaded from a yaml file validated against a schema
+    '''
+    t0 : UFloat | float
+    a_rstar : UFloat | float
+    p : UFloat | float
+    rp_rstar : UFloat | float
+    inc : UFloat | float
+    ecc : UFloat | float
+    w : UFloat | float
+    
+    class __PlanetYAML(BaseModel):
+        '''
+        Serialized YAML representation of a Planet for the Erebus pipeline
+        
+        Planet parameters with optional uncertainties are represented as lists of up to 3 floats
+        1 float = no uncertainty, 2 floats = symmetric error, 3 floats = asymmetric error
+        
+        Attributes:
+            t0          Midpoint time of reference transit
+            a_rstar     Semi-major axis in units of stellar radii
+            p           Orbital period in days
+            rp_rstar    Radius of the exoplanet in units of stellar radii
+            inc         Inclination in degrees
+            ecc         Eccentricity
+            w           Argument of periastron in degrees   
+        '''
+        def __make_title(field_name: str, _: FieldInfo) -> str:
+            return field_name
+        
+        t0 : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
+        a_rstar : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
+        p : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
+        rp_rstar : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
+        inc : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
+        ecc : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
+        w : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
+
+    def __ufloat_from_list(self, l : List[float]) -> UFloat | float:
+        if len(l) == 1:
+            return l[0]
+        elif len(l) == 2:
+            return ufloat(l[0], np.abs(l[1]))
+        elif len(l) == 3:
+            return ufloat(l[0], np.max(np.abs(l[1:])))
+
+    def __load_from_yaml(self, yaml : __PlanetYAML):
+        self.t0 = self.__ufloat_from_list(yaml.t0)
+        self.a_rstar = self.__ufloat_from_list(yaml.a_rstar)
+        self.p = self.__ufloat_from_list(yaml.p)
+        self.rp_rstar = self.__ufloat_from_list(yaml.rp_rstar)
+        self.inc = self.__ufloat_from_list(yaml.inc)
+        self.ecc = self.__ufloat_from_list(yaml.ecc)
+        self.w = self.__ufloat_from_list(yaml.w)
+    
+    def __init__(self, yaml_path : str):
+        self.__load_from_yaml(parse_yaml_file_as(Planet.__PlanetYAML, yaml_path))
+    
+    def save_schema(path : str):
+        planet_schema = Planet.__PlanetYAML.model_json_schema()
+        planet_schema_json = json.dumps(planet_schema, indent=2)
+        with open(path, "w") as f:
+            f.write(planet_schema_json)
+        
