@@ -1,4 +1,3 @@
-from sklearn.decomposition import IncrementalPCA
 from sklearn.decomposition import PCA as NormalPCA
 import src.utility.aperture_photometry_utils as ap_utils
 import numpy as np

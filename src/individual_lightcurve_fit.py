@@ -7,20 +7,25 @@ from src.utility.planet import Planet
 from src.mcmc_model import WrappedMCMC
 from src.utility.bayesian_parameter import Parameter
 from src.utility.run_cfg import ErebusRunConfig
+from src.frame_normalized_pca import perform_fnpca
 import batman
+
+from src.wrapped_fits import WrappedFits
 
 # TODO: Make this serializable with its results
 # Base hash off of the photometry hash, planet name, config to json string hash
 class IndividualLightcurveFit:
     instance = None
     
-    def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig):
+    def __init__(self, photometry_data : PhotometryData, fits : WrappedFits, planet : Planet, config : ErebusRunConfig):
         self.time = photometry_data.t
         self.raw_flux = photometry_data.light_curve
         self.config = config
         
         self.params = None
         self.transit_model = None
+        
+        self.eigenvalues, self.eigenvectors = perform_fnpca(photometry_data, fits)
         
         IndividualLightcurveFit.instance = self
         
@@ -99,7 +104,8 @@ class IndividualLightcurveFit:
                          exp1 : float, exp2 : float, a : float, b : float) -> List[float]:
         systematic = np.ones_like(x)
         if self.config.fit_fnpca:
-            systematic *= 1 # TODO
+            pc = np.dot(np.array([pc1, pc2, pc3, pc4, pc5]), self.eigenvalues[:5])
+            systematic *= 1 + pc
         elif self.config.fit_exponential:
             systematic *= exp1 * np.exp(exp2 * x)
         elif self.config.fit_linear:
