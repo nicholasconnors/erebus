@@ -87,6 +87,23 @@
       ],
       "default": null,
       "title": "Skip Visits"
+    },
+    "trim_integrations": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trim Integrations"
     }
   },
   "required": [

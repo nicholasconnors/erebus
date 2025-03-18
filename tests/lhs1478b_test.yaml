@@ -1,10 +1,11 @@
 # yaml-language-server: $schema=../src/schema/run_cfg_schema.json
 
 fit_fnpca: true
+fit_linear: true
 perform_individual_fits: true
 calints_path: /home/nicho/venus/Research/LHS1478b/JWST
 planet_path: ../reanalysis_2025/planets/lhs1478b.yaml
 aperture_radius: 5
 annulus_start: 12
 annulus_end: 20
-skip_visits: [0]
+trim_integrations: [10, 40]

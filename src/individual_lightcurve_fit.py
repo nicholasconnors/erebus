@@ -18,23 +18,24 @@ class IndividualLightcurveFit:
     instance = None
     
     def __init__(self, photometry_data : PhotometryData, fits : WrappedFits, planet : Planet, config : ErebusRunConfig):
-        self.time = photometry_data.t
-        self.raw_flux = photometry_data.light_curve
+        self.start_trim = 0 if config.trim_integrations is None else config.trim_integrations[0]
+        self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
+        
+        self.time = photometry_data.t[self.start_trim:self.end_trim] - np.min(photometry_data.t)
+        self.raw_flux = photometry_data.light_curve[self.start_trim:self.end_trim]
         self.config = config
         
         self.params = None
         self.transit_model = None
         
-        self.eigenvalues, self.eigenvectors = perform_fnpca(photometry_data, fits)
-        
-        IndividualLightcurveFit.instance = self
+        self.eigenvalues, self.eigenvectors = perform_fnpca(fits.frames[self.start_trim:self.end_trim], photometry_data.radius, photometry_data.annulus_start, photometry_data.annulus_end)
         
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
         predicted_t_sec = (planet.t0 - np.min(photometry_data.t) - 2400000.5 + planet.p / 2.0) % nominal_period
         
         mcmc = WrappedMCMC()
         mcmc.add_parameter("t_sec", Parameter.prior_from_ufloat(predicted_t_sec))
-        mcmc.add_parameter("fp", Parameter.uniform_prior(0, -2000, 2000))
+        mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -2000e-6, 2000e-6))
         mcmc.add_parameter("t0", Parameter.prior_from_ufloat(planet.t0))
         mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar))
         mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar))
@@ -45,7 +46,7 @@ class IndividualLightcurveFit:
         
         if self.config.fit_fnpca:
             for i in range(0, 5):
-                mcmc.add_parameter(f"pc{(i+1)}", Parameter.uniform_prior(0.1, -10, 10))
+                mcmc.add_parameter(f"pc{(i+1)}", Parameter.uniform_prior(100, -1e6, 1e6))
         else:
             for i in range(0, 5):
                 mcmc.add_parameter(f"pc{(i+1)}", Parameter.fixed(0))
@@ -58,19 +59,15 @@ class IndividualLightcurveFit:
             mcmc.add_parameter("exp2", Parameter.fixed(0))
 
         if self.config.fit_linear:
-            mcmc.add_parameter("a", Parameter.uniform_prior(0.01, -0.1, 0.1))
+            mcmc.add_parameter("a", Parameter.uniform_prior(0.1, -2, 2))
         else:
             mcmc.add_parameter("a", Parameter.fixed(0))
-
-        # All models involve an offset
-        if self.config.fit_fnpca or self.config.fit_exponential or self.config.fit_linear:
-            mcmc.add_parameter("b", Parameter.uniform_prior(0, -0.01, 0.01))
-        else:
-            mcmc.add_parameter("b", Parameter.fixed(0))
             
-        mcmc.add_parameter("y_err", Parameter.uniform_prior(400, 0, 2000))
+        mcmc.add_parameter("b", Parameter.uniform_prior(1e-6, -0.01, 0.01))
+            
+        mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))
         
-        mcmc.set_method(IndividualLightcurveFit.fit_method)
+        mcmc.set_method(IndividualLightcurveFit.__mcmc_fit_method)
         
         self.mcmc = mcmc
     
@@ -85,7 +82,7 @@ class IndividualLightcurveFit:
             params = batman.TransitParams()
             params.t0 = t0
             params.t_secondary = t_sec
-            params.fp = fp * 1e-6
+            params.fp = fp
             params.rp = rp_rstar
             params.inc = inc
             params.per = p
@@ -96,37 +93,52 @@ class IndividualLightcurveFit:
             params.u = [0.3, 0.3]
             transit_model = batman.TransitModel(params, x, transittype="secondary")
         params.t_secondary = t_sec
-        params.fp = fp * 1e-6
+        params.fp = fp
         flux_model = transit_model.light_curve(params)
-        return (flux_model - params.fp) * 1e6 # ppm
+        return (flux_model - params.fp)
     
     def systematic_model(self, x : List[float], pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float, 
                          exp1 : float, exp2 : float, a : float, b : float) -> List[float]:
         systematic = np.ones_like(x)
         if self.config.fit_fnpca:
-            pc = np.dot(np.array([pc1, pc2, pc3, pc4, pc5]), self.eigenvalues[:5])
-            systematic *= 1 + pc
-        elif self.config.fit_exponential:
-            systematic *= exp1 * np.exp(exp2 * x)
-        elif self.config.fit_linear:
-            systematic *= a * x
+            coeffs = np.array([pc1, pc2, pc3, pc4, pc5])
+            pca = np.ones_like(self.eigenvalues[0])
+            for i in range(0, 5):
+                pca += coeffs[i] * self.eigenvalues[i]
+            systematic *= pca
+        if self.config.fit_exponential:
+            systematic *= (exp1 * np.exp(exp2 * x)) + 1
+        if self.config.fit_linear:
+            systematic *= (a * x) + 1
         
-        # All models involve an offset
-        if self.config.fit_fnpca or self.config.fit_exponential or self.config.fit_linear:
-            systematic += b
+        systematic += b
         
         return systematic
         
     # TODO: would be nice to generate this dynamically
-    def fit_method(x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
+    def fit_method(self, x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float, 
                        pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float,
                        exp1 : float, exp2 : float, a : float, b : float) -> List[float]:
-        systematic = IndividualLightcurveFit.instance.systematic_model(x, pc1, pc2, pc3, pc4, pc5, exp1, exp2, a, b)
-        physical = IndividualLightcurveFit.instance.physical_model(x, t_sec, fp, t0, rp_rstar, a_rstar, p, inc, ecc, w)
+        systematic = self.systematic_model(x, pc1, pc2, pc3, pc4, pc5, exp1, exp2, a, b)
+        physical = self.physical_model(x, t_sec, fp, t0, rp_rstar, a_rstar, p, inc, ecc, w)
         return physical * systematic 
+    
+    def __mcmc_fit_method(x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
+                       a_rstar : float, p : float, inc : float, ecc : float, w : float, 
+                       pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float,
+                       exp1 : float, exp2 : float, a : float, b : float) -> List[float]:
+        '''
+        MCMC method input must be static
+        '''
+        return IndividualLightcurveFit.instance.fit_method(x, t_sec, fp, t0, rp_rstar,
+                                                           a_rstar, p, inc, ecc, w,
+                                                           pc1, pc2, pc3, pc4, pc5,
+                                                           exp1, exp2, a, b)
 
     def run(self):
+        # Since the MCMC runs off a static method set the static instance to this object first
+        IndividualLightcurveFit.instance = self
         self.mcmc.run(self.time, self.raw_flux)
         self.mcmc.corner_plot()
         self.mcmc.chain_plot()

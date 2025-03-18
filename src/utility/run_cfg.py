@@ -1,6 +1,6 @@
 import json
 
-from typing import Annotated, List, Optional
+from typing import Annotated, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 from pydantic.fields import FieldInfo
@@ -27,6 +27,7 @@ class ErebusRunConfig(BaseModel):
     annulus_start : int
     annulus_end : int
     skip_visits : Optional[List[int]] = None
+    trim_integrations : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     
     def load(path : str):
         return parse_yaml_file_as(ErebusRunConfig, path)

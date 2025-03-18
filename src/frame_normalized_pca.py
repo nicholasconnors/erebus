@@ -2,41 +2,37 @@ from sklearn.decomposition import PCA as NormalPCA
 import src.utility.aperture_photometry_utils as ap_utils
 import numpy as np
 
-from src.photometry_data import PhotometryData
-from src.wrapped_fits import WrappedFits
-
-def perform_fnpca(data : PhotometryData, fits : WrappedFits):
+def perform_fnpca(frames : np.ndarray, radius : int, annulus_start : int, annulus_end : int):
     '''
     Performs Frame-Normalized PCA on a photometric time series data set
     
     Returns the eigenvalue eigenimage pairs
     '''
-    center_x = fits.frames[0].shape[0]//2+1
-    center_y = fits.frames[0].shape[1]//2+1
-    points_in_aperture = ap_utils.get_points_in_disk(center_x, center_y, 0, data.radius)
-    average_in_annulus = ap_utils.average_values_over_disk(center_x, center_y, data.annulus_start, data.annulus_end, fits.frames)
+    center_x = frames[0].shape[0]//2+1
+    center_y = frames[0].shape[1]//2+1
+    points_in_aperture = ap_utils.get_points_in_disk(center_x, center_y, 0, radius)
+    average_in_annulus = ap_utils.average_values_over_disk(center_x, center_y, annulus_start, annulus_end, frames)
     # For each frame, take square surrounding aperture, take points only in aperture, do bg-subtraction, normalize
-    size = data.radius * 2 + 1
-    frames = np.zeros((len(fits.frames), size, size))
-    for i in range(0, len(fits.frames)):
+    size = radius * 2 + 1
+    normalized_frames = np.zeros((len(frames), size, size))
+    for i in range(0, len(frames)):
         for point in points_in_aperture:
             x = point[0]
             y = point[1]
-            j = x - center_x + data.radius
-            k = y - center_y + data.radius
-            frames[i, j, k] = fits.frames[i, x, y]
-        frames[i] -= average_in_annulus[i]
-        frames[i] /= np.sum(frames[i])
+            j = x - center_x + radius
+            k = y - center_y + radius
+            normalized_frames[i, j, k] = frames[i, x, y]
+        normalized_frames[i] -= average_in_annulus[i]
+        normalized_frames[i] /= np.sum(frames[i])
     
     # Perform PCA on normalized frames
-    nint, nrow, ncol = frames.shape
-    flatcube = frames.reshape(frames.shape[0],np.product(frames.shape[1:]))
+    flat_frames = normalized_frames.reshape(normalized_frames.shape[0], np.product(normalized_frames.shape[1:]))
     ipca = NormalPCA()
-    ipca.fit(flatcube)
-    eigenvalues = ipca.fit_transform(flatcube).T
-    eigenimages = np.array([image.reshape((size, size)) for image in ipca.components_])
+    ipca.fit(flat_frames)
+    eigenvalues = ipca.fit_transform(flat_frames).T
+    eigenvectors = np.array([image.reshape((size, size)) for image in ipca.components_])
     
-    return eigenvalues, eigenimages
+    return eigenvalues, eigenvectors
 
     
     

@@ -65,7 +65,7 @@ def clean_frames(raw_frames : np.ndarray, outlier_threshold : float) -> np.ndarr
             outlier = np.abs(pixel_light_curve - np.median(pixel_light_curve)) > outlier_threshold * np.std(pixel_light_curve)
             if not (~outlier).all():
                 outlier_count+=1
-                frames[:,i,j][mask] = np.interp(np.flatnonzero(mask), np.flatnonzero(~mask), pixel_light_curve[~mask])
+                frames[:,i,j][outlier] = np.interp(np.flatnonzero(outlier), np.flatnonzero(~outlier), pixel_light_curve[~outlier])
 
     bad_pixel_mask = np.zeros_like(frames[0], dtype=bool)
     for (x, y) in bad_pixels:
