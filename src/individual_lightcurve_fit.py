@@ -8,16 +8,30 @@ from src.mcmc_model import WrappedMCMC
 from src.utility.bayesian_parameter import Parameter
 from src.utility.run_cfg import ErebusRunConfig
 from src.frame_normalized_pca import perform_fnpca
+from src.utility.h5_serializable_file import H5Serializable
 import batman
+import json
 
 from src.wrapped_fits import WrappedFits
 
+EREBUS_CACHE_DIR = "erebus_cache"
+
 # TODO: Make this serializable with its results
 # Base hash off of the photometry hash, planet name, config to json string hash
-class IndividualLightcurveFit:
+class IndividualLightcurveFit(H5Serializable):
     instance = None
     
+    def exclude_keys(self):
+        return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', 'instance']
+    
     def __init__(self, photometry_data : PhotometryData, fits : WrappedFits, planet : Planet, config : ErebusRunConfig):
+        self.source_folder = fits.source_folder
+        self.visit_name = fits.visit_name
+        source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
+        config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
+        
+        self.cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{source_folder_hash}_{config_hash}_individual_fit.h5"
+        
         self.start_trim = 0 if config.trim_integrations is None else config.trim_integrations[0]
         self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
         
@@ -25,6 +39,7 @@ class IndividualLightcurveFit:
         self.raw_flux = photometry_data.light_curve[self.start_trim:self.end_trim]
         self.config = config
         
+        self.results = {}
         self.params = None
         self.transit_model = None
         
@@ -70,13 +85,17 @@ class IndividualLightcurveFit:
         mcmc.set_method(IndividualLightcurveFit.__mcmc_fit_method)
         
         self.mcmc = mcmc
+        
+        if os.path.isfile(self.cache_file):
+            self.load_from_path(self.cache_file)
+        else:
+            self.save_to_path(self.cache_file)
     
     def physical_model(self, x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
         '''
         Model for the lightcurve using batman
         fp is expected written in ppm
-        output is normalized such that the out-of-eclipse baseline is 1
         '''
         if self.params is None:
             params = batman.TransitParams()
@@ -95,7 +114,7 @@ class IndividualLightcurveFit:
         params.t_secondary = t_sec
         params.fp = fp
         flux_model = transit_model.light_curve(params)
-        return (flux_model - params.fp)
+        return flux_model
     
     def systematic_model(self, x : List[float], pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float, 
                          exp1 : float, exp2 : float, a : float, b : float) -> List[float]:
@@ -142,4 +161,7 @@ class IndividualLightcurveFit:
         self.mcmc.run(self.time, self.raw_flux)
         self.mcmc.corner_plot()
         self.mcmc.chain_plot()
+        self.results = self.mcmc.results
         print(self.mcmc.results)
+        
+        self.save_to_path(self.cache_file)

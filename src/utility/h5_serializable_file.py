@@ -1,3 +1,4 @@
+from typing import List
 import h5py
 import numpy as np
 import os
@@ -29,6 +30,9 @@ class H5Serializable:
             if "__ufloat__" in d:
                 return ufloat(float(d['nominal_value']), float(d['std_dev']))
             return d
+    
+    def exclude_keys(self) -> List[str]:
+        return []
     
     def load_from_path(self, file_path : str):
         try:
@@ -62,7 +66,7 @@ class H5Serializable:
         try:
             hf = h5py.File(file_path, 'w')
             # Filter out "private" attributes
-            names = [key for key in dir(self) if not key.startswith('_')]
+            names = [key for key in dir(self) if not key.startswith('_') and not key in self.exclude_keys()]
             for name in names:
                 try:
                     value = self.__getattribute__(name)
@@ -81,7 +85,7 @@ class H5Serializable:
                     elif not inspect.ismethod(value):
                         hf.attrs[name] = value
                 except Exception as e:
-                    print(f"Couldn't save {name}")
+                    print(f"Couldn't save [{name}]")
                     raise
         except Exception as e:
             print(f"Failed to save h5 data: {e}")

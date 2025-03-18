@@ -40,10 +40,15 @@ class Erebus(H5Serializable):
             for i in range(0, len(self.visit_names)):
                 individual_fit = IndividualLightcurveFit(self.photometry[i], self.fits[i], self.planet, self.config)
                 self.results.append(individual_fit)
+                print(f"Visit {self.visit_names[i]} " + ("was already run" if 'fp' in individual_fit.results else "was not yet run"))
         # TODO: Joint fitting
     
-    def run(self):
+    def run(self, force_clear_cache : bool = False):
         for fit in self.results:
-            fit.run()
+            has_run = 'fp' in fit.results
+            if not has_run or force_clear_cache:
+                fit.run()
+            else:
+                print(fit.visit_name + " already ran")
         
         
