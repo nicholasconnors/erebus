@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../../src/schema/run_cfg_schema.json
+
+fit_fnpca: true
+fit_linear: true
+#fit_exponential: true
+perform_individual_fits: true
+calints_path: /home/nicho/venus/Research/TRAPPIST-1B/JWST
+planet_path: ./planets/trappist1b.yaml
+aperture_radius: 5
+annulus_start: 12
+annulus_end: 20
+skip_visits: [0,2,3,4]
+trim_integrations: [15, 10]
+star_position: [697, 515]

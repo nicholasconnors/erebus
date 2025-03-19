@@ -45,8 +45,8 @@ class PhotometryData(H5Serializable):
             self.save_to_path(self.cache_file)
     
     def __do_aperture_photometry(self, fits_file : WrappedFits):
-        center_x = fits_file.frames[0].shape[0]//2+1
-        center_y = fits_file.frames[0].shape[1]//2+1
+        center_x = fits_file.frames[0].shape[0]//2
+        center_y = fits_file.frames[0].shape[1]//2
         average_in_aperture = ap_utils.average_values_over_disk(center_x, center_y, 0, self.radius, fits_file.frames)
         average_in_annulus = ap_utils.average_values_over_disk(center_x, center_y, self.annulus_start, self.annulus_end, fits_file.frames)
         flux = average_in_aperture - average_in_annulus
@@ -54,8 +54,8 @@ class PhotometryData(H5Serializable):
         self.raw_flux = flux
      
     def __get_normalized_frames(self, fits_file : WrappedFits):
-        center_x = fits_file.frames[0].shape[0]//2+1
-        center_y = fits_file.frames[0].shape[1]//2+1
+        center_x = fits_file.frames[0].shape[0]//2
+        center_y = fits_file.frames[0].shape[1]//2
         points_in_aperture = ap_utils.get_points_in_disk(center_x, center_y, 0, self.radius)
         average_in_annulus = ap_utils.average_values_over_disk(center_x, center_y, self.annulus_start, self.annulus_end, fits_file.frames)
         # For each frame, take square surrounding aperture, take points only in aperture, do bg-subtraction, normalize
@@ -67,6 +67,7 @@ class PhotometryData(H5Serializable):
                 y = point[1]
                 j = x - center_x + self.radius
                 k = y - center_y + self.radius
-                self.normalized_frames[i, j, k] = fits_file.frames[i, x, y]
-            self.normalized_frames[i] -= average_in_annulus[i]
+                # Background subtracted
+                self.normalized_frames[i, j, k] = np.max([0.0, fits_file.frames[i, x, y] - average_in_annulus[i]])
+            # Normalize
             self.normalized_frames[i] /= np.sum(self.normalized_frames[i])

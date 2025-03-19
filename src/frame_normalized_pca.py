@@ -1,8 +1,10 @@
+from typing import Tuple
 from sklearn.decomposition import PCA as NormalPCA
 import src.utility.aperture_photometry_utils as ap_utils
 import numpy as np
 
-def perform_fnpca_on_full_frame(frames : np.ndarray, radius : int, annulus_start : int, annulus_end : int):
+def perform_fnpca_on_full_frame(frames : np.ndarray, radius : int,
+                                annulus_start : int, annulus_end : int) -> Tuple[np.ndarray, np.ndarray]:
     '''
     Performs Frame-Normalized PCA on a photometric time series data set
     
@@ -27,7 +29,7 @@ def perform_fnpca_on_full_frame(frames : np.ndarray, radius : int, annulus_start
     
     return perform_fn_pca_on_aperture(normalized_frames)
 
-def perform_fn_pca_on_aperture(aperture_frames):
+def perform_fn_pca_on_aperture(aperture_frames : np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     '''
     Expected aperture_frames to be normalized and background subtracted
     '''

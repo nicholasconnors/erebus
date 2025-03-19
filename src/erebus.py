@@ -11,7 +11,7 @@ from src.mcmc_model import WrappedMCMC
 import src.utility.fits_file_utils as f_util 
 from src.utility.bayesian_parameter import Parameter
 import batman
-from src.individual_lightcurve_fit import IndividualLightcurveFit
+from individual_fit import IndividualFit
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -51,8 +51,9 @@ class Erebus(H5Serializable):
         
         if self.config.perform_individual_fits:
             for i in range(0, len(self.visit_names)):
-                individual_fit = IndividualLightcurveFit(self.photometry[i], 
-                                                         self.planet, self.config)
+                individual_fit = IndividualFit(self.photometry[i], 
+                                                         self.planet, self.config,
+                                                         force_clear_cache)
                 self.results.append(individual_fit)
                 print(f"Visit {self.visit_names[i]} " + ("was already run" if 'fp' in individual_fit.results else "was not yet run"))
         # TODO: Joint fitting
