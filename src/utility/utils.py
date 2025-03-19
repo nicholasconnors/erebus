@@ -1,3 +1,4 @@
+from typing import Callable, List
 import numpy as np
 from scipy.stats import binned_statistic
 
@@ -48,3 +49,15 @@ def bin_data(array: np.ndarray, bin_size : int):
         means.append(np.mean(array_slice))
         errs.append(np.std(array_slice) / np.sqrt(bin_size))
     return np.array(means), np.array(errs)
+
+def create_method_signature(method : Callable, args : List[str]) -> Callable:
+    '''
+    Takes a method and redefines it to use a list of arguments
+    '''
+    args_str = ", ".join(args)
+    function_def = f"def func({args_str}):\n\treturn original_function({args_str})\n"
+    function_code = compile(function_def, "", "exec")
+    function_globals = {}
+    eval(function_code, {"original_function": method}, function_globals)
+    method_with_signature = function_globals["func"]
+    return method_with_signature
