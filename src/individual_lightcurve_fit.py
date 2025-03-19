@@ -7,10 +7,11 @@ from src.utility.planet import Planet
 from src.mcmc_model import WrappedMCMC
 from src.utility.bayesian_parameter import Parameter
 from src.utility.run_cfg import ErebusRunConfig
-from src.frame_normalized_pca import perform_fnpca
+from src.frame_normalized_pca import perform_fn_pca_on_aperture
 from src.utility.h5_serializable_file import H5Serializable
 import batman
 import json
+import matplotlib.pyplot as plt
 
 from src.wrapped_fits import WrappedFits
 
@@ -24,9 +25,9 @@ class IndividualLightcurveFit(H5Serializable):
     def exclude_keys(self):
         return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', 'instance']
     
-    def __init__(self, photometry_data : PhotometryData, fits : WrappedFits, planet : Planet, config : ErebusRunConfig):
-        self.source_folder = fits.source_folder
-        self.visit_name = fits.visit_name
+    def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig):
+        self.source_folder = photometry_data.source_folder
+        self.visit_name = photometry_data.visit_name
         source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
         config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
         
@@ -35,22 +36,32 @@ class IndividualLightcurveFit(H5Serializable):
         self.start_trim = 0 if config.trim_integrations is None else config.trim_integrations[0]
         self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
         
-        self.time = photometry_data.t[self.start_trim:self.end_trim] - np.min(photometry_data.t)
-        self.raw_flux = photometry_data.light_curve[self.start_trim:self.end_trim]
+        self.time = photometry_data.time[self.start_trim:self.end_trim] - np.min(photometry_data.time)
+        self.raw_flux = photometry_data.raw_flux[self.start_trim:self.end_trim]
         self.config = config
         
         self.results = {}
+        self.chain = None
+        
         self.params = None
         self.transit_model = None
         
-        self.eigenvalues, self.eigenvectors = perform_fnpca(fits.frames[self.start_trim:self.end_trim], photometry_data.radius, photometry_data.annulus_start, photometry_data.annulus_end)
-        
-        nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
-        predicted_t_sec = (planet.t0 - np.min(photometry_data.t) - 2400000.5 + planet.p / 2.0) % nominal_period
-        
+        self.eigenvalues, self.eigenvectors = perform_fn_pca_on_aperture(photometry_data.normalized_frames[self.start_trim:self.end_trim])
+                
         mcmc = WrappedMCMC()
-        mcmc.add_parameter("t_sec", Parameter.prior_from_ufloat(predicted_t_sec))
-        mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -2000e-6, 2000e-6))
+        
+        # For circular orbit predict the eclipse time, else use a uniform prior
+        if isinstance(planet.ecc, float) and planet.ecc == 0:
+            print("Circular orbit: using gaussian prior for t_sec")
+            nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
+            predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
+            mcmc.add_parameter("t_sec", Parameter.prior_from_ufloat(predicted_t_sec))
+        else:
+            print("Eccentric orbit: using uniform prior for t_sec")
+            duration = np.max(photometry_data.time - np.min(photometry_data.time))
+            mcmc.add_parameter("t_sec", Parameter.uniform_prior(duration / 2.0, duration / 6.0, duration * 5.0 / 6.0))
+        
+        mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
         mcmc.add_parameter("t0", Parameter.prior_from_ufloat(planet.t0))
         mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar))
         mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar))
@@ -61,7 +72,7 @@ class IndividualLightcurveFit(H5Serializable):
         
         if self.config.fit_fnpca:
             for i in range(0, 5):
-                mcmc.add_parameter(f"pc{(i+1)}", Parameter.uniform_prior(100, -1e6, 1e6))
+                mcmc.add_parameter(f"pc{(i+1)}", Parameter.uniform_prior(0.1, -10, 10))
         else:
             for i in range(0, 5):
                 mcmc.add_parameter(f"pc{(i+1)}", Parameter.fixed(0))
@@ -74,7 +85,7 @@ class IndividualLightcurveFit(H5Serializable):
             mcmc.add_parameter("exp2", Parameter.fixed(0))
 
         if self.config.fit_linear:
-            mcmc.add_parameter("a", Parameter.uniform_prior(0.1, -2, 2))
+            mcmc.add_parameter("a", Parameter.uniform_prior(1e-3, -2, 2))
         else:
             mcmc.add_parameter("a", Parameter.fixed(0))
             
@@ -159,9 +170,18 @@ class IndividualLightcurveFit(H5Serializable):
         # Since the MCMC runs off a static method set the static instance to this object first
         IndividualLightcurveFit.instance = self
         self.mcmc.run(self.time, self.raw_flux)
-        self.mcmc.corner_plot()
-        self.mcmc.chain_plot()
         self.results = self.mcmc.results
+        self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
         print(self.mcmc.results)
         
         self.save_to_path(self.cache_file)
+        
+        self.mcmc.corner_plot()
+        self.mcmc.chain_plot()
+    
+    def plot_fn_pca(self):
+        pass
+    
+    def plot_initial_guess(self):
+        # TODO: Initial guess and first frame
+        pass

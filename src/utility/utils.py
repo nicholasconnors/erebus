@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import binned_statistic
 
 def gaussian_2D(xy, a : float, mu_x : float, mu_y : float, sigma : float, offset : float) -> list[float]:
     '''
@@ -30,3 +31,20 @@ def subarray_2D(array : np.ndarray, x : int, y : int, width : int) -> np.ndarray
 
     # slice only the desired subarray
     return padded_array[padded_y-width//2:padded_y+1+width//2, padded_x-width//2:padded_x+1+width//2]
+
+def bin_data(array: np.ndarray, bin_size : int):
+    '''
+    Returns the means and standard error of each bin
+    '''
+    if len(array) < bin_size:
+        return array, np.zeros_like(array)
+    
+    # Get length which is divisible by bin_size
+    length = (len(array) // bin_size) * bin_size
+    means = []
+    errs = []
+    for i in np.arange(0, length, bin_size):
+        array_slice = array[i:i+bin_size]
+        means.append(np.mean(array_slice))
+        errs.append(np.std(array_slice) / np.sqrt(bin_size))
+    return np.array(means), np.array(errs)

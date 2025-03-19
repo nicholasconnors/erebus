@@ -104,6 +104,23 @@
       ],
       "default": null,
       "title": "Trim Integrations"
+    },
+    "star_position": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Star Position"
     }
   },
   "required": [

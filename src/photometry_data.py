@@ -4,6 +4,7 @@ import numpy as np
 import src.utility.aperture_photometry_utils as ap_utils
 from src.wrapped_fits import WrappedFits
 from src.utility.h5_serializable_file import H5Serializable
+from sklearn.decomposition import PCA as NormalPCA
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -11,6 +12,8 @@ class PhotometryData(H5Serializable):
     '''
     A class representing the photometric data from a single visit loaded from a calints fits file
     with a specific aperture and annulus
+    
+    Also prepares frames for FN PCA
     
     Acts as Stage 3/4 of the Erebus pipeline
     '''
@@ -25,8 +28,10 @@ class PhotometryData(H5Serializable):
         self.cache_file = f"{EREBUS_CACHE_DIR}/_{file_prefix}_photometry_data.h5"
 
         # Defining all attributes
-        self.light_curve = []
-        self.t = fits_file.t
+        self.raw_flux = []
+        self.time = fits_file.t
+        
+        self.normalized_frames = []
         
         self.radius = radius
         self.annulus_start = annulus[0]
@@ -36,6 +41,7 @@ class PhotometryData(H5Serializable):
             self.load_from_path(self.cache_file)
         else:
             self.__do_aperture_photometry(fits_file)
+            self.__get_normalized_frames(fits_file)
             self.save_to_path(self.cache_file)
     
     def __do_aperture_photometry(self, fits_file : WrappedFits):
@@ -45,5 +51,22 @@ class PhotometryData(H5Serializable):
         average_in_annulus = ap_utils.average_values_over_disk(center_x, center_y, self.annulus_start, self.annulus_end, fits_file.frames)
         flux = average_in_aperture - average_in_annulus
         flux = flux / np.median(flux)
-        self.light_curve = flux
+        self.raw_flux = flux
      
+    def __get_normalized_frames(self, fits_file : WrappedFits):
+        center_x = fits_file.frames[0].shape[0]//2+1
+        center_y = fits_file.frames[0].shape[1]//2+1
+        points_in_aperture = ap_utils.get_points_in_disk(center_x, center_y, 0, self.radius)
+        average_in_annulus = ap_utils.average_values_over_disk(center_x, center_y, self.annulus_start, self.annulus_end, fits_file.frames)
+        # For each frame, take square surrounding aperture, take points only in aperture, do bg-subtraction, normalize
+        size = self.radius * 2 + 1
+        self.normalized_frames = np.zeros((len(fits_file.frames), size, size))
+        for i in range(0, len(fits_file.frames)):
+            for point in points_in_aperture:
+                x = point[0]
+                y = point[1]
+                j = x - center_x + self.radius
+                k = y - center_y + self.radius
+                self.normalized_frames[i, j, k] = fits_file.frames[i, x, y]
+            self.normalized_frames[i] -= average_in_annulus[i]
+            self.normalized_frames[i] /= np.sum(self.normalized_frames[i])

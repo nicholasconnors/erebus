@@ -70,6 +70,8 @@ class H5Serializable:
             for name in names:
                 try:
                     value = self.__getattribute__(name)
+                    if value is None:
+                        continue
                     # numpy strings don't serialize properly
                     # frankly I don't even know what a np string is but they crop up sometimes
                     if isinstance(value, np.str_):

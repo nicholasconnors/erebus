@@ -2,7 +2,7 @@ from sklearn.decomposition import PCA as NormalPCA
 import src.utility.aperture_photometry_utils as ap_utils
 import numpy as np
 
-def perform_fnpca(frames : np.ndarray, radius : int, annulus_start : int, annulus_end : int):
+def perform_fnpca_on_full_frame(frames : np.ndarray, radius : int, annulus_start : int, annulus_end : int):
     '''
     Performs Frame-Normalized PCA on a photometric time series data set
     
@@ -25,14 +25,17 @@ def perform_fnpca(frames : np.ndarray, radius : int, annulus_start : int, annulu
         normalized_frames[i] -= average_in_annulus[i]
         normalized_frames[i] /= np.sum(frames[i])
     
-    # Perform PCA on normalized frames
-    flat_frames = normalized_frames.reshape(normalized_frames.shape[0], np.product(normalized_frames.shape[1:]))
-    ipca = NormalPCA()
-    ipca.fit(flat_frames)
-    eigenvalues = ipca.fit_transform(flat_frames).T
-    eigenvectors = np.array([image.reshape((size, size)) for image in ipca.components_])
+    return perform_fn_pca_on_aperture(normalized_frames)
+
+def perform_fn_pca_on_aperture(aperture_frames):
+    '''
+    Expected aperture_frames to be normalized and background subtracted
+    '''
+    length, width, height = aperture_frames.shape
+    flat_frames = aperture_frames.reshape(length, width * height)
+    pca = NormalPCA()
+    pca.fit(flat_frames)
+    eigenvalues = pca.fit_transform(flat_frames).T
+    eigenvectors = np.array([image.reshape((width, height)) for image in pca.components_])
     
     return eigenvalues, eigenvectors
-
-    
-    

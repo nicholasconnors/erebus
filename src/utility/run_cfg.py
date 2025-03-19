@@ -28,6 +28,7 @@ class ErebusRunConfig(BaseModel):
     annulus_end : int
     skip_visits : Optional[List[int]] = None
     trim_integrations : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
+    star_position : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     
     def load(path : str):
         return parse_yaml_file_as(ErebusRunConfig, path)

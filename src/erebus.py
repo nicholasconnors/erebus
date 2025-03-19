@@ -28,17 +28,31 @@ class Erebus(H5Serializable):
         self.results = []
         
         self.visit_names = f_util.get_fits_files_visits_in_folder(run_cfg.calints_path)
+        if self.visit_names is None or len(self.visit_names) == 0:
+            print("No visits found, aborting")
+            return
+        
         if run_cfg.skip_visits is not None:
             filt = np.array([i not in run_cfg.skip_visits for i in range(0, len(self.visit_names))])
             self.visit_names = self.visit_names[filt]
-            
-        self.fits = [WrappedFits(run_cfg.calints_path, visit_name, force_clear_cache) for visit_name in self.visit_names]
-        self.photometry = [PhotometryData(fit, run_cfg.aperture_radius, (run_cfg.annulus_start, run_cfg.annulus_end), force_clear_cache) for fit in self.fits]
+        
+        self.photometry = []
+        for i in range(0, len(self.visit_names)):
+            star_pos = None if run_cfg.star_position is None else (tuple)(run_cfg.star_position)
+            fit = WrappedFits(run_cfg.calints_path, self.visit_names[i], 
+                              force_clear_cache=force_clear_cache,
+                              star_pixel_position=star_pos)
+            self.photometry.append(PhotometryData(fit, run_cfg.aperture_radius,
+                                                  (run_cfg.annulus_start, run_cfg.annulus_end),
+                                                  force_clear_cache))
+            # Improve memory usage
+            del fit
         self.planet = Planet(run_cfg.planet_path)
         
         if self.config.perform_individual_fits:
             for i in range(0, len(self.visit_names)):
-                individual_fit = IndividualLightcurveFit(self.photometry[i], self.fits[i], self.planet, self.config)
+                individual_fit = IndividualLightcurveFit(self.photometry[i], 
+                                                         self.planet, self.config)
                 self.results.append(individual_fit)
                 print(f"Visit {self.visit_names[i]} " + ("was already run" if 'fp' in individual_fit.results else "was not yet run"))
         # TODO: Joint fitting
