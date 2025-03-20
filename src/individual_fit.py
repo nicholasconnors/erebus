@@ -107,20 +107,22 @@ class IndividualFit(H5Serializable):
         '''
         if self.params is None:
             params = batman.TransitParams()
-            params.t0 = t0
-            params.t_secondary = t_sec
-            params.fp = fp
-            params.rp = rp_rstar
-            params.inc = inc
-            params.per = p
-            params.a = a_rstar  
-            params.ecc = ecc
-            params.w = w
             params.limb_dark = "quadratic"
             params.u = [0.3, 0.3]
-            transit_model = batman.TransitModel(params, x, transittype="secondary")
+            
+        params.t0 = t0
         params.t_secondary = t_sec
         params.fp = fp
+        params.rp = rp_rstar
+        params.inc = inc
+        params.per = p
+        params.a = a_rstar  
+        params.ecc = ecc
+        params.w = w
+        
+        if self.transit_model is None:
+            transit_model = batman.TransitModel(params, x, transittype="secondary")
+
         flux_model = transit_model.light_curve(params)
         return flux_model
     
