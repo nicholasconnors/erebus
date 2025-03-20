@@ -26,7 +26,7 @@ class Erebus(H5Serializable):
         # Config file should be split into one for a set of runs and one for each individual run
         self.config = run_cfg
         
-        self.results = []
+        self.individual_fits = []
         
         self.visit_names = f_util.get_fits_files_visits_in_folder(run_cfg.calints_path)
         if self.visit_names is None or len(self.visit_names) == 0:

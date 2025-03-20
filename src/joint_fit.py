@@ -28,9 +28,8 @@ class JointFit(H5Serializable):
     
     def get_predicted_t_sec_of_visit(self, index : int):
         planet = self.planet
-        photometry_data = self.photometry_data_list[index]
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
-        predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
+        predicted_t_sec = (planet.t0 - self.starting_times[index] - 2400000.5 + planet.p / 2.0) % nominal_period
         return predicted_t_sec
     
     def get_visit_index_from_time(self, time : float):
@@ -140,8 +139,9 @@ class JointFit(H5Serializable):
         Assumes all x values are from the same visit
         '''
         visit_index = self.get_visit_index_from_time(x[0])
+        # t_sec is relative to the start of the visit
         predicted_t_sec = self.get_predicted_t_sec_of_visit(visit_index).nominal_value
-        t_sec = predicted_t_sec + t_sec_offset
+        t_sec = predicted_t_sec + t_sec_offset + self.starting_times[visit_index]
         
         if self.params is None:
             params = batman.TransitParams()
@@ -157,11 +157,10 @@ class JointFit(H5Serializable):
         params.a = a_rstar  
         params.ecc = ecc
         params.w = w
-        
-        if visit_index not in self.transit_models:
-            starting_time = self.starting_times[visit_index]
-            time = x - starting_time
-            self.transit_models[visit_index] = batman.TransitModel(params, time, transittype="secondary")
+                
+        # Tried saving the transit model instance but it was causing it to stop returning the light curve?
+        #if visit_index not in self.transit_models:
+        self.transit_models[visit_index] = batman.TransitModel(params, x, transittype="secondary")
 
         flux_model = self.transit_models[visit_index].light_curve(params)
         return flux_model
@@ -172,6 +171,8 @@ class JointFit(H5Serializable):
         Assumes all x are from the same visit
         '''
         visit_index = self.get_visit_index_from_time(x[0])
+        starting_time = self.starting_times[visit_index]
+        time = x - starting_time
 
         systematic = np.ones_like(x)
         if self.config.fit_fnpca:
@@ -181,9 +182,9 @@ class JointFit(H5Serializable):
                 pca += coeffs[i] * self.joint_eigenvalues[visit_index][i]
             systematic *= pca
         if self.config.fit_exponential:
-            systematic *= (exp1 * np.exp(exp2 * x)) + 1
+            systematic *= (exp1 * np.exp(exp2 * time)) + 1
         if self.config.fit_linear:
-            systematic *= (a * x) + 1
+            systematic *= (a * time) + 1
         
         systematic += b
         
