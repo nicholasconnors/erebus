@@ -11,7 +11,8 @@ from src.mcmc_model import WrappedMCMC
 import src.utility.fits_file_utils as f_util 
 from src.utility.bayesian_parameter import Parameter
 import batman
-from individual_fit import IndividualFit
+from src.individual_fit import IndividualFit
+from src.joint_fit import JointFit
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -54,16 +55,23 @@ class Erebus(H5Serializable):
                 individual_fit = IndividualFit(self.photometry[i], 
                                                          self.planet, self.config,
                                                          force_clear_cache)
-                self.results.append(individual_fit)
+                self.individual_fits.append(individual_fit)
                 print(f"Visit {self.visit_names[i]} " + ("was already run" if 'fp' in individual_fit.results else "was not yet run"))
-        # TODO: Joint fitting
+        if self.config.perform_joint_fit:
+            self.joint_fit = JointFit(self.photometry, self.planet, self.config, force_clear_cache)
     
     def run(self, force_clear_cache : bool = False):
-        for fit in self.results:
-            has_run = 'fp' in fit.results
+        if self.config.perform_individual_fits:
+            for fit in self.individual_fits:
+                has_run = 'fp' in fit.results
+                if not has_run or force_clear_cache:
+                    fit.run()
+                else:
+                    print(fit.visit_name + " already ran")
+        if self.config.perform_joint_fit:
+            has_run = 'fp' in self.joint_fit.results
             if not has_run or force_clear_cache:
-                fit.run()
+                self.joint_fit.run()
             else:
-                print(fit.visit_name + " already ran")
-        
+                print("Joint fit already ran")
         

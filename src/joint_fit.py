@@ -1,0 +1,225 @@
+import os
+import hashlib
+from typing import List
+import numpy as np
+from src.photometry_data import PhotometryData
+from src.utility.planet import Planet
+from src.mcmc_model import WrappedMCMC
+from src.utility.bayesian_parameter import Parameter
+from src.utility.run_cfg import ErebusRunConfig
+from src.frame_normalized_pca import perform_fn_pca_on_aperture
+from src.utility.h5_serializable_file import H5Serializable
+import batman
+import json
+import matplotlib.pyplot as plt
+from uncertainties import ufloat
+from src.utility.utils import create_method_signature
+import inspect
+
+EREBUS_CACHE_DIR = "erebus_cache"
+
+class JointFit(H5Serializable):    
+    def exclude_keys(self):
+        '''
+        Excluded from serialization
+        '''
+        return ['config', 'planet', 'photometry_data_list', 'time', 'raw_flux', 'params',
+                'transit_models', 'mcmc']
+    
+    def get_predicted_t_sec_of_visit(self, index : int):
+        planet = self.planet
+        photometry_data = self.photometry_data_list[index]
+        nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
+        predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
+        return predicted_t_sec
+    
+    def get_visit_index_from_time(self, time : float):
+        # Could memoize this but unsure of the memory vs time tradeoff
+        # Starting times are in descending order
+        for i in range(0, len(self.starting_times)):
+            if time > self.starting_times[i]:
+                return i
+        raise Exception(f"Time {time} was outside of the range of possible times ({self.starting_times})")
+    
+    def __init__(self, photometry_data_list : List[PhotometryData], planet : Planet, config : ErebusRunConfig,
+                 force_clear_cache : bool = False):
+        self.source_folder = photometry_data_list[0].source_folder
+        source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
+        config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
+        
+        self.cache_file = f"{EREBUS_CACHE_DIR}/{source_folder_hash}_{config_hash}_joint_fit.h5"
+        
+        self.planet = planet
+        self.photometry_data_list = photometry_data_list
+        
+        self.start_trim = 0 if config.trim_integrations is None else config.trim_integrations[0]
+        self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
+        
+        self.time = np.concatenate([data.time[self.start_trim:self.end_trim] for data in photometry_data_list])
+        self.starting_times = np.array([np.min(data.time) for data in photometry_data_list])
+        self.raw_flux = np.concatenate([data.raw_flux[self.start_trim:self.end_trim] for data in photometry_data_list])
+        self.config = config
+        
+        self.results = {}
+        self.chain = None
+        
+        self.params = None
+        self.transit_models = {}
+        
+        self.joint_eigenvalues = []
+        self.joint_eigenvectors = [] 
+        for i, data in enumerate(photometry_data_list):
+            eigenvalues, eigenvectors = perform_fn_pca_on_aperture(data.normalized_frames[self.start_trim:self.end_trim])
+            self.joint_eigenvalues.append(eigenvalues)
+            self.joint_eigenvectors.append(eigenvectors)
+                
+        mcmc = WrappedMCMC()
+        
+        # For circular orbit predict the eclipse time, else use a uniform prior
+        # Joint fit represents t_sec as an offset from the predicted time for a circular orbit
+        if isinstance(planet.ecc, float) and planet.ecc == 0:
+            print("Circular orbit: using gaussian prior for t_sec_offset")
+            predicted_t_sec = self.get_predicted_t_sec_of_visit(0)
+            t_sec_offset = ufloat(0, predicted_t_sec.std_dev)
+            mcmc.add_parameter("t_sec_offset", Parameter.prior_from_ufloat(t_sec_offset))
+        else:
+            print("Eccentric orbit: using uniform prior for t_sec_offset")
+            duration = np.max(photometry_data_list[0].time - np.min(photometry_data_list[0].time))
+            mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(0, -duration / 3.0, duration / 3.0))
+        
+        mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
+        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(planet.t0))
+        mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar))
+        mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar))
+        mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p))
+        mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc))
+        mcmc.add_parameter("ecc", Parameter.prior_from_ufloat(planet.ecc))
+        mcmc.add_parameter("w", Parameter.prior_from_ufloat(planet.w))
+        
+        for visit_index in range(0, len(photometry_data_list)):
+            if self.config.fit_fnpca:
+                for i in range(0, 5):
+                    mcmc.add_parameter(f"pc{(i+1)}_{visit_index}", Parameter.uniform_prior(0.1, -10, 10))
+            else:
+                for i in range(0, 5):
+                    mcmc.add_parameter(f"pc{(i+1)}_{visit_index}", Parameter.fixed(0))
+            
+            if self.config.fit_exponential:
+                mcmc.add_parameter(f"exp1_{visit_index}", Parameter.uniform_prior(0.01, -0.1, 0.1))
+                mcmc.add_parameter(f"exp2_{visit_index}", Parameter.uniform_prior(-60.0, -200.0, -1.0))
+            else:
+                mcmc.add_parameter(f"exp1_{visit_index}", Parameter.fixed(0))
+                mcmc.add_parameter(f"exp2_{visit_index}", Parameter.fixed(0))
+
+            if self.config.fit_linear:
+                mcmc.add_parameter(f"a_{visit_index}", Parameter.uniform_prior(1e-3, -2, 2))
+            else:
+                mcmc.add_parameter(f"a_{visit_index}", Parameter.fixed(0))
+                
+            mcmc.add_parameter(f"b_{visit_index}", Parameter.uniform_prior(1e-6, -0.01, 0.01))
+            
+        mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))
+        
+        args = ["x"] + [key for key in mcmc.params][:-1]
+        fit_method = create_method_signature(self.fit_method, args)
+
+        mcmc.set_method(fit_method)
+        
+        self.mcmc = mcmc
+        
+        if os.path.isfile(self.cache_file) and not force_clear_cache:
+            self.load_from_path(self.cache_file)
+        else:
+            self.save_to_path(self.cache_file)
+    
+    def physical_model(self, x : List[float], t_sec_offset : float, fp : float, t0 : float, rp_rstar : float,
+                       a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
+        '''
+        Model for the lightcurve using batman
+        fp is expected written in ppm
+        Assumes all x values are from the same visit
+        '''
+        visit_index = self.get_visit_index_from_time(x[0])
+        predicted_t_sec = self.get_predicted_t_sec_of_visit(visit_index).nominal_value
+        t_sec = predicted_t_sec + t_sec_offset
+        
+        if self.params is None:
+            params = batman.TransitParams()
+            params.limb_dark = "quadratic"
+            params.u = [0.3, 0.3]
+        
+        params.t0 = t0
+        params.t_secondary = t_sec
+        params.fp = fp
+        params.rp = rp_rstar
+        params.inc = inc
+        params.per = p
+        params.a = a_rstar  
+        params.ecc = ecc
+        params.w = w
+        
+        if visit_index not in self.transit_models:
+            starting_time = self.starting_times[visit_index]
+            time = x - starting_time
+            self.transit_models[visit_index] = batman.TransitModel(params, time, transittype="secondary")
+
+        flux_model = self.transit_models[visit_index].light_curve(params)
+        return flux_model
+    
+    def systematic_model(self, x : List[float], pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float, 
+                         exp1 : float, exp2 : float, a : float, b : float) -> List[float]:
+        '''
+        Assumes all x are from the same visit
+        '''
+        visit_index = self.get_visit_index_from_time(x[0])
+
+        systematic = np.ones_like(x)
+        if self.config.fit_fnpca:
+            coeffs = np.array([pc1, pc2, pc3, pc4, pc5])
+            pca = np.ones_like(self.joint_eigenvalues[visit_index][0])
+            for i in range(0, 5):
+                pca += coeffs[i] * self.joint_eigenvalues[visit_index][i]
+            systematic *= pca
+        if self.config.fit_exponential:
+            systematic *= (exp1 * np.exp(exp2 * x)) + 1
+        if self.config.fit_linear:
+            systematic *= (a * x) + 1
+        
+        systematic += b
+        
+        return systematic
+        
+    def fit_method(self, *args) -> List[float]:
+        x = np.array(args[0])
+        # Excluding self and x
+        number_of_physical_args = len(inspect.getfullargspec(self.physical_model).args) - 2
+        physical_args = args[1:number_of_physical_args + 1]
+        
+        number_of_systematic_args = len(inspect.getfullargspec(self.systematic_model).args) - 2
+        
+        # Systematic arguments we're actually using will depend on the x value
+        # x is a list of times
+        visit_indices = np.array([self.get_visit_index_from_time(xi) for xi in x])
+        results = np.zeros_like(x)
+        for visit_index in range(0, len(self.photometry_data_list)):
+            filt = visit_indices == visit_index
+            time = x[filt]
+            systematic_index_start = (number_of_physical_args + 1) + (visit_index * number_of_systematic_args)
+            systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
+        
+            systematic = self.systematic_model(time, *systematic_args)
+            physical = self.physical_model(time, *physical_args)
+            results[filt] = systematic * physical
+            
+        return results
+
+    def run(self):
+        self.mcmc.run(self.time, self.raw_flux)
+        self.results = self.mcmc.results
+        self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
+        print(self.mcmc.results)
+        
+        self.save_to_path(self.cache_file)
+        
+        self.mcmc.corner_plot()
+        self.mcmc.chain_plot()
