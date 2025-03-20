@@ -19,6 +19,9 @@ class IndividualFit(H5Serializable):
     instance = None
     
     def exclude_keys(self):
+        '''
+        Excluded from serialization
+        '''
         return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', 'instance']
     
     def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
@@ -93,6 +96,8 @@ class IndividualFit(H5Serializable):
         mcmc.set_method(IndividualFit.__mcmc_fit_method)
         
         self.mcmc = mcmc
+        
+        self.first_frame = photometry_data.normalized_frames[0]
         
         if os.path.isfile(self.cache_file) and not force_clear_cache:
             self.load_from_path(self.cache_file)

@@ -10,9 +10,9 @@ from src.utility.planet import Planet
 from src.mcmc_model import WrappedMCMC
 import src.utility.fits_file_utils as f_util 
 from src.utility.bayesian_parameter import Parameter
-import batman
 from src.individual_fit import IndividualFit
 from src.joint_fit import JointFit
+import json
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -21,23 +21,35 @@ class Erebus(H5Serializable):
     Object instance for running the full pipeline
     ''' 
     
-    def __init__(self, run_cfg : ErebusRunConfig, force_clear_cache : bool = False):        
-        # TODO: Allow defining a matrix of possible run inputs
-        # Config file should be split into one for a set of runs and one for each individual run
+    def exclude_keys(self):
+        '''
+        Excluded from serialization
+        '''
+        return ['config', 'individual_fits', 'joint_fit', 'photometry', 'planet']
+    
+    
+    def __init__(self, run_cfg : ErebusRunConfig, force_clear_cache : bool = False):    
+        config_hash = hashlib.md5(json.dumps(run_cfg.model_dump()).encode()).hexdigest()   
+        self.cache_file = f"{EREBUS_CACHE_DIR}/{config_hash}_erebus.h5"
+    
         self.config = run_cfg
         
-        self.individual_fits = []
+        if force_clear_cache or not os.path.isfile(self.cache_file):
+            self.individual_fits = []
+            
+            self.visit_names = f_util.get_fits_files_visits_in_folder(run_cfg.calints_path)
+            if self.visit_names is None or len(self.visit_names) == 0:
+                print("No visits found, aborting")
+                return
         
-        self.visit_names = f_util.get_fits_files_visits_in_folder(run_cfg.calints_path)
-        if self.visit_names is None or len(self.visit_names) == 0:
-            print("No visits found, aborting")
-            return
+            if run_cfg.skip_visits is not None:
+                filt = np.array([i not in run_cfg.skip_visits for i in range(0, len(self.visit_names))])
+                self.visit_names = self.visit_names[filt]
         
-        if run_cfg.skip_visits is not None:
-            filt = np.array([i not in run_cfg.skip_visits for i in range(0, len(self.visit_names))])
-            self.visit_names = self.visit_names[filt]
-        
-        self.photometry = []
+            self.photometry = []
+        else:
+            self.load_from_path(self.cache_file)
+            
         for i in range(0, len(self.visit_names)):
             star_pos = None if run_cfg.star_position is None else (tuple)(run_cfg.star_position)
             fit = WrappedFits(run_cfg.calints_path, self.visit_names[i], 
@@ -59,6 +71,9 @@ class Erebus(H5Serializable):
                 print(f"Visit {self.visit_names[i]} " + ("was already run" if 'fp' in individual_fit.results else "was not yet run"))
         if self.config.perform_joint_fit:
             self.joint_fit = JointFit(self.photometry, self.planet, self.config, force_clear_cache)
+        
+        if force_clear_cache:
+            self.save_to_path()
     
     def run(self, force_clear_cache : bool = False):
         if self.config.perform_individual_fits:

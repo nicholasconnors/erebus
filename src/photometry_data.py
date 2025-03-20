@@ -25,7 +25,7 @@ class PhotometryData(H5Serializable):
         
         source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
         file_prefix = f"{self.visit_name}_{radius}_{annulus[0]}_{annulus[1]}_{source_folder_hash}"
-        self.cache_file = f"{EREBUS_CACHE_DIR}/_{file_prefix}_photometry_data.h5"
+        self.cache_file = f"{EREBUS_CACHE_DIR}/{file_prefix}_photometry_data.h5"
 
         # Defining all attributes
         self.raw_flux = []

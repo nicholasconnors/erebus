@@ -32,6 +32,9 @@ class H5Serializable:
             return d
     
     def exclude_keys(self) -> List[str]:
+        '''
+        Excluded from serialization
+        '''
         return []
     
     def load_from_path(self, file_path : str):
@@ -40,7 +43,7 @@ class H5Serializable:
 
             # TODO: Support recursion through groups
             for name, value in hf.attrs.items():
-                # Deserialize any dictionaries written to strings
+                # Dictionaries and ufloats have custom serialization to strings
                 if isinstance(value, str):
                     if value.startswith("JSON"):
                         value = json.loads(value[4:], cls=H5Serializable.__JSONDecoder)

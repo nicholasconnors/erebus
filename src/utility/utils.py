@@ -61,3 +61,14 @@ def create_method_signature(method : Callable, args : List[str]) -> Callable:
     eval(function_code, {"original_function": method}, function_globals)
     method_with_signature = function_globals["func"]
     return method_with_signature
+
+def get_eclipse_duration(inc : float, a_rstar : float, rp_rstar : float, per : float) -> float:
+    '''
+    Length of the eclipse in the same units as the period
+    Requires inclination in degrees
+    '''
+    b = a_rstar * np.cos(inc * np.pi / 180)
+    l = np.sqrt((1 + rp_rstar) ** 2 - b**2)
+    eclipse_phase_length = np.arcsin(l / a_rstar) / np.pi
+    l = eclipse_phase_length * per
+    return l
