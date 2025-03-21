@@ -162,3 +162,20 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_path : str
         plt.savefig(f"{path}.pdf")
     plt.show()
     plt.close()
+    
+def plot_eigenvectors(individual_fit : IndividualFit, save_to_directory : str = None):
+    '''
+    Plots the 5 highest ranked eigenimages to a given folder (if provided)
+    '''
+    for i in range(0, 5):
+        eigenimage = individual_fit.eigenvectors[i]
+        eigenimage /= np.max(np.abs(eigenimage))
+        plt.imshow(eigenimage, cmap='bwr', interpolation='nearest', norm = colors.SymLogNorm(0.5, vmin=-1, vmax=1))
+        plt.yticks([])
+        plt.xticks([])
+        if save_to_directory is not None:
+            path = f"{save_to_directory}/{individual_fit.planet.name}_{individual_fit.visit_name}_eigenimage_{(i+1)}"
+            plt.savefig(path + ".png")
+            plt.savefig(path + ".pdf")
+        plt.show()
+        plt.close()
