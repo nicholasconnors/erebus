@@ -54,7 +54,11 @@ class H5Serializable:
                 self.__setattr__(name, value)
             for name, value in hf.items():
                 if isinstance(value, h5py.Dataset):
-                    self.__setattr__(name, np.array(value[()]))
+                    v = value[()]
+                    # string arrays get serialized to bytes
+                    if len(v) != 0 and isinstance(v[0], bytes):
+                        v = [b.decode("utf-8") for b in v]
+                    self.__setattr__(name, np.array(v))
         except Exception as e:
             print(f"Failed to load h5 data: {e}")
             raise
@@ -86,6 +90,7 @@ class H5Serializable:
                         value = f"UFLOAT{value.nominal_value}+/-{value.std_dev}"
                     
                     if isinstance(value, list) or isinstance(value, np.ndarray):
+                        value = [str(v) if isinstance(v, np.str_) else v for v in value]
                         hf.create_dataset(name, data = value)
                     elif not inspect.ismethod(value):
                         hf.attrs[name] = value

@@ -34,9 +34,10 @@ class Erebus(H5Serializable):
     
         self.config = run_cfg
         
+        self.photometry = []
+        self.individual_fits = []
+        
         if force_clear_cache or not os.path.isfile(self.cache_file):
-            self.individual_fits = []
-            
             self.visit_names = f_util.get_fits_files_visits_in_folder(run_cfg.calints_path)
             if self.visit_names is None or len(self.visit_names) == 0:
                 print("No visits found, aborting")
@@ -46,7 +47,6 @@ class Erebus(H5Serializable):
                 filt = np.array([i not in run_cfg.skip_visits for i in range(0, len(self.visit_names))])
                 self.visit_names = self.visit_names[filt]
         
-            self.photometry = []
         else:
             self.load_from_path(self.cache_file)
             
@@ -73,7 +73,7 @@ class Erebus(H5Serializable):
             self.joint_fit = JointFit(self.photometry, self.planet, self.config, force_clear_cache)
         
         if force_clear_cache:
-            self.save_to_path()
+            self.save_to_path(self.cache_file)
     
     def run(self, force_clear_cache : bool = False):
         if self.config.perform_individual_fits:
