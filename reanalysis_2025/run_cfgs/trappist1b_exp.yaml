@@ -1,10 +1,10 @@
 # yaml-language-server: $schema=../../src/schema/run_cfg_schema.json
 
-fit_fnpca: true
+fit_exponential: true
 fit_linear: true
 perform_individual_fits: true
 perform_joint_fit: true
-calints_path: /home/nconnors/Research/TRAPPIST-1B_2
+calints_path: /home/nconnors/Research/TRAPPIST-1B
 planet_path: ./reanalysis/planets/trappist1b.yaml
 aperture_radius: 5
 annulus_start: 12

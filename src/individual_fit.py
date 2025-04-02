@@ -25,13 +25,16 @@ class IndividualFit(H5Serializable):
         return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', 'instance']
     
     def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
-                 force_clear_cache : bool = False):
+                 force_clear_cache : bool = False, override_cache_path : str = None):
         self.source_folder = photometry_data.source_folder
         self.visit_name = photometry_data.visit_name
         source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
         config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
-        
+
         self.cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{source_folder_hash}_{config_hash}_individual_fit.h5"
+        
+        if override_cache_path is not None:
+            self.cache_file = override_cache_path
         
         self.start_trim = 0 if config.trim_integrations is None else config.trim_integrations[0]
         self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])

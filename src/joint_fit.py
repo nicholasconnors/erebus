@@ -24,7 +24,7 @@ class JointFit(H5Serializable):
         Excluded from serialization
         '''
         return ['config', 'planet', 'photometry_data_list', 'time', 'raw_flux', 'params',
-                'transit_models', 'mcmc']
+                'transit_models', 'mcmc', "starting_times"]
     
     def get_predicted_t_sec_of_visit(self, index : int):
         planet = self.planet
@@ -36,17 +36,25 @@ class JointFit(H5Serializable):
         # Could memoize this but unsure of the memory vs time tradeoff
         # Starting times are in descending order
         for i in range(0, len(self.starting_times)):
-            if time > self.starting_times[i]:
+            if time >= self.starting_times[i] and (i == len(self.starting_times) - 1 or time < self.starting_times[i + 1]):
                 return i
         raise Exception(f"Time {time} was outside of the range of possible times ({self.starting_times})")
     
     def __init__(self, photometry_data_list : List[PhotometryData], planet : Planet, config : ErebusRunConfig,
-                 force_clear_cache : bool = False):
+                 force_clear_cache : bool = False, override_cache_path : str = None):
         self.source_folder = photometry_data_list[0].source_folder
         source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
         config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
         
         self.cache_file = f"{EREBUS_CACHE_DIR}/{source_folder_hash}_{config_hash}_joint_fit.h5"
+        
+        self.results = {}
+        
+        if override_cache_path is not None:
+            self.cache_file = override_cache_path
+        
+        if os.path.isfile(self.cache_file) and not force_clear_cache:
+            self.load_from_path(self.cache_file)
         
         self.planet = planet
         self.photometry_data_list = photometry_data_list
@@ -55,11 +63,16 @@ class JointFit(H5Serializable):
         self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
         
         self.time = np.concatenate([data.time[self.start_trim:self.end_trim] for data in photometry_data_list])
-        self.starting_times = np.array([np.min(data.time) for data in photometry_data_list])
+        self.starting_times = np.sort(np.array([np.min(data.time) for data in photometry_data_list]))
         self.raw_flux = np.concatenate([data.raw_flux[self.start_trim:self.end_trim] for data in photometry_data_list])
+        
+        # Orders might be wrong, assumes each visit was in order
+        sort = np.argsort(self.time)
+        self.time = self.time[sort]
+        self.raw_flux = self.raw_flux[sort]
+        
         self.config = config
         
-        self.results = {}
         self.chain = None
         
         self.params = None
@@ -126,10 +139,7 @@ class JointFit(H5Serializable):
         
         self.mcmc = mcmc
         
-        if os.path.isfile(self.cache_file) and not force_clear_cache:
-            self.load_from_path(self.cache_file)
-        else:
-            self.save_to_path(self.cache_file)
+        self.save_to_path(self.cache_file)
     
     def physical_model(self, x : List[float], t_sec_offset : float, fp : float, t0 : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
@@ -205,6 +215,7 @@ class JointFit(H5Serializable):
         for visit_index in range(0, len(self.photometry_data_list)):
             filt = visit_indices == visit_index
             time = x[filt]
+                        
             systematic_index_start = (number_of_physical_args + 1) + (visit_index * number_of_systematic_args)
             systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
         
@@ -215,12 +226,12 @@ class JointFit(H5Serializable):
         return results
 
     def run(self):
-        self.mcmc.run(self.time, self.raw_flux)
+        self.mcmc.run(self.time, self.raw_flux, walkers = 96)
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
         print(self.mcmc.results)
         
         self.save_to_path(self.cache_file)
         
-        self.mcmc.corner_plot()
-        self.mcmc.chain_plot()
+        #self.mcmc.corner_plot()
+        #self.mcmc.chain_plot()

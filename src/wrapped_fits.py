@@ -18,14 +18,18 @@ class WrappedFits(H5Serializable):
     Acts as the Stage 2 input to the Erebus pipeline
     '''
     def __init__(self, source_folder : str, visit_name : str, force_clear_cache : bool = False,
-                 cache_path_override : str = None, star_pixel_position : tuple[int, int] = None):       
-        # Since extracting photometric data takes a long time, we cache it
-        # The cache folder name is based on a hash of the source folder
-        source_folder_hash = hashlib.md5(source_folder.encode()).hexdigest()
-        
-        self.cache_file = f"{EREBUS_CACHE_DIR}/{visit_name}_{source_folder_hash}_wrapped_fits.h5"
-        self.visit_name = visit_name
-        self.source_folder = source_folder
+                 override_cache_path : str = None, star_pixel_position : tuple[int, int] = None):      
+                
+        if override_cache_path is not None:
+            self.cache_file = override_cache_path
+        else:
+            # Since extracting photometric data takes a long time, we cache it
+            # The cache folder name is based on a hash of the source folder
+            source_folder_hash = hashlib.md5(source_folder.encode()).hexdigest()
+            
+            self.cache_file = f"{EREBUS_CACHE_DIR}/{visit_name}_{source_folder_hash}_wrapped_fits.h5"
+            self.visit_name = visit_name
+            self.source_folder = source_folder
         
         # Defining all attributes
         self.t = []
@@ -34,9 +38,6 @@ class WrappedFits(H5Serializable):
         self.frames = []
         self.raw_frames = []
         self.first_frame = []
-        
-        if cache_path_override is not None:
-            self.cache_file = cache_path_override
         
         if not force_clear_cache and os.path.isfile(self.cache_file):
             self.load_from_path(self.cache_file)

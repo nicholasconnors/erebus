@@ -75,7 +75,7 @@ class Parameter:
         param.log_prior_fn = lambda value: prior(mu, sigma, value)
         param.type = "gaussian"
         param.set_value(mu)
-        param.initial_guess_variation = sigma / 2
+        param.initial_guess_variation = sigma
         return param
 
     @classmethod

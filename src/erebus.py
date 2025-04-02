@@ -28,9 +28,13 @@ class Erebus(H5Serializable):
         return ['config', 'individual_fits', 'joint_fit', 'photometry', 'planet']
     
     
-    def __init__(self, run_cfg : ErebusRunConfig, force_clear_cache : bool = False):    
+    def __init__(self, run_cfg : ErebusRunConfig, force_clear_cache : bool = False,
+                 override_cache_path : str = None):    
         config_hash = hashlib.md5(json.dumps(run_cfg.model_dump()).encode()).hexdigest()   
         self.cache_file = f"{EREBUS_CACHE_DIR}/{config_hash}_erebus.h5"
+    
+        if override_cache_path is not None:
+            self.cache_file = override_cache_path
     
         self.config = run_cfg
         
@@ -68,12 +72,12 @@ class Erebus(H5Serializable):
                                                          self.planet, self.config,
                                                          force_clear_cache)
                 self.individual_fits.append(individual_fit)
-                print(f"Visit {self.visit_names[i]} " + ("was already run" if 'fp' in individual_fit.results else "was not yet run"))
+                print(f"Visit {self.visit_names[i]} " + ("already ran" if 'fp' in individual_fit.results else "wasn't run yet"))
         if self.config.perform_joint_fit:
             self.joint_fit = JointFit(self.photometry, self.planet, self.config, force_clear_cache)
+            print(f"Joint fit " + ("already ran" if 'fp' in self.joint_fit.results else "wasn't run yet"))
         
-        if force_clear_cache:
-            self.save_to_path(self.cache_file)
+        self.save_to_path(self.cache_file)
     
     def run(self, force_clear_cache : bool = False):
         if self.config.perform_individual_fits:
@@ -82,11 +86,11 @@ class Erebus(H5Serializable):
                 if not has_run or force_clear_cache:
                     fit.run()
                 else:
-                    print(fit.visit_name + " already ran")
+                    print("Skipping " + fit.visit_name + ": already ran")
         if self.config.perform_joint_fit:
             has_run = 'fp' in self.joint_fit.results
             if not has_run or force_clear_cache:
                 self.joint_fit.run()
             else:
-                print("Joint fit already ran")
+                print("Skipping joint fit: already ran")
         

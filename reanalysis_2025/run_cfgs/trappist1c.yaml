@@ -3,9 +3,11 @@
 fit_fnpca: true
 fit_linear: true
 perform_individual_fits: true
-calints_path: /home/nicho/venus/Research/TRAPPIST-1C/JWST
-planet_path: ./planets/trappist1c.yaml
+perform_joint_fit: true
+calints_path: /home/nconnors/Research/TRAPPIST-1C/JWST
+planet_path: ./reanalysis/planets/trappist1c.yaml
 aperture_radius: 5
 annulus_start: 12
 annulus_end: 20
 trim_integrations: [10, 10]
+star_position: [693, 510]

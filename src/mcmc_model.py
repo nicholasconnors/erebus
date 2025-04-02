@@ -98,7 +98,6 @@ class WrappedMCMC:
         initial_guess = [self.params[p].value for p in self.get_free_params()]
         
         initial_guess_var = [self.params[p].initial_guess_variation for p in self.get_free_params()]
-        nwalkers = walkers
         ndim = len(initial_guess_var)
         nchains = 2
         
@@ -108,13 +107,13 @@ class WrappedMCMC:
         
         sampler = [None] * nchains
         for i in range(0, nchains):
-            sampler[i] = emcee.EnsembleSampler(nwalkers, ndim, self.__log_probability, args=(x, y))
+            sampler[i] = emcee.EnsembleSampler(walkers, ndim, self.__log_probability, args=(x, y))
     
         # Let walkers get away from starting positions
         pos = [None] * nchains
         for i in range(0, nchains):
-            pos[i] = np.array(initial_guess) + (np.array(initial_guess_var) * np.random.rand(walkers, len(initial_guess)))
-            pos[i], _, _ = sampler[i].run_mcmc(pos[i], 1000)
+            pos[i] = np.array(initial_guess) + (np.array(initial_guess_var) * (2 * np.random.rand(walkers, len(initial_guess)) - 1))
+            pos[i], _, _ = sampler[i].run_mcmc(pos[i], 1000, skip_initial_state_check=True)
             sampler[i].reset()
         pos = np.array(pos)
 
@@ -159,7 +158,7 @@ class WrappedMCMC:
         while loopcriteria:
             for jj in range(0, nchains):
                 print("process chain %d" % jj)
-                for result in sampler[jj].sample(pos[jj], iterations=chainstep, rstate0=rstate[jj], progress=True):
+                for result in sampler[jj].sample(pos[jj], iterations=chainstep, rstate0=rstate[jj], progress=True, skip_initial_state_check=True):
                     pos[jj] = result[0]
                     rstate[jj] = result[2]
                     # Use the second half of the chain for convergence test

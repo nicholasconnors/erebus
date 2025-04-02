@@ -43,6 +43,8 @@ class H5Serializable:
 
             # TODO: Support recursion through groups
             for name, value in hf.attrs.items():
+                if name in self.exclude_keys():
+                    continue
                 # Dictionaries and ufloats have custom serialization to strings
                 if isinstance(value, str):
                     if value.startswith("JSON"):
@@ -53,6 +55,8 @@ class H5Serializable:
                     
                 self.__setattr__(name, value)
             for name, value in hf.items():
+                if name in self.exclude_keys():
+                    continue
                 if isinstance(value, h5py.Dataset):
                     v = value[()]
                     # string arrays get serialized to bytes
