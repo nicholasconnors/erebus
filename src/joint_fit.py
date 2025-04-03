@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from uncertainties import ufloat
 from src.utility.utils import create_method_signature
 import inspect
+from src.utility.utils import bin_data
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -44,9 +45,10 @@ class JointFit(H5Serializable):
                  force_clear_cache : bool = False, override_cache_path : str = None):
         self.source_folder = photometry_data_list[0].source_folder
         source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
-        config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
+        self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
+        self.planet_name = planet.name
         
-        self.cache_file = f"{EREBUS_CACHE_DIR}/{source_folder_hash}_{config_hash}_joint_fit.h5"
+        self.cache_file = f"{EREBUS_CACHE_DIR}/{source_folder_hash}_{self.config_hash}_joint_fit.h5"
         
         self.results = {}
         
@@ -62,9 +64,11 @@ class JointFit(H5Serializable):
         self.start_trim = 0 if config.trim_integrations is None else config.trim_integrations[0]
         self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
         
-        self.time = np.concatenate([data.time[self.start_trim:self.end_trim] for data in photometry_data_list])
+        # For the joint fit we bin the data to speed up convergence
+        self.bin_size = 4
+        self.time = np.concatenate([bin_data(data.time[self.start_trim:self.end_trim], self.bin_size)[0] for data in photometry_data_list])
         self.starting_times = np.sort(np.array([np.min(data.time) for data in photometry_data_list]))
-        self.raw_flux = np.concatenate([data.raw_flux[self.start_trim:self.end_trim] for data in photometry_data_list])
+        self.raw_flux = np.concatenate([bin_data(data.raw_flux[self.start_trim:self.end_trim], self.bin_size)[0] for data in photometry_data_list])
         
         # Orders might be wrong, assumes each visit was in order
         sort = np.argsort(self.time)
@@ -82,7 +86,8 @@ class JointFit(H5Serializable):
         self.joint_eigenvectors = [] 
         for i, data in enumerate(photometry_data_list):
             eigenvalues, eigenvectors = perform_fn_pca_on_aperture(data.normalized_frames[self.start_trim:self.end_trim])
-            self.joint_eigenvalues.append(eigenvalues)
+            binned_eigenvalues = np.array([bin_data(ev, self.bin_size)[0] for ev in eigenvalues])
+            self.joint_eigenvalues.append(binned_eigenvalues)
             self.joint_eigenvectors.append(eigenvectors)
                 
         mcmc = WrappedMCMC()
@@ -93,20 +98,21 @@ class JointFit(H5Serializable):
             print("Circular orbit: using gaussian prior for t_sec_offset")
             predicted_t_sec = self.get_predicted_t_sec_of_visit(0)
             t_sec_offset = ufloat(0, predicted_t_sec.std_dev)
-            mcmc.add_parameter("t_sec_offset", Parameter.prior_from_ufloat(t_sec_offset))
+            mcmc.add_parameter("t_sec_offset", Parameter.prior_from_ufloat(t_sec_offset, True))
         else:
             print("Eccentric orbit: using uniform prior for t_sec_offset")
             duration = np.max(photometry_data_list[0].time - np.min(photometry_data_list[0].time))
             mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(0, -duration / 3.0, duration / 3.0))
         
         mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
-        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(planet.t0))
-        mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar))
-        mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar))
-        mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p))
-        mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc))
-        mcmc.add_parameter("ecc", Parameter.prior_from_ufloat(planet.ecc))
-        mcmc.add_parameter("w", Parameter.prior_from_ufloat(planet.w))
+        # For the joint fit we fix the orbital parameters
+        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(planet.t0, True))
+        mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar, True))
+        mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar, True))
+        mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, True))
+        mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc, True))
+        mcmc.add_parameter("ecc", Parameter.prior_from_ufloat(planet.ecc, True))
+        mcmc.add_parameter("w", Parameter.prior_from_ufloat(planet.w, True))
         
         for visit_index in range(0, len(photometry_data_list)):
             if self.config.fit_fnpca:
@@ -226,12 +232,15 @@ class JointFit(H5Serializable):
         return results
 
     def run(self):
-        self.mcmc.run(self.time, self.raw_flux, walkers = 96)
+        self.mcmc.run(self.time, self.raw_flux, walkers = 80)
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
         print(self.mcmc.results)
         
+        self.auto_correlation = self.mcmc.auto_correlation
+        self.iterations = self.mcmc.iterations
+        
         self.save_to_path(self.cache_file)
         
-        #self.mcmc.corner_plot()
-        #self.mcmc.chain_plot()
+        self.mcmc.corner_plot(f"./figures/{self.planet_name}_joint_{self.config_hash}_corner.pdf")
+        self.mcmc.chain_plot(f"./figures/{self.planet_name}_joint_{self.config_hash}_chain.pdf")

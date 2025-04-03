@@ -4,10 +4,12 @@ import matplotlib.colors as colors
 from scipy.ndimage.filters import uniform_filter1d
 from pathlib import Path
 from src.individual_fit import IndividualFit
+from src.joint_fit import JointFit
 import matplotlib.pyplot as plt
 import numpy as np
+import inspect
 
-def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_path : str = None):
+def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory : str = None):
     '''
     Will save both a png and a pdf
     Expects the individual fit to be done with fnpca and a linear component
@@ -156,11 +158,10 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_path : str
     cbar_ax.set_yticklabels([-1, 0, 1])
     cbar_ax.set_ylabel("Scale (symlog)")
 
-    if save_to_path is not None:
-        path = Path(save_to_path).stem
-        plt.savefig(f"{path}.png")
-        plt.savefig(f"{path}.pdf")
-    plt.show()
+    if save_to_directory is not None:
+        path = f"{save_to_directory}/{individual_fit.planet_name}_{individual_fit.visit_name}_{individual_fit.config_hash}"
+        plt.savefig(path + ".png", bbox_inches='tight')
+        plt.savefig(path + ".pdf", bbox_inches='tight')
     plt.close()
     
 def plot_eigenvectors(individual_fit : IndividualFit, save_to_directory : str = None):
@@ -174,8 +175,74 @@ def plot_eigenvectors(individual_fit : IndividualFit, save_to_directory : str = 
         plt.yticks([])
         plt.xticks([])
         if save_to_directory is not None:
-            path = f"{save_to_directory}/{individual_fit.planet.name}_{individual_fit.visit_name}_eigenimage_{(i+1)}"
-            plt.savefig(path + ".png")
-            plt.savefig(path + ".pdf")
-        plt.show()
+            path = f"{save_to_directory}/{individual_fit.config.fit_fnpca}_{individual_fit.planet_name}_{individual_fit.visit_name}_eigenimage_{(i+1)}"
+            plt.savefig(path + ".png", bbox_inches='tight')
+            plt.savefig(path + ".pdf", bbox_inches='tight')
         plt.close()
+
+def plot_joint_fit(joint_fit : JointFit, save_to_directory : str = None):
+    fp = joint_fit.results['fp'].nominal_value
+    fp_err = joint_fit.results['fp'].std_dev
+    inc = joint_fit.results["inc"].nominal_value
+    a = joint_fit.results["a_rstar"].nominal_value
+    rp = joint_fit.results["rp_rstar"].nominal_value
+    per = joint_fit.results["p"].nominal_value
+    offset = joint_fit.results["t_sec_offset"].nominal_value * 24
+    duration = get_eclipse_duration(inc, a, rp, per) * 24
+    print("Offset: ", offset, "hours")
+    eclipse_start = offset - duration/2
+    eclipse_end = offset + duration/2
+    
+    args = [x.nominal_value for x in list(joint_fit.results.values())]
+    number_of_physical_args = len(inspect.getfullargspec(joint_fit.physical_model).args) - 2
+    physical_args = args[0:number_of_physical_args]
+    number_of_systematic_args = len(inspect.getfullargspec(joint_fit.systematic_model).args) - 2
+    visit_indices = np.array([joint_fit.get_visit_index_from_time(xi) for xi in joint_fit.time])
+    #for visit_index in range(0, len(joint_fit.photometry_data_list)):
+    detrended_visit = []
+    time_visit = []
+    physical_visit = []
+    for visit_index in range(0, len(joint_fit.photometry_data_list)):
+        filt = visit_indices == visit_index
+        time = joint_fit.time[filt]
+        flux = joint_fit.raw_flux[filt]
+                    
+        systematic_index_start = (number_of_physical_args) + (visit_index * number_of_systematic_args)
+        systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
+    
+        systematic = joint_fit.systematic_model(time, *systematic_args)
+        physical = joint_fit.physical_model(time, *physical_args)
+        
+        detrended_visit.append(flux / systematic)
+        time_visit.append((time - joint_fit.get_predicted_t_sec_of_visit(visit_index).nominal_value - joint_fit.starting_times[visit_index]) * 24)
+        physical_visit.append(physical)
+    
+    for i in range(0, len(joint_fit.photometry_data_list)):
+        plt.plot(time_visit[i], detrended_visit[i], linestyle='', marker='.', color='grey', alpha=0.2)
+    
+    combined_times = np.concatenate(time_visit)
+    combined_flux = np.concatenate(detrended_visit)
+    sort = np.argsort(combined_times)
+    combined_times = combined_times[sort]
+    combined_flux = combined_flux[sort]
+    
+    bin_size = len(combined_times) // 30
+    bin_time, _ = bin_data(combined_times, bin_size)
+    bin_flux, _ = bin_data(combined_flux, bin_size)
+    yerr = joint_fit.results['y_err'].nominal_value
+    
+    plt.errorbar(bin_time, bin_flux, yerr/np.sqrt(bin_size), color='black', linestyle='', marker='.')
+    
+    plt.plot(time_visit[0], physical_visit[0], color='red')
+    plt.axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
+    plt.ylabel("Normalized flux")
+    plt.xlabel("Time from 0.5 phase (hours)")
+    plt.title("Phase folded light curve")
+    
+    plt.gca().text(0.5, 0.95, f"Eclipse depth: {fp*1e6:0.0f}+/-{fp_err*1e6:0.0f}ppm", horizontalalignment='center', verticalalignment='top', transform=plt.gca().transAxes)
+    
+    if save_to_directory is not None:
+        path = f"{save_to_directory}/{joint_fit.config.fit_fnpca}_{joint_fit.planet_name}_joint_fit_{joint_fit.config_hash}"
+        plt.savefig(path + ".png", bbox_inches='tight')
+        plt.savefig(path + ".pdf", bbox_inches='tight')
+    plt.close()

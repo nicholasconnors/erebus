@@ -29,9 +29,10 @@ class IndividualFit(H5Serializable):
         self.source_folder = photometry_data.source_folder
         self.visit_name = photometry_data.visit_name
         source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
-        config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
+        self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
+        self.planet_name = planet.name
 
-        self.cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{source_folder_hash}_{config_hash}_individual_fit.h5"
+        self.cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{source_folder_hash}_{self.config_hash}_individual_fit.h5"
         
         if override_cache_path is not None:
             self.cache_file = override_cache_path
@@ -181,13 +182,13 @@ class IndividualFit(H5Serializable):
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
         print(self.mcmc.results)
         
+        self.auto_correlation = self.mcmc.auto_correlation
+        self.iterations = self.mcmc.iterations
+        
         self.save_to_path(self.cache_file)
         
-        self.mcmc.corner_plot()
-        self.mcmc.chain_plot()
-    
-    def plot_fn_pca(self):
-        pass
+        self.mcmc.corner_plot(f"./figures/{self.planet_name}_{self.visit_name}_{self.config_hash}_corner.pdf")
+        self.mcmc.chain_plot(f"./figures/{self.planet_name}_{self.visit_name}_{self.config_hash}_chain.pdf")
     
     def plot_initial_guess(self):
         # TODO: Initial guess and first frame

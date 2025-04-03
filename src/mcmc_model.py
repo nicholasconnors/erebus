@@ -92,7 +92,7 @@ class WrappedMCMC:
 
     def run(self, x, y, max_steps = 100000, walkers = 64) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
         '''
-        Runs the MCMC, returns the results (with errors), ensemble sampler instance, autocorrelation time, and interation count
+        Runs the MCMC, gets the results (with errors), ensemble sampler instance, autocorrelation time, and interation count
         '''   
         # The initial guess will be whatever the free parameters were initially set to
         initial_guess = [self.params[p].value for p in self.get_free_params()]
@@ -236,7 +236,6 @@ class WrappedMCMC:
         
         if save_to_path is not None:
             plt.savefig(save_to_path)
-        plt.show()
         plt.close()
     
     def chain_plot(self, save_to_path : str = None):
@@ -263,5 +262,4 @@ class WrappedMCMC:
 
         if save_to_path is not None:
             plt.savefig(save_to_path)
-        plt.show()
         plt.close()

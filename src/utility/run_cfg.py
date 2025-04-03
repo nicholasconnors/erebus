@@ -29,9 +29,12 @@ class ErebusRunConfig(BaseModel):
     skip_visits : Optional[List[int]] = None
     trim_integrations : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     star_position : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
+    path : Optional[str] = Field(None, exclude=True)
     
     def load(path : str):
-        return parse_yaml_file_as(ErebusRunConfig, path)
+        config = parse_yaml_file_as(ErebusRunConfig, path)
+        config.path = path
+        return config
     
     def save_schema(path : str):
         run_schema = ErebusRunConfig.model_json_schema()

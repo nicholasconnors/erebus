@@ -13,6 +13,7 @@ from src.utility.bayesian_parameter import Parameter
 from src.individual_fit import IndividualFit
 from src.joint_fit import JointFit
 import json
+from src.plotting import *
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -64,7 +65,10 @@ class Erebus(H5Serializable):
                                                   force_clear_cache))
             # Improve memory usage
             del fit
-        self.planet = Planet(run_cfg.planet_path)
+        planet_path = run_cfg.planet_path
+        if not os.path.isabs(planet_path): 
+            planet_path = os.path.join(os.path.dirname(run_cfg.path), planet_path)
+        self.planet = Planet(planet_path)
         
         if self.config.perform_individual_fits:
             for i in range(0, len(self.visit_names)):
@@ -80,6 +84,13 @@ class Erebus(H5Serializable):
         self.save_to_path(self.cache_file)
     
     def run(self, force_clear_cache : bool = False):
+        folder = "./figures/"
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+        eigenvec_folder = "./figures/eigenvectors"
+        if not os.path.isdir(eigenvec_folder):
+            os.makedirs(eigenvec_folder)
+        
         if self.config.perform_individual_fits:
             for fit in self.individual_fits:
                 has_run = 'fp' in fit.results
@@ -87,10 +98,13 @@ class Erebus(H5Serializable):
                     fit.run()
                 else:
                     print("Skipping " + fit.visit_name + ": already ran")
+                plot_fnpca_individual_fit(fit, folder)
+                plot_eigenvectors(fit, eigenvec_folder)
         if self.config.perform_joint_fit:
             has_run = 'fp' in self.joint_fit.results
             if not has_run or force_clear_cache:
                 self.joint_fit.run()
             else:
                 print("Skipping joint fit: already ran")
+            plot_joint_fit(self.joint_fit, folder)
         

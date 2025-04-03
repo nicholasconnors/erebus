@@ -39,9 +39,11 @@ class Parameter:
                 self.initial_guess_variation = np.min([value - self.minimum, self.maximum - value]) / 4
     
     @classmethod
-    def prior_from_ufloat(cls, parameter : float | UFloat):
+    def prior_from_ufloat(cls, parameter : float | UFloat, force_fixed : bool = False):
         if isinstance(parameter, float):
             return Parameter.fixed(parameter)
+        elif force_fixed:
+            return Parameter.fixed(parameter.nominal_value)
         else:
             return Parameter.gaussian_prior(parameter.nominal_value, parameter.std_dev)
         
@@ -75,7 +77,7 @@ class Parameter:
         param.log_prior_fn = lambda value: prior(mu, sigma, value)
         param.type = "gaussian"
         param.set_value(mu)
-        param.initial_guess_variation = sigma
+        param.initial_guess_variation = sigma / 2
         return param
 
     @classmethod

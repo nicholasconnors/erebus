@@ -175,3 +175,6 @@ cython_debug/
 
 # Erebus cache files can get too large to commit without LFS
 erebus_cache
+
+# For personal testing
+other

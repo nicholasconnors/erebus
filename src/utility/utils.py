@@ -1,6 +1,8 @@
 from typing import Callable, List
 import numpy as np
 from scipy.stats import binned_statistic
+from src.photometry_data import PhotometryData
+from src.utility.planet import Planet
 
 def gaussian_2D(xy, a : float, mu_x : float, mu_y : float, sigma : float, offset : float) -> list[float]:
     '''
@@ -72,3 +74,8 @@ def get_eclipse_duration(inc : float, a_rstar : float, rp_rstar : float, per : f
     eclipse_phase_length = np.arcsin(l / a_rstar) / np.pi
     l = eclipse_phase_length * per
     return l
+
+def get_predicted_t_sec(planet : Planet, photometry_data : PhotometryData) -> float:
+    nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
+    predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
+    return predicted_t_sec 
