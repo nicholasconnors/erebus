@@ -40,6 +40,7 @@ class IndividualFit(H5Serializable):
         self.start_trim = 0 if config.trim_integrations is None else config.trim_integrations[0]
         self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
         
+        self.start_time = np.min(photometry_data.time)
         self.time = photometry_data.time[self.start_trim:self.end_trim] - np.min(photometry_data.time)
         self.raw_flux = photometry_data.raw_flux[self.start_trim:self.end_trim]
         self.config = config
@@ -54,14 +55,21 @@ class IndividualFit(H5Serializable):
                 
         mcmc = WrappedMCMC()
         
+        nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
+        predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
+        flag_impossible_t_sec = predicted_t_sec > np.max(photometry_data.time) - np.min(photometry_data.time):
+
+        if flag_impossible_t_sec:
+            print("Impossible t_sec!", predicted_t_sec, ">", np.max(photometry_data.time) - np.min(photometry_data.time))
+
         # For circular orbit predict the eclipse time, else use a uniform prior
-        if isinstance(planet.ecc, float) and planet.ecc == 0:
+        if not flag_impossible_t_sec and isinstance(planet.ecc, float) and planet.ecc == 0:
             print("Circular orbit: using gaussian prior for t_sec")
-            nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
-            predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
+
             mcmc.add_parameter("t_sec", Parameter.prior_from_ufloat(predicted_t_sec))
+            print("Predicted t_sec:", predicted_t_sec)
         else:
-            print("Eccentric orbit: using uniform prior for t_sec")
+            print("Eccentric orbit or impossible t_sec: using uniform prior for t_sec")
             duration = np.max(photometry_data.time - np.min(photometry_data.time))
             mcmc.add_parameter("t_sec", Parameter.uniform_prior(duration / 2.0, duration / 6.0, duration * 5.0 / 6.0))
         
