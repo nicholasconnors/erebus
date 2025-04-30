@@ -54,7 +54,8 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory 
     allan_gs = allan_deviation_subfigure.add_gridspec(1, 1)
     allan_gs.update(bottom=0.0, top=0.8, right=0.85)
     allan_ax = allan_gs.subplots()
-    allan_ax.set_title("Allan deviation plot")
+    # This is NOT an Allan deviation plot (Kipping 2025)
+    #allan_ax.set_title("Allan deviation plot")
     
     eigenvalue_gs = pca_subfig.add_gridspec(6,1, hspace=0.0, wspace=0.1)
     eigenvalue_axs = eigenvalue_gs.subplots(sharex=True, sharey=False)
@@ -116,7 +117,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory 
     allan_ax.set_xticklabels(["1", "10"])
     allan_ax.set_yticks([100, 1000])
     allan_ax.set_yticklabels(["100", "1000"])
-    allan_ax.set_ylabel("RMS")
+    allan_ax.set_ylabel("RMS of residuals")
     plt.setp(allan_ax.get_xminorticklabels(), visible=False)
     plt.setp(allan_ax.get_yminorticklabels(), visible=False)
     allan_ax.text(0.5, 0.95, f"Scatter: {yerr*1e6:0.0f}ppm", horizontalalignment='center', verticalalignment='top', transform=allan_ax.transAxes)
@@ -159,7 +160,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory 
     cbar_ax.set_ylabel("Scale (symlog)")
 
     if save_to_directory is not None:
-        path = f"{save_to_directory}/{individual_fit.planet_name}_{individual_fit.visit_name}_{individual_fit.config_hash}"
+        path = f"{save_to_directory}/{individual_fit.config.fit_fnpca}_{individual_fit.planet_name}_{individual_fit.visit_name}_{individual_fit.config_hash}"
         plt.savefig(path + ".png", bbox_inches='tight')
         plt.savefig(path + ".pdf", bbox_inches='tight')
     plt.close()
@@ -201,6 +202,7 @@ def plot_joint_fit(joint_fit : JointFit, save_to_directory : str = None):
     #for visit_index in range(0, len(joint_fit.photometry_data_list)):
     detrended_visit = []
     time_visit = []
+    physical_time_visit = []
     physical_visit = []
     for visit_index in range(0, len(joint_fit.photometry_data_list)):
         filt = visit_indices == visit_index
@@ -211,10 +213,13 @@ def plot_joint_fit(joint_fit : JointFit, save_to_directory : str = None):
         systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
     
         systematic = joint_fit.systematic_model(time, *systematic_args)
-        physical = joint_fit.physical_model(time, *physical_args)
+        physical_time = np.linspace(np.min(time), np.max(time), 1000)
+        physical = joint_fit.physical_model(physical_time, *physical_args)
         
         detrended_visit.append(flux / systematic)
-        time_visit.append((time - joint_fit.get_predicted_t_sec_of_visit(visit_index).nominal_value - joint_fit.starting_times[visit_index]) * 24)
+        time_offset = joint_fit.get_predicted_t_sec_of_visit(visit_index).nominal_value + joint_fit.starting_times[visit_index]
+        time_visit.append((time - time_offset) * 24)
+        physical_time_visit.append((physical_time - time_offset) * 24)
         physical_visit.append(physical)
     
     for i in range(0, len(joint_fit.photometry_data_list)):
@@ -233,7 +238,7 @@ def plot_joint_fit(joint_fit : JointFit, save_to_directory : str = None):
     
     plt.errorbar(bin_time, bin_flux, yerr/np.sqrt(bin_size), color='black', linestyle='', marker='.')
     
-    plt.plot(time_visit[0], physical_visit[0], color='red')
+    plt.plot(physical_time_visit[0], physical_visit[0], color='red')
     plt.axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
     plt.ylabel("Normalized flux")
     plt.xlabel("Time from 0.5 phase (hours)")
