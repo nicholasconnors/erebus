@@ -84,11 +84,13 @@ class JointFit(H5Serializable):
         
         self.joint_eigenvalues = []
         self.joint_eigenvectors = [] 
+        self.pca_variance_ratios = []
         for i, data in enumerate(photometry_data_list):
-            eigenvalues, eigenvectors = perform_fn_pca_on_aperture(data.normalized_frames[self.start_trim:self.end_trim])
+            eigenvalues, eigenvectors, variance_ratios = perform_fn_pca_on_aperture(data.normalized_frames[self.start_trim:self.end_trim])
             binned_eigenvalues = np.array([bin_data(ev, self.bin_size)[0] for ev in eigenvalues])
             self.joint_eigenvalues.append(binned_eigenvalues)
             self.joint_eigenvectors.append(eigenvectors)
+            self.pca_variance_ratios.append(variance_ratios)
                 
         mcmc = WrappedMCMC()
         

@@ -51,7 +51,7 @@ class IndividualFit(H5Serializable):
         self.params = None
         self.transit_model = None
         
-        self.eigenvalues, self.eigenvectors = perform_fn_pca_on_aperture(photometry_data.normalized_frames[self.start_trim:self.end_trim])
+        self.eigenvalues, self.eigenvectors, self.pca_variance_ratios = perform_fn_pca_on_aperture(photometry_data.normalized_frames[self.start_trim:self.end_trim])
                 
         mcmc = WrappedMCMC()
         

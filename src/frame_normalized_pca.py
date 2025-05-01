@@ -40,4 +40,4 @@ def perform_fn_pca_on_aperture(aperture_frames : np.ndarray) -> Tuple[np.ndarray
     eigenvalues = pca.fit_transform(flat_frames).T
     eigenvectors = np.array([image.reshape((width, height)) for image in pca.components_])
     
-    return eigenvalues, eigenvectors
+    return eigenvalues, eigenvectors, pca.explained_variance_ratio
