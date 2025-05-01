@@ -15,13 +15,16 @@ class ErebusRunConfig(BaseModel):
     '''
     Settings for running through the entire pipeline
     Serializable to YAML
+    
+    One of calints_path or uncalints_path must be set
     '''    
     fit_fnpca : Optional[bool] = False
     fit_exponential : Optional[bool] = False
     fit_linear : Optional[bool] = False
     perform_joint_fit : Optional[bool] = False
     perform_individual_fits : bool
-    calints_path : str
+    calints_path : Optional[str] = None
+    uncalints_path : Optional[str] = None
     planet_path : str
     aperture_radius : int
     annulus_start : int
