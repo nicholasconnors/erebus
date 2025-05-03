@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import inspect
 
-def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory : str = None):
+def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory : str = None, show : bool = False):
     '''
     Will save both a png and a pdf
     Expects the individual fit to be done with fnpca and a linear component
@@ -140,7 +140,9 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory 
         eigenvalue_ax.set_ylabel(f"PC{(i+1)}")
         eigenvalue_ax.set_yticks([])
         eigenvalue_ax.set_ylim([-1, 1])
-    
+        
+        eigenvalue_ax.text(0.9, 0.95, f"{individual_fit.pca_variance_ratios[i]*100:0.1f}%", horizontalalignment='center', verticalalignment='top', transform=eigenvalue_ax.transAxes)
+
         eigenimage = individual_fit.eigenvectors[i]
         eigenimage /= np.max(eigenimage)
         im = eigenimage_axs[i+1].imshow(eigenimage, cmap='bwr', interpolation='nearest', norm = colors.SymLogNorm(0.5, vmin=-1, vmax=1))
@@ -163,6 +165,10 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory 
         path = f"{save_to_directory}/{individual_fit.config.fit_fnpca}_{individual_fit.planet_name}_{individual_fit.visit_name}_{individual_fit.config_hash}"
         plt.savefig(path + ".png", bbox_inches='tight')
         plt.savefig(path + ".pdf", bbox_inches='tight')
+    
+    if show:
+        plt.show()    
+    
     plt.close()
     
 def plot_eigenvectors(individual_fit : IndividualFit, save_to_directory : str = None):
