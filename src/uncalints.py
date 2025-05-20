@@ -8,8 +8,10 @@ import glob
 from jwst.pipeline import Detector1Pipeline
 from jwst.pipeline import Image2Pipeline
 from eureka.S1_detector_processing.ramp_fitting import Eureka_RampFitStep
+from eureka.lib.readECF import MetaClass
 
 import os
+import logging
 
 class Custom1Pipeline(Detector1Pipeline):
     '''
@@ -21,6 +23,52 @@ class Custom1Pipeline(Detector1Pipeline):
         # This is the part that actually makes the data usable
         # Apparently this method is just an easy place to inject custom code in
         self.ramp_fit = Eureka_RampFitStep()
+        
+        # Eureka docs says this can be None but then the actual code complains its None so
+        self.ramp_fit.s1_meta = MetaClass()
+        self.ramp_fit.s1_meta.skip_saturation = False
+        self.ramp_fit.s1_meta.skip_superbias = False
+        self.ramp_fit.s1_meta.skip_refpix = False
+        self.ramp_fit.s1_meta.skip_linearity = False
+        self.ramp_fit.s1_meta.skip_dark_current = False
+        self.ramp_fit.s1_meta.skip_jump = False
+        self.ramp_fit.s1_meta.skip_ramp_fitting = False
+        self.ramp_fit.s1_meta.skip_gain_scale = False
+        
+        self.ramp_fit.s1_meta.jump_rejection_threshold = 4.0
+        
+        self.ramp_fit.s1_meta.custom_linearity = False
+        self.ramp_fit.s1_meta.custom_mask = False
+        
+        self.ramp_fit.s1_meta.update_sat_flags = False
+        self.ramp_fit.s1_meta.expand_prev_group = False
+        self.ramp_fit.s1_meta.dq_sat_mode = "percentile"
+        self.ramp_fit.s1_meta.dq_sat_percentile = 50
+        
+        self.ramp_fit.s1_meta.grouplevel_bg = True
+        self.ramp_fit.s1_meta.ncpu = 6
+        self.ramp_fit.s1_meta.bg_y1 = 6
+        self.ramp_fit.s1_meta.bg_y2 = 26
+        self.ramp_fit.s1_meta.bg_deg = 0
+        self.ramp_fit.s1_meta.bg_method = "median"
+        self.ramp_fit.s1_meta.p3thresh = 5
+        self.ramp_fit.s1_meta.bg_row_by_row = False
+        self.ramp_fit.s1_meta.bg_x1 = None
+        self.ramp_fit.s1_meta.bg_x2 = None
+
+        self.ramp_fit.s1_meta.masktrace = True
+        self.ramp_fit.s1_meta.window_len = 11
+        self.ramp_fit.s1_meta.expand_mask = 8
+        self.ramp_fit.s1_meta.ignore_low = 600
+        self.ramp_fit.s1_meta.ignore_hi = None
+        
+        self.ramp_fit.s1_meta.refpix_corr = False
+        self.ramp_fit.s1_meta.remove_390hz = False
+        self.ramp_fit.s1_meta.mask_groups = False
+        self.ramp_fit.algorithm = "default"
+        self.ramp_fit.weighting = "default"
+        
+        self.ramp_fit.s1_log = logging.getLogger()
         
         self.save_results = True
         self.output_dir = output_dir
@@ -44,7 +92,12 @@ def __run_stage_1(folder : str):
 
     for file in glob.glob(input_folder + "/*/*_mirimage_uncal.fits"):
         print(f"Running stage 1 on {file}")
-        Custom1Pipeline().run(file, output_folder)
+        basename = os.path.basename(file)
+        stage1output = output_folder + "/" + basename.replace("uncal", "rateints")
+        if (os.path.exists(stage1output)):
+            print("Already processed")
+        else:
+            Custom1Pipeline().run(file, output_folder)
     
 class Custom2Pipeline(Image2Pipeline):
     '''
@@ -86,7 +139,12 @@ def __run_stage_2(folder : str):
 
     for file in stage_2_files:
         print(f"Running stage 2 on {file}")
-        Custom2Pipeline().run(file, output_folder)
+        basename = os.path.basename(file)
+        stage2output = output_folder + "/" + basename.replace("rateints", "calints")
+        if (os.path.exists(stage2output)):
+            print("Already processed")
+        else:
+            Custom2Pipeline().run(file, output_folder)
 
 def process_uncalints(folder : str) -> str:
     '''

@@ -71,16 +71,17 @@ def clean_frames(raw_frames : np.ndarray, outlier_threshold : float) -> np.ndarr
     for (x, y) in bad_pixels:
         bad_pixel_mask[x, y] = True
 
-    for ind, frame in enumerate(frames):
-        # Now interpolate bad pixels based on the surrounding pixels
-        # LinearNDInterpolator will not be able to fill in pixels outside of its convex hull
-        # For those we use the neartest value in the grid: should only be happening in the background anyway where its very uniform
-        linear_interp = LinearNDInterpolator(good_pixels, frame[~bad_pixel_mask])
-        nearest_interp = NearestNDInterpolator(good_pixels, frame[~bad_pixel_mask])
-        
-        for i, j in bad_pixels:
-            linear_interp_value = linear_interp(i, j)
-            frames[ind, i, j] = linear_interp_value if not np.isnan(linear_interp_value) else nearest_interp(i, j)
+    if bad_pixel_mask.any():
+        for ind, frame in enumerate(frames):
+            # Now interpolate bad pixels based on the surrounding pixels
+            # LinearNDInterpolator will not be able to fill in pixels outside of its convex hull
+            # For those we use the neartest value in the grid: should only be happening in the background anyway where its very uniform
+            linear_interp = LinearNDInterpolator(good_pixels, frame[~bad_pixel_mask])
+            nearest_interp = NearestNDInterpolator(good_pixels, frame[~bad_pixel_mask])
+            
+            for i, j in bad_pixels:
+                linear_interp_value = linear_interp(i, j)
+                frames[ind, i, j] = linear_interp_value if not np.isnan(linear_interp_value) else nearest_interp(i, j)
 
     pixels_per_frame = frames.shape[1] * frames.shape[2]
     total_pixels = frames.shape[0] * frames.shape[1] * frames.shape[2]
