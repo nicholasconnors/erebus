@@ -8,67 +8,36 @@ import glob
 from jwst.pipeline import Detector1Pipeline
 from jwst.pipeline import Image2Pipeline
 from eureka.S1_detector_processing.ramp_fitting import Eureka_RampFitStep
+from eureka.S1_detector_processing.superbias import Eureka_SuperBiasStep
 from eureka.lib.readECF import MetaClass
+from eureka.lib import logedit
 
 import os
-import logging
 
 class Custom1Pipeline(Detector1Pipeline):
     '''
     Internal class for running stage 1 of the JWST pipeline
     '''
     def run(self, input_file : str, output_dir : str):
-        self.firstframe.skip = True
-        self.lastframe.skip = True
-        # This is the part that actually makes the data usable
-        # Apparently this method is just an easy place to inject custom code in
+        self.superbias = Eureka_SuperBiasStep()
         self.ramp_fit = Eureka_RampFitStep()
         
         # Eureka docs says this can be None but then the actual code complains its None so
-        self.ramp_fit.s1_meta = MetaClass()
-        self.ramp_fit.s1_meta.skip_saturation = False
-        self.ramp_fit.s1_meta.skip_superbias = False
-        self.ramp_fit.s1_meta.skip_refpix = False
-        self.ramp_fit.s1_meta.skip_linearity = False
-        self.ramp_fit.s1_meta.skip_dark_current = False
-        self.ramp_fit.s1_meta.skip_jump = False
-        self.ramp_fit.s1_meta.skip_ramp_fitting = False
-        self.ramp_fit.s1_meta.skip_gain_scale = False
+        meta = MetaClass()
+        meta.set_MIRI_defaults()
+        self.superbias.s1_meta = meta
+        self.ramp_fit.s1_meta = meta
         
-        self.ramp_fit.s1_meta.jump_rejection_threshold = 4.0
-        
-        self.ramp_fit.s1_meta.custom_linearity = False
-        self.ramp_fit.s1_meta.custom_mask = False
-        
-        self.ramp_fit.s1_meta.update_sat_flags = False
-        self.ramp_fit.s1_meta.expand_prev_group = False
-        self.ramp_fit.s1_meta.dq_sat_mode = "percentile"
-        self.ramp_fit.s1_meta.dq_sat_percentile = 50
-        
-        self.ramp_fit.s1_meta.grouplevel_bg = True
-        self.ramp_fit.s1_meta.ncpu = 6
-        self.ramp_fit.s1_meta.bg_y1 = 6
-        self.ramp_fit.s1_meta.bg_y2 = 26
-        self.ramp_fit.s1_meta.bg_deg = 0
-        self.ramp_fit.s1_meta.bg_method = "median"
-        self.ramp_fit.s1_meta.p3thresh = 5
-        self.ramp_fit.s1_meta.bg_row_by_row = False
-        self.ramp_fit.s1_meta.bg_x1 = None
-        self.ramp_fit.s1_meta.bg_x2 = None
+        log = logedit.Logedit("Log")
+        self.superbias.s1_log = log
+        self.ramp_fit.s1_log = log
 
-        self.ramp_fit.s1_meta.masktrace = True
-        self.ramp_fit.s1_meta.window_len = 11
-        self.ramp_fit.s1_meta.expand_mask = 8
-        self.ramp_fit.s1_meta.ignore_low = 600
-        self.ramp_fit.s1_meta.ignore_hi = None
-        
-        self.ramp_fit.s1_meta.refpix_corr = False
-        self.ramp_fit.s1_meta.remove_390hz = False
-        self.ramp_fit.s1_meta.mask_groups = False
-        self.ramp_fit.algorithm = "default"
-        self.ramp_fit.weighting = "default"
-        
-        self.ramp_fit.s1_log = logging.getLogger()
+        self.firstframe.skip = True
+        self.lastframe.skip = True
+        self.reset.skip = meta.skip_reset
+        self.rscd.skip = meta.skip_rscd
+        self.emicorr.skip = meta.skip_emicorr
+        self.emicorr.algorithm = meta.emicorr_algorithm
         
         self.save_results = True
         self.output_dir = output_dir
