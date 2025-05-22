@@ -8,6 +8,7 @@ from uncertainties import ufloat
 from uncertainties.core import Variable as UFloat
 
 from pydantic_yaml import parse_yaml_file_as
+from pydantic_yaml import to_yaml_file
 
 import numpy as np
 
@@ -38,6 +39,9 @@ class ErebusRunConfig(BaseModel):
         config = parse_yaml_file_as(ErebusRunConfig, path)
         config.path = path
         return config
+    
+    def save(self, path : str):
+        to_yaml_file(path, self)
     
     def save_schema(path : str):
         run_schema = ErebusRunConfig.model_json_schema()

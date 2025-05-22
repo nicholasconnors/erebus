@@ -15,6 +15,9 @@ from src.joint_fit import JointFit
 import json
 from src.plotting import *
 #from src.uncalints import process_uncalints
+from datetime import datetime
+from src.joint_fit_results import JointFitResults
+from src.individual_fit_results import IndividualFitResults
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -27,8 +30,11 @@ class Erebus(H5Serializable):
         '''
         Excluded from serialization
         '''
-        return ['config', 'individual_fits', 'joint_fit', 'photometry', 'planet']
+        return ['individual_fits', 'joint_fit', 'photometry', 'planet']
     
+    @staticmethod
+    def load(path : str):
+        return Erebus(None, override_cache_path=path)
     
     def __init__(self, run_cfg : ErebusRunConfig, force_clear_cache : bool = False,
                  override_cache_path : str = None):    
@@ -43,9 +49,13 @@ class Erebus(H5Serializable):
         self.photometry = []
         self.individual_fits = []
         
+        # Record absolute path so that a run file can be moved elsewhere and still work
+        self.calints_abs_path = os.path.abspath(run_cfg.calints_path)
+        
         #if run_cfg.uncalints_path is not None:
         #    run_cfg.calints_path = process_uncalints(run_cfg.uncalints_path)
         
+        # Load from file if needed
         if force_clear_cache or not os.path.isfile(self.cache_file):
             self.visit_names = f_util.get_fits_files_visits_in_folder(run_cfg.calints_path)
             if self.visit_names is None or len(self.visit_names) == 0:
@@ -61,7 +71,7 @@ class Erebus(H5Serializable):
             
         for i in range(0, len(self.visit_names)):
             star_pos = None if run_cfg.star_position is None else (tuple)(run_cfg.star_position)
-            fit = WrappedFits(run_cfg.calints_path, self.visit_names[i], 
+            fit = WrappedFits(self.calints_abs_path, self.visit_names[i], 
                               force_clear_cache=force_clear_cache,
                               star_pixel_position=star_pos)
             self.photometry.append(PhotometryData(fit, run_cfg.aperture_radius,
@@ -69,6 +79,8 @@ class Erebus(H5Serializable):
                                                   force_clear_cache))
             # Improve memory usage
             del fit
+            
+        # Planet path is relative to the config file
         planet_path = run_cfg.planet_path
         if not os.path.isabs(planet_path): 
             planet_path = os.path.join(os.path.dirname(run_cfg.path), planet_path)
@@ -81,19 +93,35 @@ class Erebus(H5Serializable):
                                                          force_clear_cache)
                 self.individual_fits.append(individual_fit)
                 print(f"Visit {self.visit_names[i]} " + ("already ran" if 'fp' in individual_fit.results else "wasn't run yet"))
+            individual_fit_order = np.argsort([fit.start_time for fit in self.individual_fits]) + 1
+            # Label the visits by the order they were observed
+            # If you are skipping visits this won't be done since it will be inaccurate
+            if self.run_cfg.skip_visits is None:
+                for i, fit in enumerate(self.individual_fit):
+                    fit.order = individual_fit_order
+
         if self.config.perform_joint_fit:
             self.joint_fit = JointFit(self.photometry, self.planet, self.config, force_clear_cache)
             print(f"Joint fit " + ("already ran" if 'fp' in self.joint_fit.results else "wasn't run yet"))
         
         self.save_to_path(self.cache_file)
     
-    def run(self, force_clear_cache : bool = False):
-        folder = "./figures/"
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-        eigenvec_folder = "./figures/eigenvectors"
+    def run(self, force_clear_cache : bool = False, output_folder="./output_{DATE}/"):
+        time = datetime.now().strftime("%d_%m_%y_%H_%M_%")
+        output_folder = output_folder.replace("{DATE}", time)
+        
+        if not os.path.isdir(output_folder):
+            os.makedirs(output_folder)
+            
+        eigenvec_folder = output_folder + "eigenvec"
         if not os.path.isdir(eigenvec_folder):
             os.makedirs(eigenvec_folder)
+            
+        # Save inputs that were used
+        self.config.save(output_folder + "run_config.yaml")
+        self.planet.save(output_folder + "planet_config.yaml")
+        
+        figure_folder = output_folder + "figures"
         
         if self.config.perform_individual_fits:
             for fit in self.individual_fits:
@@ -102,13 +130,16 @@ class Erebus(H5Serializable):
                     fit.run()
                 else:
                     print("Skipping " + fit.visit_name + ": already ran")
-                plot_fnpca_individual_fit(fit, folder)
+                plot_fnpca_individual_fit(fit, figure_folder)
                 plot_eigenvectors(fit, eigenvec_folder)
+                IndividualFitResults(fit).save_to_path(output_folder + "fit" + fit.order + ".h5")
         if self.config.perform_joint_fit:
             has_run = 'fp' in self.joint_fit.results
             if not has_run or force_clear_cache:
                 self.joint_fit.run()
             else:
                 print("Skipping joint fit: already ran")
-            plot_joint_fit(self.joint_fit, folder)
+            plot_joint_fit(self.joint_fit, figure_folder)
+            JointFitResults(fit).save_to_path(output_folder + "joint_fit.h5")
+        
         
