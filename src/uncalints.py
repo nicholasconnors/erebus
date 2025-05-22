@@ -8,6 +8,9 @@ import glob
 from jwst.pipeline import Detector1Pipeline
 from jwst.pipeline import Image2Pipeline
 from eureka.S1_detector_processing.ramp_fitting import Eureka_RampFitStep
+from eureka.S1_detector_processing.superbias import Eureka_SuperBiasStep
+from eureka.S1_detector_processing.s1_meta import S1MetaClass
+from eureka.lib import logedit
 
 import os
 
@@ -16,11 +19,24 @@ class Custom1Pipeline(Detector1Pipeline):
     Internal class for running stage 1 of the JWST pipeline
     '''
     def run(self, input_file : str, output_dir : str):
+        self.superbias = Eureka_SuperBiasStep()
+        self.ramp_fit = Eureka_RampFitStep()
+        
+        # Eureka docs says this can be None but then the actual code complains its None so
+        meta = S1MetaClass(folder=os.path.dirname(__file__) + os.sep, file="EurekaStage1.ecf")
+        meta.set_MIRI_defaults()
+        self.superbias.s1_meta = meta
+        self.ramp_fit.s1_meta = meta
+        
+        log = logedit.Logedit("Log")
+        self.superbias.s1_log = log
+        self.ramp_fit.s1_log = log
+
         self.firstframe.skip = True
         self.lastframe.skip = True
-        # This is the part that actually makes the data usable
-        # Apparently this method is just an easy place to inject custom code in
-        self.ramp_fit = Eureka_RampFitStep()
+        
+        self.ramp_fit.algorithm = "default"
+        self.ramp_fit.weighting = "default"
         
         self.save_results = True
         self.output_dir = output_dir
@@ -44,7 +60,12 @@ def __run_stage_1(folder : str):
 
     for file in glob.glob(input_folder + "/*/*_mirimage_uncal.fits"):
         print(f"Running stage 1 on {file}")
-        Custom1Pipeline().run(file, output_folder)
+        basename = os.path.basename(file)
+        stage1output = output_folder + "/" + basename.replace("uncal", "rateints")
+        if (os.path.exists(stage1output)):
+            print("Already processed")
+        else:
+            Custom1Pipeline().run(file, output_folder)
     
 class Custom2Pipeline(Image2Pipeline):
     '''
@@ -86,7 +107,12 @@ def __run_stage_2(folder : str):
 
     for file in stage_2_files:
         print(f"Running stage 2 on {file}")
-        Custom2Pipeline().run(file, output_folder)
+        basename = os.path.basename(file)
+        stage2output = output_folder + "/" + basename.replace("rateints", "calints")
+        if (os.path.exists(stage2output)):
+            print("Already processed")
+        else:
+            Custom2Pipeline().run(file, output_folder)
 
 def process_uncalints(folder : str) -> str:
     '''
