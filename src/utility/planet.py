@@ -8,6 +8,7 @@ from uncertainties import ufloat
 from uncertainties.core import Variable as UFloat
 
 from pydantic_yaml import parse_yaml_file_as
+from pydantic_yaml import to_yaml_file
 
 import numpy as np
 
@@ -71,6 +72,10 @@ class Planet:
         self.inc = self.__ufloat_from_list(yaml.inc)
         self.ecc = self.__ufloat_from_list(yaml.ecc)
         self.w = self.__ufloat_from_list(yaml.w)
+        self.__yaml = yaml
+    
+    def save(self, path : str):
+        self.to_yaml_file(path, self.__yaml)
     
     def __init__(self, yaml_path : str):
         self.__load_from_yaml(parse_yaml_file_as(Planet.__PlanetYAML, yaml_path))

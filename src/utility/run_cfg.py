@@ -8,6 +8,7 @@ from uncertainties import ufloat
 from uncertainties.core import Variable as UFloat
 
 from pydantic_yaml import parse_yaml_file_as
+from pydantic_yaml import to_yaml_file
 
 import numpy as np
 
@@ -15,16 +16,13 @@ class ErebusRunConfig(BaseModel):
     '''
     Settings for running through the entire pipeline
     Serializable to YAML
-    
-    One of calints_path or uncalints_path must be set
     '''    
     fit_fnpca : Optional[bool] = False
     fit_exponential : Optional[bool] = False
     fit_linear : Optional[bool] = False
     perform_joint_fit : Optional[bool] = False
     perform_individual_fits : bool
-    calints_path : Optional[str] = None
-    uncalints_path : Optional[str] = None
+    calints_path : str = None
     planet_path : str
     aperture_radius : int
     annulus_start : int
@@ -38,6 +36,9 @@ class ErebusRunConfig(BaseModel):
         config = parse_yaml_file_as(ErebusRunConfig, path)
         config.path = path
         return config
+    
+    def save(self, path : str):
+        to_yaml_file(path, self)
     
     def save_schema(path : str):
         run_schema = ErebusRunConfig.model_json_schema()
