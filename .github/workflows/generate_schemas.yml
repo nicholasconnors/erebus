@@ -30,7 +30,7 @@ jobs:
 
       - name: Run generate_schemas.py
         env:
-          PYTHONPATH: ${{ github.workspace }}
+          PYTHONPATH: ${{ github.workspace }}/erebus
         run: python .github/workflows/generate_schemas.py
         
       - name: Commit and push changes
