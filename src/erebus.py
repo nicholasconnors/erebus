@@ -14,7 +14,6 @@ from src.individual_fit import IndividualFit
 from src.joint_fit import JointFit
 import json
 from src.plotting import *
-#from src.uncalints import process_uncalints
 from datetime import datetime
 from src.joint_fit_results import JointFitResults
 from src.individual_fit_results import IndividualFitResults
@@ -51,9 +50,6 @@ class Erebus(H5Serializable):
         
         # Record absolute path so that a run file can be moved elsewhere and still work
         self.calints_abs_path = os.path.abspath(run_cfg.calints_path)
-        
-        #if run_cfg.uncalints_path is not None:
-        #    run_cfg.calints_path = process_uncalints(run_cfg.uncalints_path)
         
         # Load from file if needed
         if force_clear_cache or not os.path.isfile(self.cache_file):
