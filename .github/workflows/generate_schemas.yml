@@ -5,6 +5,7 @@ on:
     paths:
       - src/utility/planet.py
       - src/utility/run_cfg.py
+  workflow_run:
 
 jobs:
   generate_schemas:
