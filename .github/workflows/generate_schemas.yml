@@ -26,6 +26,7 @@ jobs:
           pip install uncertainties
           pip install pydantic
           pip install pydantic_yaml
+          pip install numpy
 
       - name: Run generate_schemas.py
         env:
