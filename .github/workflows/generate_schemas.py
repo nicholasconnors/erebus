@@ -1,6 +1,6 @@
 import sys
 import os
-directory = os.path.abspath(os.path.dirname(os.getcwd())) + os.sep + ".."
+directory = os.path.abspath(os.path.dirname(os.getcwd()))
 sys.path.append(directory)
 print(directory)
 
