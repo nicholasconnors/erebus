@@ -1,0 +1,34 @@
+site_name: Erebus Documentation
+repo_url: https://github.com/nicholasconnors/erebus
+nav:
+  - Home: 'index.md'
+  - License: 'copyright.md'
+
+copyright: Copyright 2025 Erebus developers
+
+theme:
+  name: material
+  palette:
+    scheme: default
+
+plugins:
+- mkdocstrings:
+    handlers:
+      python:
+        paths: [src]
+        options:
+          show_source: true
+          docstring_style: sphinx
+          annotations_path: full
+          docstring_section_style: table
+          show_signature_annotations: true
+- search
+- mkdocs-jupyter
+
+markdown_extensions:
+  - markdown_include.include:
+      base_path: ./
+
+extra:
+  version:
+    provider: mike
