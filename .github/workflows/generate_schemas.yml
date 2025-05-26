@@ -38,7 +38,11 @@ jobs:
           git config user.name "nicholasconnors"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Auto-generate schemas"
-          git push origin HEAD:${{ github.ref_name }}
+          if ! git diff --cached --quiet; then
+            git commit -m "Auto-generate schemas"
+            git push origin HEAD:${{ github.ref_name }}
+          else
+            echo "No changes to schema"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
