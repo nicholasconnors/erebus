@@ -25,6 +25,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install uncertainties
           pip install pydantic
+          pip install pydantic_yaml
 
       - name: Run generate_schemas.py
         env:
