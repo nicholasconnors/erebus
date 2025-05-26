@@ -178,3 +178,7 @@ erebus_cache
 
 # For personal testing
 other
+
+.vscode
+
+DS_Store

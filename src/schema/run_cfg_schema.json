@@ -54,6 +54,7 @@
       "type": "boolean"
     },
     "calints_path": {
+      "default": null,
       "title": "Calints Path",
       "type": "string"
     },
@@ -121,11 +122,22 @@
       ],
       "default": null,
       "title": "Star Position"
+    },
+    "path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Path"
     }
   },
   "required": [
     "perform_individual_fits",
-    "calints_path",
     "planet_path",
     "aperture_radius",
     "annulus_start",

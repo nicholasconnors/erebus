@@ -15,34 +15,41 @@ class PhotometryData(H5Serializable):
     
     Also prepares frames for FN PCA
     
-    Acts as Stage 3/4 of the Erebus pipeline
+    Acts as Stage 3 of the Erebus pipeline
     '''
+    @staticmethod
+    def load(path : str):
+        return PhotometryData(None, None, None, override_cache_path=path)
+    
     def __init__(self, fits_file : WrappedFits, radius : int, annulus : tuple[int, int],
                  force_clear_cache : bool = False, override_cache_path : str = None):  
-        # The cache folder name is based on a hash of the source folder
-        self.source_folder = fits_file.source_folder
-        self.visit_name = fits_file.visit_name
         
         if override_cache_path is not None:
             self.cache_file = override_cache_path
         else:
+            # The cache folder name is based on a hash of the source folder
+            self.source_folder = fits_file.source_folder
+            self.visit_name = fits_file.visit_name
+            
             source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
             file_prefix = f"{self.visit_name}_{radius}_{annulus[0]}_{annulus[1]}_{source_folder_hash}"
             self.cache_file = f"{EREBUS_CACHE_DIR}/{file_prefix}_photometry_data.h5"
-
-        # Defining all attributes
-        self.raw_flux = []
-        self.time = fits_file.t
-        
-        self.normalized_frames = []
-        
-        self.radius = radius
-        self.annulus_start = annulus[0]
-        self.annulus_end = annulus[1]
         
         if not force_clear_cache and os.path.isfile(self.cache_file):
             self.load_from_path(self.cache_file)
         else:
+            # Defining all attributes
+            self.raw_flux = []
+            self.time = fits_file.t
+            
+            self.normalized_frames = []
+            
+            self.radius = radius
+            self.annulus_start = annulus[0]
+            self.annulus_end = annulus[1]
+            
+            self.fits_file_location = os.path.abspath(fits_file.cache_file)
+            
             self.__do_aperture_photometry(fits_file)
             self.__get_normalized_frames(fits_file)
             self.save_to_path(self.cache_file)
