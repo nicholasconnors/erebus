@@ -3,7 +3,6 @@ batman_package==2.4.9
 corner==2.2.2
 emcee==3.1.6
 h5py==3.12.1
-h5py==3.11.0
 jwst==1.15.1
 matplotlib==3.10.3
 numpy==2.2.6
