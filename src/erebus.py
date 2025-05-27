@@ -22,7 +22,7 @@ EREBUS_CACHE_DIR = "erebus_cache"
 
 class Erebus(H5Serializable):   
     '''
-    Object instance for running the full pipeline
+    Object instance for running the full pipeline, starting from calints files.
     ''' 
     
     def exclude_keys(self):
@@ -103,6 +103,10 @@ class Erebus(H5Serializable):
         self.save_to_path(self.cache_file)
     
     def run(self, force_clear_cache : bool = False, output_folder="./output_{DATE}/"):
+        '''
+        Performs all individual and joint fits. Results and plots are saved to the given folder.
+        Output folder can optionally include the current time by writing {DATE}
+        '''
         time = datetime.now().strftime("%d_%m_%y_%H_%M_%")
         output_folder = output_folder.replace("{DATE}", time)
         
@@ -128,7 +132,8 @@ class Erebus(H5Serializable):
                     print("Skipping " + fit.visit_name + ": already ran")
                 plot_fnpca_individual_fit(fit, figure_folder)
                 plot_eigenvectors(fit, eigenvec_folder)
-                IndividualFitResults(fit).save_to_path(output_folder + "fit" + fit.order + ".h5")
+                IndividualFitResults(fit).save_to_path(output_folder + "fit_visit_" + fit.order + ".h5")
+        
         if self.config.perform_joint_fit:
             has_run = 'fp' in self.joint_fit.results
             if not has_run or force_clear_cache:

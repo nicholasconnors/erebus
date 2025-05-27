@@ -14,6 +14,7 @@ class IndividualFitResults(H5Serializable):
             self.eigenvalues = fit.eigenvalues
             self.eigenvectors = fit.eigenvectors
             self.pca_variance_ratios = fit.pca_variance_ratios
+            self.order = fit.order
             self.results = fit.results
     
     @staticmethod

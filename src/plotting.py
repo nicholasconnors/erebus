@@ -11,8 +11,8 @@ import inspect
 
 def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory : str = None, show : bool = False):
     '''
-    Will save both a png and a pdf
-    Expects the individual fit to be done with fnpca and a linear component
+    Creates an informative plot for an individual fit. Will save both a png and a pdf.
+    Expects the individual fit to be done with fnpca/exponential and a linear component.
     '''
     yerr = individual_fit.results['y_err'].nominal_value
     t_sec = individual_fit.results['t_sec'].nominal_value
@@ -54,8 +54,6 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory 
     allan_gs = allan_deviation_subfigure.add_gridspec(1, 1)
     allan_gs.update(bottom=0.0, top=0.8, right=0.85)
     allan_ax = allan_gs.subplots()
-    # This is NOT an Allan deviation plot (Kipping 2025)
-    #allan_ax.set_title("Allan deviation plot")
     
     eigenvalue_gs = pca_subfig.add_gridspec(6,1, hspace=0.0, wspace=0.1)
     eigenvalue_axs = eigenvalue_gs.subplots(sharex=True, sharey=False)
@@ -94,7 +92,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory 
     flux_axs[2].legend()
     flux_axs[2].set_ylabel("Systematc factor\n(ppm)")
 
-    # Allan deviation plot
+    # This is not an Allan deviation plot https://arxiv.org/abs/2504.13238
     def get_res(x, y, bin_size):
         model = flux_model
         if bin_size > 1:
@@ -188,6 +186,9 @@ def plot_eigenvectors(individual_fit : IndividualFit, save_to_directory : str = 
         plt.close()
 
 def plot_joint_fit(joint_fit : JointFit, save_to_directory : str = None):
+    '''
+    Creates an informative plot for the joint fit results. Saves as a png and a pdf.
+    '''
     fp = joint_fit.results['fp'].nominal_value
     fp_err = joint_fit.results['fp'].std_dev
     inc = joint_fit.results["inc"].nominal_value

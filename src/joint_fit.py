@@ -20,6 +20,10 @@ from src.utility.utils import bin_data
 EREBUS_CACHE_DIR = "erebus_cache"
 
 class JointFit(H5Serializable):    
+    '''
+    A joint fit takes multiple eclipse observations and fits for all of them at once with a shared eclipse depth value.
+    Orbital parameters are also shared, but systematics are per visit.
+    '''
     def exclude_keys(self):
         '''
         Excluded from serialization
@@ -28,12 +32,19 @@ class JointFit(H5Serializable):
                 'transit_models', 'mcmc', "starting_times"]
     
     def get_predicted_t_sec_of_visit(self, index : int):
+        '''
+        Predicted t_sec given a perfectly circular orbit, for a given visit
+        '''
         planet = self.planet
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
         predicted_t_sec = (planet.t0 - self.starting_times[index] - 2400000.5 + planet.p / 2.0) % nominal_period
         return predicted_t_sec
     
     def get_visit_index_from_time(self, time : float):
+        '''
+        Information on each visit that is part of this joint fit is stored in various arrays
+        This method takes a given time and determines which visit index it corresponds to
+        '''
         # Could memoize this but unsure of the memory vs time tradeoff
         # Starting times are in descending order
         for i in range(0, len(self.starting_times)):
@@ -209,6 +220,9 @@ class JointFit(H5Serializable):
         return systematic
         
     def fit_method(self, *args) -> List[float]:
+        '''
+        Fits for the output lightcurve given the list of arguments
+        '''
         x = np.array(args[0])
         # Excluding self and x
         number_of_physical_args = len(inspect.getfullargspec(self.physical_model).args) - 2
@@ -234,6 +248,9 @@ class JointFit(H5Serializable):
         return results
 
     def run(self):
+        '''
+        Performs the joint fit via MCMC. Caches the results to the disk and creates corner and chain plots.
+        '''
         self.mcmc.run(self.time, self.raw_flux, walkers = 80)
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)

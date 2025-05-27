@@ -6,7 +6,8 @@ from scipy.interpolate import NearestNDInterpolator
 
 def fit_star_position(frame, xy):
     '''
-    Frames is a 2d array
+    Attempts to find a star within the image
+    Expects frame as a 2d array and xy as a meshgrid of pixel positions
     '''
     
     x, y = xy

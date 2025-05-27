@@ -74,6 +74,9 @@ def get_eclipse_duration(inc : float, a_rstar : float, rp_rstar : float, per : f
     return l
 
 def get_predicted_t_sec(planet, photometry_data) -> float:
+    '''
+    Predicted t_sec given a perfectly circular orbit, given a planet and photometry data
+    '''
     nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
     predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
     return predicted_t_sec 
