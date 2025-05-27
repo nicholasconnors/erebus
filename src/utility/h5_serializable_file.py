@@ -6,6 +6,7 @@ import inspect
 import json
 from uncertainties.core import Variable as UFloat
 from uncertainties import ufloat
+import types
 
 class H5Serializable:
     '''
@@ -79,6 +80,9 @@ class H5Serializable:
             # Filter out "private" attributes
             names = [key for key in dir(self) if not key.startswith('_') and not key in self.exclude_keys()]
             for name in names:
+                # Don't try to save functions
+                if isinstance(getattr(self.__class__, name, None), types.FunctionType):
+                    continue
                 try:
                     value = self.__getattribute__(name)
                     if value is None:
