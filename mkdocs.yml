@@ -2,6 +2,9 @@ site_name: Erebus Documentation
 repo_url: https://github.com/nicholasconnors/erebus
 nav:
   - Home: 'index.md'
+  - User Guide: 
+    - Installation: 'installation.md'
+  - Contributing: 'contributing.md'
   - License: 'copyright.md'
 
 copyright: Copyright 2025 Erebus developers
