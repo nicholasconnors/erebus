@@ -75,7 +75,7 @@ class Planet:
         self.__yaml = yaml
     
     def save(self, path : str):
-        self.to_yaml_file(path, self.__yaml)
+        to_yaml_file(path, self.__yaml)
     
     def __init__(self, yaml_path : str):
         self.__load_from_yaml(parse_yaml_file_as(Planet.__PlanetYAML, yaml_path))

@@ -195,6 +195,9 @@ class IndividualFit(H5Serializable):
         
         self.save_to_path(self.cache_file)
         
+        if not os.path.exists("./figures"):
+            os.makedirs("./figures")
+        
         self.mcmc.corner_plot(f"./figures/{self.planet_name}_{self.visit_name}_{self.config_hash}_corner.pdf")
         self.mcmc.chain_plot(f"./figures/{self.planet_name}_{self.visit_name}_{self.config_hash}_chain.pdf")
     

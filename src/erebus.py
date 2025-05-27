@@ -89,11 +89,11 @@ class Erebus(H5Serializable):
                                                          force_clear_cache)
                 self.individual_fits.append(individual_fit)
                 print(f"Visit {self.visit_names[i]} " + ("already ran" if 'fp' in individual_fit.results else "wasn't run yet"))
-            individual_fit_order = np.argsort([fit.start_time for fit in self.individual_fits]) + 1
+            individual_fit_order = np.argsort([fit.start_time for fit in self.individual_fits])[0] + 1
             # Label the visits by the order they were observed
             # If you are skipping visits this won't be done since it will be inaccurate
-            if self.run_cfg.skip_visits is None:
-                for i, fit in enumerate(self.individual_fit):
+            if self.config.skip_visits is None:
+                for i, fit in enumerate(self.individual_fits):
                     fit.order = individual_fit_order
 
         if self.config.perform_joint_fit:
@@ -107,7 +107,7 @@ class Erebus(H5Serializable):
         Performs all individual and joint fits. Results and plots are saved to the given folder.
         Output folder can optionally include the current time by writing {DATE}
         '''
-        time = datetime.now().strftime("%d_%m_%y_%H_%M_%")
+        time = datetime.now().strftime("%d_%m_%y_%H_%M_%S")
         output_folder = output_folder.replace("{DATE}", time)
         
         if not os.path.isdir(output_folder):
@@ -116,12 +116,14 @@ class Erebus(H5Serializable):
         eigenvec_folder = output_folder + "eigenvec"
         if not os.path.isdir(eigenvec_folder):
             os.makedirs(eigenvec_folder)
+        
+        figure_folder = output_folder + "figures"
+        if not os.path.isdir(figure_folder):
+            os.makedirs(figure_folder)
             
         # Save inputs that were used
         self.config.save(output_folder + "run_config.yaml")
         self.planet.save(output_folder + "planet_config.yaml")
-        
-        figure_folder = output_folder + "figures"
         
         if self.config.perform_individual_fits:
             for fit in self.individual_fits:
@@ -132,7 +134,7 @@ class Erebus(H5Serializable):
                     print("Skipping " + fit.visit_name + ": already ran")
                 plot_fnpca_individual_fit(fit, figure_folder)
                 plot_eigenvectors(fit, eigenvec_folder)
-                IndividualFitResults(fit).save_to_path(output_folder + "fit_visit_" + fit.order + ".h5")
+                IndividualFitResults(fit).save_to_path(output_folder + "fit_visit_" + str(fit.order) + ".h5")
         
         if self.config.perform_joint_fit:
             has_run = 'fp' in self.joint_fit.results

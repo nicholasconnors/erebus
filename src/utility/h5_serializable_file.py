@@ -7,6 +7,8 @@ import json
 from uncertainties.core import Variable as UFloat
 from uncertainties import ufloat
 import types
+from pydantic import BaseModel
+from pydantic_core import from_json
 
 class H5Serializable:
     '''
@@ -53,6 +55,8 @@ class H5Serializable:
                     elif value.startswith("UFLOAT"):
                         nominal_value, std_dev = value[6:].split("+/-")
                         value = ufloat(float(nominal_value), float(std_dev))
+                    elif value.startswith("PYDANTIC"):
+                        value = from_json(value[8:])
                     
                 self.__setattr__(name, value)
             for name, value in hf.items():
@@ -100,6 +104,8 @@ class H5Serializable:
                     if isinstance(value, list) or isinstance(value, np.ndarray):
                         value = [str(v) if isinstance(v, np.str_) else v for v in value]
                         hf.create_dataset(name, data = value)
+                    elif isinstance(value, BaseModel):
+                        value = "PYDANTIC" + json.dumps(value.model_dump(mode='json'), cls=H5Serializable.__JSONEncoder)
                     elif not inspect.ismethod(value):
                         hf.attrs[name] = value
                 except Exception as e:
