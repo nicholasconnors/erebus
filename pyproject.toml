@@ -1,0 +1,18 @@
+[project]
+name = "erebus_nicholasconnors"
+version = "0.1.0"
+authors = [
+  { name="Nicholas Connors", email="nicholas.connors@umontreal.ca" },
+]
+description = "An exoplanet eclipse depth tool"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3"
+]
+license = "MIT"
+license-files = ["LICENSE*"]
+
+[project.urls]
+Homepage = "https://github.com/nicholasconnors/erebus"
+Issues = "https://github.com/nicholasconnors/erebus/issues"
