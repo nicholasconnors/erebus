@@ -19,4 +19,4 @@ class IndividualFitResults(H5Serializable):
     
     @staticmethod
     def load(path : str):
-        return IndividualFitResults().load_from_path(path)
+        return IndividualFitResults(None).load_from_path(path)

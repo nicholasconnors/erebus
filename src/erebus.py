@@ -143,6 +143,6 @@ class Erebus(H5Serializable):
             else:
                 print("Skipping joint fit: already ran")
             plot_joint_fit(self.joint_fit, figure_folder)
-            JointFitResults(fit).save_to_path(output_folder + "joint_fit.h5")
+            JointFitResults(self.joint_fit).save_to_path(output_folder + "joint_fit.h5")
         
         

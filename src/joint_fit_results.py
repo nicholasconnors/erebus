@@ -17,4 +17,4 @@ class JointFitResults(H5Serializable):
     
     @staticmethod
     def load(path : str):
-        return JointFitResults().load_from_path(path)
+        return JointFitResults(None).load_from_path(path)
