@@ -1,3 +1,3 @@
-# Erebus documentation
+# Contributing
 
-This will be the documentation site for Erebus
+{!CONTRIBUTING.md!}
