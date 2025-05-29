@@ -28,5 +28,5 @@ jobs:
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
-          name: erebus.tar.gz
+          name: erebus
           path: dist/*.tar.gz
