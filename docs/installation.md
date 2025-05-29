@@ -25,7 +25,7 @@ If using the action artifact, unzip `erebus.zip` to get access to the `.tar.gz` 
 Navigate to the folder containing the archive file and run the following from your conda environment (substituting in the actual file name):
 
 ```
-pip install erebus_nicholasconnors-x.y.z.tar.gz
+pip install erebus-x.y.z.tar.gz
 ```
 
 ### Running Jupyter Notebook demos
@@ -36,6 +36,8 @@ To set up Jupyter to run in your conda environment, run:
 
 ```
 conda install jupyter
+conda install -c anaconda ipykernel
+python -m ipykernel install --user --name=erebus_env
 jupyter notebook
 ```
 
