@@ -18,7 +18,9 @@ Todo
 
 ### Manual installation
 
-Download the Erebus installation file on the GitHub repo from the latest release or from an action artifact (Actions tab, build dev package artifact, tar.gz file at the bottom).
+Download the Erebus installation file on the GitHub repo from the latest release or from an action artifact (Actions tab, build dev package artifact, erebus file at the bottom).
+
+If using the action artifact, unzip `erebus.zip` to get access to the `.tar.gz` file
 
 Navigate to the folder containing the archive file and run the following from your conda environment (substituting in the actual file name):
 
