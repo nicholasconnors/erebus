@@ -4,6 +4,9 @@ nav:
   - Home: 'index.md'
   - User Guide: 
     - Installation: 'installation.md'
+    - Full pipeline demo: 'demos/full_pipeline.ipynb'
+    - FNPCA standalone demo: 'demos/fnpca_systematic.ipynb'
+  - API: 'api.md'
   - Contributing: 'contributing.md'
   - License: 'copyright.md'
 
