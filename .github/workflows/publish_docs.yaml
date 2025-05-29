@@ -1,0 +1,65 @@
+name: Build/Publish Develop Docs 
+on:
+  push:
+    branches:
+      - '*'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    env:
+     BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      skip: ${{ steps.get-version.outputs.skip }}
+    steps:
+      - name: Get branch name
+        id: get-version
+        run: |
+          branch="${BRANCH_NAME}"
+          echo "skip=true" >> $GITHUB_OUTPUT
+          if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+            echo "version=latest" >> $GITHUB_OUTPUT
+          elif [[ "$branch" == "dev" ]]; then
+            echo "version=dev" >> $GITHUB_OUTPUT
+          elif [[ "$branch" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "version=$branch" >> $GITHUB_OUTPUT
+          else
+            echo "Branch $branch doesn't need docs."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          fi
+  deploy:
+    needs: get-version
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.get-version.outputs.version }}
+    if: ${{ needs.get-version.outputs.skip }} != 'true'
+    steps:
+      - name: Log
+        run: |
+          echo "Should skip? [${{ needs.get-version.outputs.skip }}]"
+          echo "Branch is [${{ env.VERSION }}]"
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.10.6
+      - name: Install Dependencies
+        run: |
+          pip install mkdocs-material
+          pip install pillow cairosvg mike
+          pip install mkdocstrings-python
+          pip install markdown-include
+          pip install mkdocs-jupyter
+      - name: Setup Docs Deploy
+        run: |
+          git config --global user.name "Docs"
+          git config --global user.email ""
+      - name: Build Docs Website
+        run: |
+          echo "Deploying site for ${{ env.VERSION }}"
+          mike deploy --push ${{ env.VERSION }}
+          mike set-default latest --push
