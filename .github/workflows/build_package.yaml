@@ -1,11 +1,7 @@
-name: Python package
+name: Build Python package
 
 on: 
-  push:
-    branches-ignore:
-      - 'gh-pages'
-    paths:
-      - src/**
+  workflow_dispatch
 
 jobs:
   build:
