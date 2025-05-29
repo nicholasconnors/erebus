@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#erebus-documentation" class="md-skip">
+        <a href="#contributing" class="md-skip">
           Skip to content
         </a>
       
@@ -406,8 +406,23 @@
   
 
 
-<h1 id="erebus-documentation">Erebus documentation</h1>
-<p>This will be the documentation site for Erebus</p>
+<h1 id="contributing">Contributing</h1>
+<h1 id="contributing_1">Contributing</h1>
+<p>Erebus is made with Python 3.12. To develop, create a fresh conda environment in this version and then install the dependencies in requirements.txt.</p>
+<p>I am not currently seeking contritions but have written this for posterity and the sake of internal documentation.</p>
+<h3 id="writing-new-documentation">Writing new documentation</h3>
+<p>Documentation for Erebus is made using MkDocs and hosted using GitHub pages. A separate version of the docs is made per version. The main branch is published as <code>latest</code> and the dev branch is published as <code>dev</code>, and previous versions of the software are to be kept in their own branches labeled with their version number.</p>
+<p>The docs have their own separate requirements, but the same Python version as the tool itself.</p>
+<pre><code>  pip install mkdocs-material
+  pip install pillow cairosvg mike
+  pip install mkdocstrings-python
+  pip install markdown-include
+  pip install mkdocs-jupyter
+</code></pre>
+<p>When these are installed, open a terminal from the root of the repo and run <code>mkdocs serve</code> to host the site locally. The local adress will be displayed to you.</p>
+<p>Any new functionality added to Erebus must be documented.</p>
+<h3 id="testing">Testing</h3>
+<p>Before making a pull request, run all manual tests locally on your branch and ensure they all work as expected and without logging errors.</p>
 
 
 
