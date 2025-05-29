@@ -3,6 +3,13 @@ on:
   push:
     branches:
       - '*'
+    paths:
+      - LICENSE.md
+      - README.md
+      - mkdocs.yml
+      - CONTRIBUTING.md
+      - docs/**
+      - src/**
   workflow_dispatch:
 permissions:
   contents: write
