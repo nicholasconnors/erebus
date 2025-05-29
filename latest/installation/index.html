@@ -516,12 +516,14 @@ conda install python=3.12
 <p>Download the Erebus installation file on the GitHub repo from the latest release or from an action artifact (Actions tab, build dev package artifact, erebus file at the bottom).</p>
 <p>If using the action artifact, unzip <code>erebus.zip</code> to get access to the <code>.tar.gz</code> file</p>
 <p>Navigate to the folder containing the archive file and run the following from your conda environment (substituting in the actual file name):</p>
-<pre><code>pip install erebus_nicholasconnors-x.y.z.tar.gz
+<pre><code>pip install erebus-x.y.z.tar.gz
 </code></pre>
 <h3 id="running-jupyter-notebook-demos">Running Jupyter Notebook demos</h3>
 <p>Demo notebooks can be found at https://github.com/nicholasconnors/erebus/docs/demos</p>
 <p>To set up Jupyter to run in your conda environment, run:</p>
 <pre><code>conda install jupyter
+conda install -c anaconda ipykernel
+python -m ipykernel install --user --name=erebus_env
 jupyter notebook
 </code></pre>
 <p>To test that Erebus has installed correctly simply run a notebook with</p>
