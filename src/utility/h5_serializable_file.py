@@ -41,6 +41,9 @@ class H5Serializable:
         return []
     
     def load_from_path(self, file_path : str):
+        '''
+        Loads a serializable file and returns itself
+        '''
         try:
             hf = h5py.File(file_path, 'r')
 
@@ -73,6 +76,7 @@ class H5Serializable:
             raise
         finally:
             hf.close()
+        return self
     
     def save_to_path(self, file_path : str):
         folder = os.path.dirname(os.path.abspath(file_path))

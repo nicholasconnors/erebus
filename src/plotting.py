@@ -189,7 +189,7 @@ def plot_eigenvectors(individual_fit : IndividualFit, save_to_directory : str = 
             plt.savefig(path + ".pdf", bbox_inches='tight')
         plt.close()
 
-def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : str = None):
+def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : str = None, show : bool = False):
     '''
     Creates an informative plot for the joint fit results. Saves as a png and a pdf.
     
@@ -244,4 +244,8 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
         path = f"{save_to_directory}/{joint_fit.config.fit_fnpca}_{joint_fit.planet_name}_joint_fit_{joint_fit.config_hash}"
         plt.savefig(path + ".png", bbox_inches='tight')
         plt.savefig(path + ".pdf", bbox_inches='tight')
+        
+    if show:
+        plt.show()
+    
     plt.close()
