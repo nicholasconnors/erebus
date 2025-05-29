@@ -1,14 +1,10 @@
 # Erebus installation
 
-### Using pip
-
-Todo
-
-### Manually
+It is recommended to use erebus in a dedicated Anaconda environment.
 
 Todo: add conda installation instructions.
 
-Create a new conda environment on Python 3.12 by running the following in the terminal (feel free to rename the environment).
+Next, create a new conda environment on Python 3.12 by running the following in the terminal (feel free to rename the environment).
 
 ```
 conda create --name erebus_env
@@ -16,9 +12,15 @@ conda activate erebus_env
 conda install python=3.12
 ```
 
+### Installation using pip
+
+Todo
+
+### Manual installation
+
 Download the Erebus installation file on the GitHub repo from the latest release or from an action artifact (Actions tab, build dev package artifact, tar.gz file at the bottom).
 
-Navigate to the folder containing the archive file and run (substituting in the actual file name)
+Navigate to the folder containing the archive file and run the following from your conda environment (substituting in the actual file name):
 
 ```
 pip install erebus_nicholasconnors-x.y.z.tar.gz
