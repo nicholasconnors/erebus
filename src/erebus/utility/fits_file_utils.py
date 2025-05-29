@@ -14,7 +14,7 @@ def get_fits_files_visits_in_folder(folder : str):
     # First 13 characters are the visit ID
     visits = np.unique([file_name[:13] for file_name in file_names])
     if len(visits) == 0:
-        print("No visits were found in that folder. Is the directory mounted?")
+        print(f"No visits were found in [{folder}]. Is the directory mounted?")
     return visits
 
 def get_fits_files_in_folder(folder : str, visit_name : str, calibrated : bool):
