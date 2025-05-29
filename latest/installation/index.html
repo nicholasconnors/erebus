@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#erebus-documentation" class="md-skip">
+        <a href="#erebus-installation" class="md-skip">
           Skip to content
         </a>
       
@@ -303,6 +303,19 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -314,6 +327,52 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#using-pip" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using pip
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manually" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manually
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-jupyter-notebook-demos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Jupyter Notebook demos
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -391,6 +450,41 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#using-pip" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using pip
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manually" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manually
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-jupyter-notebook-demos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Jupyter Notebook demos
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -408,8 +502,29 @@
   
 
 
-<h1 id="erebus-documentation">Erebus documentation</h1>
-<p>This will be the documentation site for Erebus</p>
+<h1 id="erebus-installation">Erebus installation</h1>
+<h3 id="using-pip">Using pip</h3>
+<p>Todo</p>
+<h3 id="manually">Manually</h3>
+<p>Todo: add conda installation instructions.</p>
+<p>Create a new conda environment on Python 3.12 by running the following in the terminal (feel free to rename the environment).</p>
+<pre><code>conda create --name erebus_env
+conda activate erebus_env
+conda install python=3.12
+</code></pre>
+<p>Download the Erebus installation file on the GitHub repo from the latest release or from an action artifact (Actions tab, build dev package artifact, tar.gz file at the bottom).</p>
+<p>Navigate to the folder containing the archive file and run (substituting in the actual file name)</p>
+<pre><code>pip install erebus_nicholasconnors-x.y.z.tar.gz
+</code></pre>
+<h3 id="running-jupyter-notebook-demos">Running Jupyter Notebook demos</h3>
+<p>Demo notebooks can be found at https://github.com/nicholasconnors/erebus/docs/demos</p>
+<p>To set up Jupyter to run in your conda environment, run:</p>
+<pre><code>conda install jupyter
+jupyter notebook
+</code></pre>
+<p>To test that Erebus has installed correctly simply run a notebook with</p>
+<pre><code>import erebus
+</code></pre>
 
 
 
