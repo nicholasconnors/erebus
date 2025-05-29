@@ -27,6 +27,7 @@ jobs:
           python -m build
       - name: Unzip because uploading the artifact forces it to get zipped again
         run: |
+          mkdir dist/package
           tar -xvzf dist/*.tar.gz dist/package
       - name: Upload distributions
         uses: actions/upload-artifact@v4
