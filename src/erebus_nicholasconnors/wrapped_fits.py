@@ -1,10 +1,10 @@
 import numpy as np
 import os
 import hashlib
-import src.utility.fits_file_utils as f_utils
-import src.utility.aperture_photometry_utils as ap_utils
-import src.utility.utils as utils
-from src.utility.h5_serializable_file import H5Serializable
+import src.erebus_nicholasconnors.utility.fits_file_utils as f_utils
+import src.erebus_nicholasconnors.utility.aperture_photometry_utils as ap_utils
+import src.erebus_nicholasconnors.utility.utils as utils
+from src.erebus_nicholasconnors.utility.h5_serializable_file import H5Serializable
 
 EREBUS_CACHE_DIR = "erebus_cache"
 

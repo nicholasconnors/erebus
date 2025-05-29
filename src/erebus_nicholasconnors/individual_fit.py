@@ -2,13 +2,13 @@ import os
 import hashlib
 from typing import List
 import numpy as np
-from src.photometry_data import PhotometryData
-from src.utility.planet import Planet
-from src.mcmc_model import WrappedMCMC
-from src.utility.bayesian_parameter import Parameter
-from src.utility.run_cfg import ErebusRunConfig
-from src.frame_normalized_pca import perform_fn_pca_on_aperture
-from src.utility.h5_serializable_file import H5Serializable
+from src.erebus_nicholasconnors.photometry_data import PhotometryData
+from src.erebus_nicholasconnors.utility.planet import Planet
+from src.erebus_nicholasconnors.mcmc_model import WrappedMCMC
+from src.erebus_nicholasconnors.utility.bayesian_parameter import Parameter
+from src.erebus_nicholasconnors.utility.run_cfg import ErebusRunConfig
+from src.erebus_nicholasconnors.frame_normalized_pca import perform_fn_pca_on_aperture
+from src.erebus_nicholasconnors.utility.h5_serializable_file import H5Serializable
 import batman
 import json
 import matplotlib.pyplot as plt

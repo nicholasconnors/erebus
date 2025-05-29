@@ -3,7 +3,7 @@ import emcee
 import numpy as np
 from scipy.stats import norm
 import inspect
-from src.utility.bayesian_parameter import Parameter
+from src.erebus_nicholasconnors.utility.bayesian_parameter import Parameter
 from uncertainties import ufloat
 import corner
 import matplotlib.pyplot as plt

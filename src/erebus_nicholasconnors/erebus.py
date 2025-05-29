@@ -2,21 +2,21 @@ import os
 import hashlib
 from typing import List
 import numpy as np
-from src.utility.h5_serializable_file import H5Serializable
-from src.utility.run_cfg import ErebusRunConfig
-from src.photometry_data import PhotometryData
-from src.wrapped_fits import WrappedFits
-from src.utility.planet import Planet
-from src.mcmc_model import WrappedMCMC
-import src.utility.fits_file_utils as f_util 
-from src.utility.bayesian_parameter import Parameter
-from src.individual_fit import IndividualFit
-from src.joint_fit import JointFit
+from src.erebus_nicholasconnors.utility.h5_serializable_file import H5Serializable
+from src.erebus_nicholasconnors.utility.run_cfg import ErebusRunConfig
+from src.erebus_nicholasconnors.photometry_data import PhotometryData
+from src.erebus_nicholasconnors.wrapped_fits import WrappedFits
+from src.erebus_nicholasconnors.utility.planet import Planet
+from src.erebus_nicholasconnors.mcmc_model import WrappedMCMC
+import src.erebus_nicholasconnors.utility.fits_file_utils as f_util 
+from src.erebus_nicholasconnors.utility.bayesian_parameter import Parameter
+from src.erebus_nicholasconnors.individual_fit import IndividualFit
+from src.erebus_nicholasconnors.joint_fit import JointFit
 import json
-from src.plotting import *
+from src.erebus_nicholasconnors.plotting import *
 from datetime import datetime
-from src.joint_fit_results import JointFitResults
-from src.individual_fit_results import IndividualFitResults
+from src.erebus_nicholasconnors.joint_fit_results import JointFitResults
+from src.erebus_nicholasconnors.individual_fit_results import IndividualFitResults
 
 EREBUS_CACHE_DIR = "erebus_cache"
 

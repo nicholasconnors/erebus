@@ -12,6 +12,9 @@ classifiers = [
 ]
 license = "MIT"
 license-files = ["LICENSE*"]
+dynamic = ["dependencies"]
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 
 [project.urls]
 Homepage = "https://github.com/nicholasconnors/erebus"

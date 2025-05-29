@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.optimize import curve_fit
-from src.utility import utils
+from src.erebus_nicholasconnors.utility import utils
 from scipy.interpolate import LinearNDInterpolator
 from scipy.interpolate import NearestNDInterpolator
 
