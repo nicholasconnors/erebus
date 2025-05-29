@@ -1,9 +1,9 @@
 import os
 import hashlib
 import numpy as np
-import src.erebus_nicholasconnors.utility.aperture_photometry_utils as ap_utils
-from src.erebus_nicholasconnors.wrapped_fits import WrappedFits
-from src.erebus_nicholasconnors.utility.h5_serializable_file import H5Serializable
+import src.erebus.utility.aperture_photometry_utils as ap_utils
+from src.erebus.wrapped_fits import WrappedFits
+from src.erebus.utility.h5_serializable_file import H5Serializable
 from sklearn.decomposition import PCA as NormalPCA
 
 EREBUS_CACHE_DIR = "erebus_cache"

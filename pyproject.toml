@@ -1,5 +1,5 @@
 [project]
-name = "erebus_nicholasconnors"
+name = "erebus"
 version = "0.1.0"
 authors = [
   { name="Nicholas Connors", email="nicholas.connors@umontreal.ca" },
