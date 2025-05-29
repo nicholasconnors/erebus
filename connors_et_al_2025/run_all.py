@@ -1,5 +1,5 @@
 import glob
-from erebus.erebus import Erebus
+from erebus import Erebus
 from erebus.utility.run_cfg import ErebusRunConfig
 
 runs = glob.glob("./run_cfgs/*.yaml")

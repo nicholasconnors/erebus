@@ -1,19 +1,15 @@
 import os
 import hashlib
-from typing import List
 import numpy as np
 from erebus.utility.h5_serializable_file import H5Serializable
 from erebus.utility.run_cfg import ErebusRunConfig
 from erebus.photometry_data import PhotometryData
 from erebus.wrapped_fits import WrappedFits
 from erebus.utility.planet import Planet
-from erebus.mcmc_model import WrappedMCMC
 import erebus.utility.fits_file_utils as f_util 
-from erebus.utility.bayesian_parameter import Parameter
 from erebus.individual_fit import IndividualFit
 from erebus.joint_fit import JointFit
 import json
-from erebus.plotting import *
 from datetime import datetime
 from erebus.joint_fit_results import JointFitResults
 from erebus.individual_fit_results import IndividualFitResults
