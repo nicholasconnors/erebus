@@ -22,7 +22,7 @@ class IndividualFit(H5Serializable):
         '''
         Excluded from serialization
         '''
-        return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', 'instance']
+        return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', 'instance', 'photometry_data']
     
     def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None):
@@ -31,6 +31,8 @@ class IndividualFit(H5Serializable):
         source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
         self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
         self.planet_name = planet.name
+        self.order = 'X'
+        self.photometry_data = photometry_data
 
         self.cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{source_folder_hash}_{self.config_hash}_individual_fit.h5"
         

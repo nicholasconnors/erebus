@@ -5,15 +5,20 @@ from scipy.ndimage.filters import uniform_filter1d
 from pathlib import Path
 from src.individual_fit import IndividualFit
 from src.joint_fit import JointFit
+from src.joint_fit_results import JointFitResults
+from src.individual_fit_results import IndividualFitResults
 import matplotlib.pyplot as plt
 import numpy as np
 import inspect
 
-def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory : str = None, show : bool = False):
+def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResults, save_to_directory : str = None, show : bool = False):
     '''
     Creates an informative plot for an individual fit. Will save both a png and a pdf.
     Expects the individual fit to be done with fnpca/exponential and a linear component.
     '''
+    if isinstance(individual_fit, IndividualFit):
+        individual_fit = IndividualFitResults(individual_fit)
+    
     yerr = individual_fit.results['y_err'].nominal_value
     t_sec = individual_fit.results['t_sec'].nominal_value
     rp = individual_fit.results['rp_rstar'].nominal_value
@@ -22,6 +27,9 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory 
     per = individual_fit.results['p'].nominal_value
     fp = individual_fit.results['fp'].nominal_value
     fp_err = individual_fit.results['fp'].std_dev
+    
+    flux_model = individual_fit.flux_model
+    systematic_factor = individual_fit.systematic_factor
 
     raw_time = individual_fit.time
     time = (raw_time - t_sec) * 24 # hours
@@ -32,10 +40,6 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit, save_to_directory 
     bin_flux, _ = bin_data(flux, bin_size)
     bin_yerr = yerr / np.sqrt(bin_size)
     duration = get_eclipse_duration(inc, a, rp, per) * 24
-    res_nominal_values = [individual_fit.results[k].nominal_value for k in individual_fit.results][:-1]
-    systematic_params = res_nominal_values[9:]
-    flux_model = individual_fit.fit_method(raw_time, *res_nominal_values)
-    systematic_factor = individual_fit.systematic_model(raw_time, *systematic_params)
     
     fig = plt.figure(figsize=(9, 5.5))
     grid = fig.add_gridspec(4, 2)
@@ -180,15 +184,21 @@ def plot_eigenvectors(individual_fit : IndividualFit, save_to_directory : str = 
         plt.yticks([])
         plt.xticks([])
         if save_to_directory is not None:
-            path = f"{save_to_directory}/{individual_fit.config.fit_fnpca}_{individual_fit.planet_name}_{individual_fit.visit_name}_eigenimage_{(i+1)}"
+            path = f"{save_to_directory}/{individual_fit.planet_name}_{individual_fit.visit_name}_eigenimage_{(i+1)}"
             plt.savefig(path + ".png", bbox_inches='tight')
             plt.savefig(path + ".pdf", bbox_inches='tight')
         plt.close()
 
-def plot_joint_fit(joint_fit : JointFit, save_to_directory : str = None):
+def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : str = None):
     '''
     Creates an informative plot for the joint fit results. Saves as a png and a pdf.
+    
+    File name starts with true/false for if FNPCA was used, then planet name, then visit name,
+    then unique hash of config file settings
     '''
+    if isinstance(joint_fit, JointFit):
+        joint_fit = JointFitResults(joint_fit)
+    
     fp = joint_fit.results['fp'].nominal_value
     fp_err = joint_fit.results['fp'].std_dev
     inc = joint_fit.results["inc"].nominal_value
@@ -201,39 +211,16 @@ def plot_joint_fit(joint_fit : JointFit, save_to_directory : str = None):
     eclipse_start = offset - duration/2
     eclipse_end = offset + duration/2
     
-    args = [x.nominal_value for x in list(joint_fit.results.values())]
-    number_of_physical_args = len(inspect.getfullargspec(joint_fit.physical_model).args) - 2
-    physical_args = args[0:number_of_physical_args]
-    number_of_systematic_args = len(inspect.getfullargspec(joint_fit.systematic_model).args) - 2
-    visit_indices = np.array([joint_fit.get_visit_index_from_time(xi) for xi in joint_fit.time])
-    #for visit_index in range(0, len(joint_fit.photometry_data_list)):
-    detrended_visit = []
-    time_visit = []
-    physical_time_visit = []
-    physical_visit = []
-    for visit_index in range(0, len(joint_fit.photometry_data_list)):
-        filt = visit_indices == visit_index
-        time = joint_fit.time[filt]
-        flux = joint_fit.raw_flux[filt]
-                    
-        systematic_index_start = (number_of_physical_args) + (visit_index * number_of_systematic_args)
-        systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
+    detrended_flux_per_visit = joint_fit.detrended_flux_per_visit
+    relative_time_per_visit = joint_fit.relative_time_per_visit
+    model_time_per_visit = joint_fit.model_time_per_visit
+    model_flux_per_visit = joint_fit.model_flux_per_visit
     
-        systematic = joint_fit.systematic_model(time, *systematic_args)
-        physical_time = np.linspace(np.min(time), np.max(time), 1000)
-        physical = joint_fit.physical_model(physical_time, *physical_args)
-        
-        detrended_visit.append(flux / systematic)
-        time_offset = joint_fit.get_predicted_t_sec_of_visit(visit_index).nominal_value + joint_fit.starting_times[visit_index]
-        time_visit.append((time - time_offset) * 24)
-        physical_time_visit.append((physical_time - time_offset) * 24)
-        physical_visit.append(physical)
+    for i in range(0, np.shape(relative_time_per_visit)[0]):
+        plt.plot(relative_time_per_visit[i], detrended_flux_per_visit[i], linestyle='', marker='.', color='grey', alpha=0.2)
     
-    for i in range(0, len(joint_fit.photometry_data_list)):
-        plt.plot(time_visit[i], detrended_visit[i], linestyle='', marker='.', color='grey', alpha=0.2)
-    
-    combined_times = np.concatenate(time_visit)
-    combined_flux = np.concatenate(detrended_visit)
+    combined_times = np.concatenate(relative_time_per_visit)
+    combined_flux = np.concatenate(detrended_flux_per_visit)
     sort = np.argsort(combined_times)
     combined_times = combined_times[sort]
     combined_flux = combined_flux[sort]
@@ -245,7 +232,7 @@ def plot_joint_fit(joint_fit : JointFit, save_to_directory : str = None):
     
     plt.errorbar(bin_time, bin_flux, yerr/np.sqrt(bin_size), color='black', linestyle='', marker='.')
     
-    plt.plot(physical_time_visit[0], physical_visit[0], color='red')
+    plt.plot(model_time_per_visit[0], model_flux_per_visit[0], color='red')
     plt.axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
     plt.ylabel("Normalized flux")
     plt.xlabel("Time from 0.5 phase (hours)")
