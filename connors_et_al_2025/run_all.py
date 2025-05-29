@@ -1,6 +1,6 @@
 import glob
-from src.erebus.erebus import Erebus
-from src.erebus.utility.run_cfg import ErebusRunConfig
+from erebus.erebus import Erebus
+from erebus.utility.run_cfg import ErebusRunConfig
 
 runs = glob.glob("./run_cfgs/*.yaml")
 for run in runs:

@@ -1,6 +1,6 @@
 import sys
 import os
-directory = os.path.abspath(os.path.dirname(os.getcwd()))
+directory = os.path.abspath(os.path.dirname(os.getcwd()) + "/src")
 sys.path.append(directory)
 print(directory)
 

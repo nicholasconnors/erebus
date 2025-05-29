@@ -2,21 +2,21 @@ import os
 import hashlib
 from typing import List
 import numpy as np
-from src.erebus.utility.h5_serializable_file import H5Serializable
-from src.erebus.utility.run_cfg import ErebusRunConfig
-from src.erebus.photometry_data import PhotometryData
-from src.erebus.wrapped_fits import WrappedFits
-from src.erebus.utility.planet import Planet
-from src.erebus.mcmc_model import WrappedMCMC
-import src.erebus.utility.fits_file_utils as f_util 
-from src.erebus.utility.bayesian_parameter import Parameter
-from src.erebus.individual_fit import IndividualFit
-from src.erebus.joint_fit import JointFit
+from erebus.utility.h5_serializable_file import H5Serializable
+from erebus.utility.run_cfg import ErebusRunConfig
+from erebus.photometry_data import PhotometryData
+from erebus.wrapped_fits import WrappedFits
+from erebus.utility.planet import Planet
+from erebus.mcmc_model import WrappedMCMC
+import erebus.utility.fits_file_utils as f_util 
+from erebus.utility.bayesian_parameter import Parameter
+from erebus.individual_fit import IndividualFit
+from erebus.joint_fit import JointFit
 import json
-from src.erebus.plotting import *
+from erebus.plotting import *
 from datetime import datetime
-from src.erebus.joint_fit_results import JointFitResults
-from src.erebus.individual_fit_results import IndividualFitResults
+from erebus.joint_fit_results import JointFitResults
+from erebus.individual_fit_results import IndividualFitResults
 
 EREBUS_CACHE_DIR = "erebus_cache"
 

@@ -1,5 +1,5 @@
-from src.erebus.utility.h5_serializable_file import H5Serializable
-from src.erebus.joint_fit import JointFit
+from erebus.utility.h5_serializable_file import H5Serializable
+from erebus.joint_fit import JointFit
 import inspect
 import numpy as np
 

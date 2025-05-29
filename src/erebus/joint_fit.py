@@ -2,20 +2,20 @@ import os
 import hashlib
 from typing import List
 import numpy as np
-from src.erebus.photometry_data import PhotometryData
-from src.erebus.utility.planet import Planet
-from src.erebus.mcmc_model import WrappedMCMC
-from src.erebus.utility.bayesian_parameter import Parameter
-from src.erebus.utility.run_cfg import ErebusRunConfig
-from src.erebus.frame_normalized_pca import perform_fn_pca_on_aperture
-from src.erebus.utility.h5_serializable_file import H5Serializable
+from erebus.photometry_data import PhotometryData
+from erebus.utility.planet import Planet
+from erebus.mcmc_model import WrappedMCMC
+from erebus.utility.bayesian_parameter import Parameter
+from erebus.utility.run_cfg import ErebusRunConfig
+from erebus.frame_normalized_pca import perform_fn_pca_on_aperture
+from erebus.utility.h5_serializable_file import H5Serializable
 import batman
 import json
 import matplotlib.pyplot as plt
 from uncertainties import ufloat
-from src.erebus.utility.utils import create_method_signature
+from erebus.utility.utils import create_method_signature
 import inspect
-from src.erebus.utility.utils import bin_data
+from erebus.utility.utils import bin_data
 
 EREBUS_CACHE_DIR = "erebus_cache"
 

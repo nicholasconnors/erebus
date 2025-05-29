@@ -1,6 +1,6 @@
 from typing import Tuple
 from sklearn.decomposition import PCA as NormalPCA
-import src.erebus.utility.aperture_photometry_utils as ap_utils
+import erebus.utility.aperture_photometry_utils as ap_utils
 import numpy as np
 
 def perform_fnpca_on_full_frame(frames : np.ndarray, radius : int,
