@@ -1,0 +1,11 @@
+name: Build dev package artifact
+on: 
+  push:
+    branches-ignore:
+      - 'gh-pages'
+    paths:
+      - src/**
+
+jobs:
+  build_package:
+    uses: ./.github/workflows/build_package.yaml
