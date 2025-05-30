@@ -37,6 +37,7 @@ class IndividualFitResults(H5Serializable):
             
             res_nominal_values = [fit.results[k].nominal_value for k in fit.results][:-1]
             systematic_params = res_nominal_values[9:]
+            
             self.flux_model = fit.fit_method(fit.time, *res_nominal_values)
             '''The best fit detrended lightcurve.'''
             self.systematic_factor = fit.systematic_model(fit.time, *systematic_params)
@@ -44,4 +45,5 @@ class IndividualFitResults(H5Serializable):
     
     @staticmethod
     def load(path : str):
+        '''After running an Erebus instance, the results file can be loaded later using this method.'''
         return IndividualFitResults(None).load_from_path(path)

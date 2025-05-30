@@ -14,16 +14,20 @@ class WrappedMCMC:
     The model will always fit for a Gaussian noise parameter "y_err"
     '''
     def __init__(self):
-        # Dictionary of parameters
         self.params : dict = {}
-        # Function to be fit
+        '''Dictionary of parameters. Each is a bayesian_parameter instance.'''
         self.model_function : Callable[[Any], float] = None
+        '''The function to be fit'''
         
         # Values set once it is done running
-        self.sampler = None
-        self.results = {}
+        self.sampler : emcee.EnsembleSampler = None
+        '''The emcee EnsembleSampler which this class wrapped'''
+        self.results : dict = {}
+        '''Dictionary of results after fitting'''
         self.auto_correlation = 0
+        '''The integrated autocorrelation time after the MCMC has finished running'''
         self.iterations = 0
+        '''How many iterations this MCMC ran for before stopping.'''
 
     def add_parameter(self, name : str, param : Parameter):
         '''
@@ -67,6 +71,7 @@ class WrappedMCMC:
         return self.model_function(x, *all_params[:-1])
 
     def log_likelihood(self, theta : list[float], x : float, y : float):
+        '''Given the parameters theta and the x and y values, calculates the Bayesian log likelihood.'''
         # y_err is a gaussian noise parameter
         model = self.evaluate_model(x, *theta)
         y_err = self.params["y_err"].value

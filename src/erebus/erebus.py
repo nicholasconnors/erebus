@@ -30,6 +30,7 @@ class Erebus(H5Serializable):
     
     @staticmethod
     def load(path : str):
+        '''Helper method to directly load an Erebus instance cache file.'''
         return Erebus(None, override_cache_path=path)
     
     def __init__(self, run_cfg : ErebusRunConfig | str, force_clear_cache : bool = False,
@@ -39,26 +40,36 @@ class Erebus(H5Serializable):
             run_cfg = ErebusRunConfig.load(run_cfg) 
         
         config_hash = hashlib.md5(json.dumps(run_cfg.model_dump()).encode()).hexdigest()   
-        self.cache_file = f"{EREBUS_CACHE_DIR}/{config_hash}_erebus.h5"
+        self._cache_file = f"{EREBUS_CACHE_DIR}/{config_hash}_erebus.h5"
     
         if override_cache_path is not None:
-            self.cache_file = override_cache_path
+            self._cache_file = override_cache_path
     
-        self.config = run_cfg
+        self.config : ErebusRunConfig = run_cfg
+        '''The configuration file used for this instance of the Erebus pipeline.'''
         
-        self.photometry = []
-        self.individual_fits = []
+        self.photometry : list[PhotometryData] = []
+        '''The photometry data of each visit.'''
+        
+        self.individual_fits : list[IndividualFit] = []
+        '''The individual fit instances of each visit.'''
+        
+        self.joint_fit : JointFit = None
+        '''The joint fit instance.'''
         
         # Record absolute path so that a run file can be moved elsewhere and still work
         root_folder = os.path.dirname(os.path.abspath(run_cfg.path))
         if os.path.isabs(run_cfg.calints_path):
-            self.calints_abs_path = run_cfg.calints_path
+            self._calints_abs_path = run_cfg.calints_path
         else:
-            self.calints_abs_path = root_folder + os.sep + run_cfg.calints_path
+            self._calints_abs_path = root_folder + os.sep + run_cfg.calints_path
+        
+        self.visit_names : list[str] = []
+        '''The unique names of each visit.'''
         
         # Load from file if needed
-        if force_clear_cache or not os.path.isfile(self.cache_file):
-            self.visit_names = f_util.get_fits_files_visits_in_folder(self.calints_abs_path)
+        if force_clear_cache or not os.path.isfile(self._cache_file):
+            self.visit_names = f_util.get_fits_files_visits_in_folder(self._calints_abs_path)
             if self.visit_names is None or len(self.visit_names) == 0:
                 print("No visits found, aborting")
                 return
@@ -68,11 +79,11 @@ class Erebus(H5Serializable):
                 self.visit_names = self.visit_names[filt]
         
         else:
-            self.load_from_path(self.cache_file)
+            self.load_from_path(self._cache_file)
             
         for i in range(0, len(self.visit_names)):
             star_pos = None if run_cfg.star_position is None else (tuple)(run_cfg.star_position)
-            fit = WrappedFits(self.calints_abs_path, self.visit_names[i], 
+            fit = WrappedFits(self._calints_abs_path, self.visit_names[i], 
                               force_clear_cache=force_clear_cache,
                               star_pixel_position=star_pos)
             self.photometry.append(PhotometryData(fit, run_cfg.aperture_radius,
@@ -86,6 +97,7 @@ class Erebus(H5Serializable):
         if not os.path.isabs(planet_path): 
             planet_path = os.path.join(os.path.dirname(run_cfg.path), planet_path)
         self.planet = Planet(planet_path)
+        '''The planet configuration file used for this instance of the pipeline'''
         
         if self.config.perform_individual_fits:
             for i in range(0, len(self.visit_names)):
@@ -108,7 +120,7 @@ class Erebus(H5Serializable):
             self.joint_fit = JointFit(self.photometry, self.planet, self.config, force_clear_cache)
             print(f"Joint fit " + ("already ran" if 'fp' in self.joint_fit.results else "wasn't run yet"))
         
-        self.save_to_path(self.cache_file)
+        self.save_to_path(self._cache_file)
     
     def run(self, force_clear_cache : bool = False, output_folder="./output_{DATE}/"):
         '''

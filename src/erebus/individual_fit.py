@@ -34,10 +34,10 @@ class IndividualFit(H5Serializable):
         self.order = 'X'
         self.photometry_data = photometry_data
 
-        self.cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{source_folder_hash}_{self.config_hash}_individual_fit.h5"
+        self._cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{source_folder_hash}_{self.config_hash}_individual_fit.h5"
         
         if override_cache_path is not None:
-            self.cache_file = override_cache_path
+            self._cache_file = override_cache_path
         
         self.start_trim = 0 if config.trim_integrations is None else config.trim_integrations[0]
         self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
@@ -110,13 +110,11 @@ class IndividualFit(H5Serializable):
         mcmc.set_method(IndividualFit.__mcmc_fit_method)
         
         self.mcmc = mcmc
-        
-        self.first_frame = photometry_data.normalized_frames[0]
-        
-        if os.path.isfile(self.cache_file) and not force_clear_cache:
-            self.load_from_path(self.cache_file)
+                
+        if os.path.isfile(self._cache_file) and not force_clear_cache:
+            self.load_from_path(self._cache_file)
         else:
-            self.save_to_path(self.cache_file)
+            self.save_to_path(self._cache_file)
     
     def physical_model(self, x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
@@ -195,7 +193,7 @@ class IndividualFit(H5Serializable):
         self.auto_correlation = self.mcmc.auto_correlation
         self.iterations = self.mcmc.iterations
         
-        self.save_to_path(self.cache_file)
+        self.save_to_path(self._cache_file)
         
         if not os.path.exists("./figures"):
             os.makedirs("./figures")

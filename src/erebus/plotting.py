@@ -132,7 +132,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     eigenvalue_axs[0].plot(bin_time, bin_flux, marker='.', linestyle='', color='black')
     eigenvalue_axs[0].set_ylabel("Raw flux\n(ppm)")
     
-    eigenimage_axs[0].imshow(individual_fit.first_frame)
+    eigenimage_axs[0].imshow(individual_fit.frames[0])
 
     for i in range(0, 5):
         eigenvalue = individual_fit.eigenvalues[i]

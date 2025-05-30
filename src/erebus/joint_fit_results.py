@@ -67,4 +67,5 @@ class JointFitResults(H5Serializable):
     
     @staticmethod
     def load(path : str):
+        '''After running an Erebus instance, the results file can be loaded later using this method.'''
         return JointFitResults(None).load_from_path(path)

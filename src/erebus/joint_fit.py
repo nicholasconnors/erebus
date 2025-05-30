@@ -59,15 +59,15 @@ class JointFit(H5Serializable):
         self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
         self.planet_name = planet.name
         
-        self.cache_file = f"{EREBUS_CACHE_DIR}/{source_folder_hash}_{self.config_hash}_joint_fit.h5"
+        self._cache_file = f"{EREBUS_CACHE_DIR}/{source_folder_hash}_{self.config_hash}_joint_fit.h5"
         
         self.results = {}
         
         if override_cache_path is not None:
-            self.cache_file = override_cache_path
+            self._cache_file = override_cache_path
         
-        if os.path.isfile(self.cache_file) and not force_clear_cache:
-            self.load_from_path(self.cache_file)
+        if os.path.isfile(self._cache_file) and not force_clear_cache:
+            self.load_from_path(self._cache_file)
         
         self.planet = planet
         self.photometry_data_list = photometry_data_list
@@ -158,7 +158,7 @@ class JointFit(H5Serializable):
         
         self.mcmc = mcmc
         
-        self.save_to_path(self.cache_file)
+        self.save_to_path(self._cache_file)
     
     def physical_model(self, x : List[float], t_sec_offset : float, fp : float, t0 : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
@@ -259,7 +259,7 @@ class JointFit(H5Serializable):
         self.auto_correlation = self.mcmc.auto_correlation
         self.iterations = self.mcmc.iterations
         
-        self.save_to_path(self.cache_file)
+        self.save_to_path(self._cache_file)
         
         if not os.path.exists("./figures"):
             os.makedirs("./figures")
