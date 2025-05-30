@@ -24,7 +24,7 @@ class JointFit(H5Serializable):
     A joint fit takes multiple eclipse observations and fits for all of them at once with a shared eclipse depth value.
     Orbital parameters are also shared, but systematics are per visit.
     '''
-    def exclude_keys(self):
+    def _exclude_keys(self):
         '''
         Excluded from serialization
         '''

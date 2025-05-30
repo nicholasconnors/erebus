@@ -14,8 +14,21 @@ import numpy as np
 
 class Planet:
     '''
-    Class which represents known planet values with uncertainties
-    Loaded from a yaml file validated against a schema
+    Class which represents known planet values with uncertainties.
+    Loaded from a yaml file and optionally validated against a schema. Uncertainties are
+    expressed by writing the values into the yaml file as a list of floats, where the first value is
+    the absolute value of the measurement. The second value is taken as the symmetric error, and if
+    a third value is provided it is taken a the upper error.
+    
+    Attributes:
+        name (str): The name of the planet.
+        t0 (UFloat | float): The last known time of conjunction of the planet.
+        a_rstar (UFloat | float): The ratio of semi-major axis to star radius.
+        p (UFloat | float): The period of the planet in days.
+        rp_rstar (UFloat | float): The ratio of the planet's radius to the star's radius.
+        inc (UFloat | float): The inclination of the planet in degrees.
+        ecc (UFloat | float): The eccentricity of the planet (0 inclusive to 1 exclusive).
+        w (UFloat | float): The argument of periastron of the planet (degrees).
     '''
     name : str
     t0 : UFloat | float
@@ -28,10 +41,10 @@ class Planet:
     
     class __PlanetYAML(BaseModel):
         '''
-        Serialized YAML representation of a Planet for the Erebus pipeline
+        Serialized YAML representation of a Planet for the Erebus pipeline.
         
         Planet parameters with optional uncertainties are represented as lists of up to 3 floats
-        1 float = no uncertainty, 2 floats = symmetric error, 3 floats = asymmetric error
+        1 float = no uncertainty, 2 floats = symmetric error, 3 floats = asymmetric error.
         
         Attributes:
             name        Name of the planet
@@ -80,7 +93,7 @@ class Planet:
     def __init__(self, yaml_path : str):
         self.__load_from_yaml(parse_yaml_file_as(Planet.__PlanetYAML, yaml_path))
     
-    def save_schema(path : str):
+    def _save_schema(path : str):
         planet_schema = Planet.__PlanetYAML.model_json_schema()
         planet_schema_json = json.dumps(planet_schema, indent=2)
         with open(path, "w") as f:

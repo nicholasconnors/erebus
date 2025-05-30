@@ -20,6 +20,7 @@ pip install pillow cairosvg mike
 pip install mkdocstrings-python
 pip install markdown-include
 pip install mkdocs-jupyter
+pip install griffe-pydantic
 ```
 
 When these are installed, open a terminal from the root of the repo and run `mkdocs serve` to host the site locally. The local adress will be displayed to you.

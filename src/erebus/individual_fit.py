@@ -11,14 +11,14 @@ from erebus.frame_normalized_pca import perform_fn_pca_on_aperture
 from erebus.utility.h5_serializable_file import H5Serializable
 import batman
 import json
-import matplotlib.pyplot as plt
+import erebus.plotting as plotting
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
 class IndividualFit(H5Serializable):
     instance = None
     
-    def exclude_keys(self):
+    def _exclude_keys(self):
         '''
         Excluded from serialization
         '''
@@ -69,7 +69,7 @@ class IndividualFit(H5Serializable):
             print("Circular orbit: using gaussian prior for t_sec")
 
             mcmc.add_parameter("t_sec", Parameter.prior_from_ufloat(predicted_t_sec))
-            print("Predicted t_sec:", predicted_t_sec)
+            print("Predicted t_sec:", predicted_t_sec, "days from the start of the observation")
         else:
             print("Eccentric orbit or impossible t_sec: using uniform prior for t_sec")
             duration = np.max(photometry_data.time - np.min(photometry_data.time))
@@ -200,8 +200,8 @@ class IndividualFit(H5Serializable):
         if not os.path.exists("./figures"):
             os.makedirs("./figures")
         
-        self.mcmc.corner_plot(f"./figures/{self.planet_name}_{self.visit_name}_{self.config_hash}_corner.pdf")
-        self.mcmc.chain_plot(f"./figures/{self.planet_name}_{self.visit_name}_{self.config_hash}_chain.pdf")
+        plotting.corner_plot(self.mcmc, f"./figures/{self.planet_name}_{self.visit_name}_{self.config_hash}_corner.pdf")
+        plotting.chain_plot(self.mcmc, f"./figures/{self.planet_name}_{self.visit_name}_{self.config_hash}_chain.pdf")
     
     def plot_initial_guess(self):
         # TODO: Initial guess and first frame

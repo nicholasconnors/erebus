@@ -6,9 +6,10 @@ import numpy as np
 def perform_fnpca_on_full_frame(frames : np.ndarray, radius : int,
                                 annulus_start : int, annulus_end : int) -> Tuple[np.ndarray, np.ndarray]:
     '''
-    Performs Frame-Normalized PCA on a photometric time series data set
+    Performs Frame-Normalized PCA on a photometric time series data set. Expects the star to be centered
+    on each frame.
     
-    Returns the eigenvalue eigenimage pairs
+    Returns the eigenvalue-eigenimage pairs and ratios of explained variance.
     '''
     center_x = frames[0].shape[0]//2+1
     center_y = frames[0].shape[1]//2+1
@@ -31,7 +32,11 @@ def perform_fnpca_on_full_frame(frames : np.ndarray, radius : int,
 
 def perform_fn_pca_on_aperture(aperture_frames : np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     '''
-    Expected aperture_frames to be normalized and background subtracted
+    Performs Frame-Normalized PCA on a photometric time series data set. Expects the star to be centered
+    on each frame. Expects each frame to already be normalized and background subtracted, with pixels outside
+    the aperture set to 0.
+    
+    Returns the eigenvalue-eigenimage pairs and ratios of explained variance.
     '''
     length, width, height = aperture_frames.shape
     flat_frames = aperture_frames.reshape(length, width * height)

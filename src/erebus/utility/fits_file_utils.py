@@ -4,6 +4,7 @@ import os
 import glob
 from jwst.datamodels import dqflags
 import re
+import tqdm
 
 def get_fits_files_visits_in_folder(folder : str):
     '''
@@ -41,7 +42,7 @@ def load_all_calints_for_visit(folder : str, visit_name : str):
     
     print(f"Loading {len(calints_file_names)} segments")
     
-    for file_name in calints_file_names:
+    for file_name in tqdm(calints_file_names):
         # Segment number is in the file name
         segment_number = int(re.search("seg[0-9][0-9][0-9]", file_name).group().replace("seg", ""))
         

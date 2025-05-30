@@ -3,6 +3,7 @@ from scipy.optimize import curve_fit
 from erebus.utility import utils
 from scipy.interpolate import LinearNDInterpolator
 from scipy.interpolate import NearestNDInterpolator
+import tqdm
 
 def fit_star_position(frame, xy):
     '''
@@ -39,7 +40,7 @@ def clean_frames(raw_frames : np.ndarray, outlier_threshold : float) -> np.ndarr
     outlier_count = 0
     bad_pixels = []
     good_pixels = []
-    for i in range(0, frames.shape[1]):
+    for i in tqdm(range(0, frames.shape[1])):
         for j in range(0, frames.shape[2]):
             pixel_light_curve = raw_frames[:,i,j]
             frames[:,i,j] = pixel_light_curve
@@ -72,7 +73,7 @@ def clean_frames(raw_frames : np.ndarray, outlier_threshold : float) -> np.ndarr
     for (x, y) in bad_pixels:
         bad_pixel_mask[x, y] = True
 
-    for ind, frame in enumerate(frames):
+    for ind, frame in enumerate(tqdm(frames)):
         # Now interpolate bad pixels based on the surrounding pixels
         # LinearNDInterpolator will not be able to fill in pixels outside of its convex hull
         # For those we use the neartest value in the grid: should only be happening in the background anyway where its very uniform

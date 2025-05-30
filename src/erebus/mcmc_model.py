@@ -5,8 +5,6 @@ from scipy.stats import norm
 import inspect
 from erebus.utility.bayesian_parameter import Parameter
 from uncertainties import ufloat
-import corner
-import matplotlib.pyplot as plt
 
 # TODO: Save/load using emcee.backends.HDFBackend + H5Serializable
 class WrappedMCMC:
@@ -219,47 +217,3 @@ class WrappedMCMC:
         self.auto_correlation = auto_correlation_time
         self.iterations = iteration_counter
     
-    def corner_plot(self, save_to_path : str = None):
-        '''
-        Can be called only after a run is complete 
-        Shows and optionally saves a corner plot
-        '''
-        
-        if self.sampler is None:
-            print("Cannot make corner plot: fitting was not yet run!")
-            return
-        
-        labels = self.get_free_params()
-        corner.corner(
-            self.sampler.get_chain(discard=200, thin=15, flat=True), labels=labels
-        )
-        
-        if save_to_path is not None:
-            plt.savefig(save_to_path)
-        plt.close()
-    
-    def chain_plot(self, save_to_path : str = None):
-        '''
-        Can be called only after a run is complete 
-        Shows and optionally saves a plot of the chain evolution
-        '''
-        if self.sampler is None:
-            print("Cannot make chain plot: fitting was not yet run!")
-            return
-        samples = self.sampler.get_chain()
-        labels = self.get_free_params()
-        ndim = len(labels)
-        fig, axes = plt.subplots(ndim, figsize=(10, 7), sharex = True)
-        if ndim == 1:
-            axes = [axes]
-        for i in range(ndim):
-            ax = axes[i]
-            ax.plot(samples[:, :, i], "k", alpha=0.3)
-            ax.set_xlim(0, len(samples))
-            ax.set_ylabel(labels[i])
-            ax.yaxis.set_label_coords(-0.1, 0.5)
-        axes[-1].set_xlabel("Step number")
-
-        if save_to_path is not None:
-            plt.savefig(save_to_path)
-        plt.close()

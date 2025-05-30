@@ -10,6 +10,8 @@ from erebus.individual_fit_results import IndividualFitResults
 import matplotlib.pyplot as plt
 import numpy as np
 import inspect
+from erebus.mcmc_model import WrappedMCMC
+import corner
 
 def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResults, save_to_directory : str = None, show : bool = False):
     '''
@@ -175,7 +177,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     
 def plot_eigenvectors(individual_fit : IndividualFit, save_to_directory : str = None):
     '''
-    Plots the 5 highest ranked eigenimages to a given folder (if provided)
+    Plots the 5 highest ranked eigenimages to a given folder (if provided).
     '''
     for i in range(0, 5):
         eigenimage = individual_fit.eigenvectors[i]
@@ -194,7 +196,7 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     Creates an informative plot for the joint fit results. Saves as a png and a pdf.
     
     File name starts with true/false for if FNPCA was used, then planet name, then visit name,
-    then unique hash of config file settings
+    then unique hash of config file settings.
     '''
     if isinstance(joint_fit, JointFit):
         joint_fit = JointFitResults(joint_fit)
@@ -248,4 +250,48 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     if show:
         plt.show()
     
+    plt.close()
+
+def corner_plot(mcmc : WrappedMCMC, save_to_path : str = None):
+    '''
+    Call this on an MCMC model after it has run in order to show and optionally save a corner plot.
+    '''
+    
+    if mcmc.sampler is None:
+        print("Cannot make corner plot: fitting was not yet run!")
+        return
+    
+    labels = mcmc.get_free_params()
+    corner.corner(
+        mcmc.sampler.get_chain(discard=200, thin=15, flat=True), labels=labels
+    )
+    
+    if save_to_path is not None:
+        plt.savefig(save_to_path)
+    plt.close()
+
+def chain_plot(mcmc : WrappedMCMC, save_to_path : str = None):
+    '''
+    Call this on an MCMC model after it has run in order to show and optionally save a chain plot.
+
+    '''
+    if mcmc.sampler is None:
+        print("Cannot make chain plot: fitting was not yet run!")
+        return
+    samples = mcmc.sampler.get_chain()
+    labels = mcmc.get_free_params()
+    ndim = len(labels)
+    fig, axes = plt.subplots(ndim, figsize=(10, 7), sharex = True)
+    if ndim == 1:
+        axes = [axes]
+    for i in range(ndim):
+        ax = axes[i]
+        ax.plot(samples[:, :, i], "k", alpha=0.3)
+        ax.set_xlim(0, len(samples))
+        ax.set_ylabel(labels[i])
+        ax.yaxis.set_label_coords(-0.1, 0.5)
+    axes[-1].set_xlabel("Step number")
+
+    if save_to_path is not None:
+        plt.savefig(save_to_path)
     plt.close()

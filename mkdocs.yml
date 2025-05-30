@@ -6,7 +6,11 @@ nav:
     - Installation: 'installation.md'
     - Full pipeline demo: 'demos/full_pipeline.ipynb'
     - FNPCA standalone demo: 'demos/fnpca_systematic.ipynb'
-  - API: 'api.md'
+  - API:
+    - Configuration: 'api_config.md'
+    - Running: 'api_run.md'
+    - FN-PCA: 'api_fnpca.md'
+    - Results: 'api_results.md'
   - Contributing: 'contributing.md'
   - License: 'copyright.md'
 
@@ -23,11 +27,22 @@ plugins:
       python:
         paths: [src/erebus]
         options:
-          show_source: true
-          docstring_style: sphinx
+          show_source: false
+          docstring_style: google
           annotations_path: full
           docstring_section_style: table
           show_signature_annotations: true
+          show_root_heading: true
+          member_order: source
+          show_labels: true
+          show_attributes: true
+          show_if_no_docstring: true
+          show_special_members: ["__init__"]
+          filters:
+          - "!^_"
+        extensions:
+          - griffe_pydantic:
+              schema: true
 - search
 - mkdocs-jupyter
 

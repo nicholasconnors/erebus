@@ -34,7 +34,7 @@ class H5Serializable:
                 return ufloat(float(d['nominal_value']), float(d['std_dev']))
             return d
     
-    def exclude_keys(self) -> List[str]:
+    def _exclude_keys(self) -> List[str]:
         '''
         Excluded from serialization
         '''
@@ -49,7 +49,7 @@ class H5Serializable:
 
             # TODO: Support recursion through groups
             for name, value in hf.attrs.items():
-                if name in self.exclude_keys():
+                if name in self._exclude_keys():
                     continue
                 # Dictionaries and ufloats have custom serialization to strings
                 if isinstance(value, str):
@@ -63,7 +63,7 @@ class H5Serializable:
                     
                 self.__setattr__(name, value)
             for name, value in hf.items():
-                if name in self.exclude_keys():
+                if name in self._exclude_keys():
                     continue
                 if isinstance(value, h5py.Dataset):
                     v = value[()]
@@ -86,7 +86,7 @@ class H5Serializable:
         try:
             hf = h5py.File(file_path, 'w')
             # Filter out "private" attributes
-            names = [key for key in dir(self) if not key.startswith('_') and not key in self.exclude_keys()]
+            names = [key for key in dir(self) if not key.startswith('_') and not key in self._exclude_keys()]
             for name in names:
                 # Don't try to save functions
                 if isinstance(getattr(self.__class__, name, None), types.FunctionType):

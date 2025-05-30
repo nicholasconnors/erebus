@@ -14,8 +14,24 @@ import numpy as np
 
 class ErebusRunConfig(BaseModel):
     '''
-    Settings for running through the entire pipeline
-    Serializable to YAML
+    Settings for running through the entire Erebus pipeline.
+    Serializable to/from YAML. One of perform_joint_fit or perform_individual_fits must
+    be true else the run will not do anything.
+    
+    Attributes:
+        fit_fnpca (bool): Optional bool to use FN-PCA in the systematic model.
+        fit_exponential (bool): Optional bool to use an exponential curve in the systematic model.
+        fit_linear (bool): Optional bool to use a linear slope in the systematic model.
+        perform_joint_fit (bool): Optional bool to fit all visits together with a shared eclipse depth.
+        perform_individual_fits (bool): Optional bool to fit each visit with their own eclipse depth.
+        calints_path (str): Relative path from the folder containing this file to where the .fits files are.
+        planet_path (str): Relative path from the folder containing this file to where the planet config is.
+        aperture_radius (int): Pixel radius for aperture photometry.
+        annulus_start (int): Inner pixel radius of disk used for background subtraction.
+        annulus_end (int): Outer pixel radius of disk used for background subtraction.
+        skip_visits (list[int]): Optional list of indices to skip when doing individual fits. Index based on visit ID.
+        trim_integrations (list[int]): Length-two list with the number of integrations to clip from the start and end. Optional.
+        star_position (list[int]): X and y pixel coordinates of the star. Optional (will search for the star or assume its centered).
     '''    
     fit_fnpca : Optional[bool] = False
     fit_exponential : Optional[bool] = False
@@ -40,7 +56,7 @@ class ErebusRunConfig(BaseModel):
     def save(self, path : str):
         to_yaml_file(path, self)
     
-    def save_schema(path : str):
+    def _save_schema(path : str):
         run_schema = ErebusRunConfig.model_json_schema()
         run_schema_json = json.dumps(run_schema, indent=2)
         with open(path, "w") as f:

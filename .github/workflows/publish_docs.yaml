@@ -61,6 +61,7 @@ jobs:
           pip install mkdocstrings-python
           pip install markdown-include
           pip install mkdocs-jupyter
+          pip install griffe-pydantic
       - name: Setup Docs Deploy
         run: |
           git config --global user.name "Docs"
