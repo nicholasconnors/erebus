@@ -13,6 +13,7 @@ import json
 from datetime import datetime
 from erebus.joint_fit_results import JointFitResults
 from erebus.individual_fit_results import IndividualFitResults
+from erebus.plotting import *
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -21,7 +22,7 @@ class Erebus(H5Serializable):
     Object instance for running the full pipeline, starting from calints files.
     ''' 
     
-    def exclude_keys(self):
+    def _exclude_keys(self):
         '''
         Excluded from serialization
         '''
@@ -31,8 +32,12 @@ class Erebus(H5Serializable):
     def load(path : str):
         return Erebus(None, override_cache_path=path)
     
-    def __init__(self, run_cfg : ErebusRunConfig, force_clear_cache : bool = False,
+    def __init__(self, run_cfg : ErebusRunConfig | str, force_clear_cache : bool = False,
                  override_cache_path : str = None):    
+        
+        if isinstance(run_cfg, str):
+            run_cfg = ErebusRunConfig.load(run_cfg) 
+        
         config_hash = hashlib.md5(json.dumps(run_cfg.model_dump()).encode()).hexdigest()   
         self.cache_file = f"{EREBUS_CACHE_DIR}/{config_hash}_erebus.h5"
     
@@ -45,11 +50,15 @@ class Erebus(H5Serializable):
         self.individual_fits = []
         
         # Record absolute path so that a run file can be moved elsewhere and still work
-        self.calints_abs_path = os.path.abspath(run_cfg.calints_path)
+        root_folder = os.path.dirname(os.path.abspath(run_cfg.path))
+        if os.path.isabs(run_cfg.calints_path):
+            self.calints_abs_path = run_cfg.calints_path
+        else:
+            self.calints_abs_path = root_folder + os.sep + run_cfg.calints_path
         
         # Load from file if needed
         if force_clear_cache or not os.path.isfile(self.cache_file):
-            self.visit_names = f_util.get_fits_files_visits_in_folder(run_cfg.calints_path)
+            self.visit_names = f_util.get_fits_files_visits_in_folder(self.calints_abs_path)
             if self.visit_names is None or len(self.visit_names) == 0:
                 print("No visits found, aborting")
                 return
