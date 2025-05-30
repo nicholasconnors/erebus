@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Building erebus locally"
+echo "Building and installing Erebus locally"
 
 if [ ! -d "build" ]; then
     mkdir "build"
