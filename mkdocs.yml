@@ -21,7 +21,7 @@ plugins:
 - mkdocstrings:
     handlers:
       python:
-        paths: [src]
+        paths: [src/erebus]
         options:
           show_source: true
           docstring_style: sphinx

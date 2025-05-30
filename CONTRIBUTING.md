@@ -2,7 +2,7 @@
 
 Erebus is made with Python 3.12. To develop, create a fresh conda environment in this version and then install the dependencies in requirements.txt.
 
-I am not currently seeking contritions but have written this for posterity and the sake of internal documentation.
+I am not currently seeking contritions but have written this for posterity and the sake of internal documentation. However, please report any bugs encounted via the issues tab on the GitHub repository, and feel free to suggest features which could be used to improve the user experience.
 
 ### Writing new documentation
 

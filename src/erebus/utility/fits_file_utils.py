@@ -50,9 +50,7 @@ def load_all_calints_for_visit(folder : str, visit_name : str):
         time = file['INT_TIMES'].data
         dq_array = file['DQ'].data
         file.close()
-        
-        print(f"INT_TIMES format: {time[0]}")
-        
+                
         # We take the start of the integration as our time
         int_starts = [t[1] for t in time]
         
