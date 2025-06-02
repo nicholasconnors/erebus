@@ -4,6 +4,11 @@ directory = os.path.abspath(os.path.dirname(os.getcwd()) + "erebus/src/erebus/ut
 sys.path.append(directory)
 print(directory)
 
+print(os.path.isdir(directory))
+
+for item in os.listdir(directory):
+  print(item)
+
 from planet import Planet
 from run_cfg import ErebusRunConfig
 
