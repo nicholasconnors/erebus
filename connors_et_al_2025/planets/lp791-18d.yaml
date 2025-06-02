@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../src/schema/planet_schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nicholasconnors/erebus/refs/heads/main/src/erebus/schema/planet_schema.json
 
 name: LP791-18d
 t0: [2458772.16211, 0.00082]

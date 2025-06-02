@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../src/schema/planet_schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nicholasconnors/erebus/refs/heads/main/src/erebus/schema/planet_schema.json
 
 name: TRAPPIST-1b
 t0: [2459779.210475, 0.000025]
