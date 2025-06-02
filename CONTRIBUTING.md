@@ -34,3 +34,7 @@ Before making a pull request, run all manual tests locally on your branch and en
 ### Semantic versioning
 
 Semantic versioning or [semver](https://semver.org/) is a simple set of rules for interpreting version numbers. Whenever making an update to Erebus we should strive to ensure there is backwards compatibility, and only when that is no longer tenable should we make a major release. Any deprecated functionality must remain in Erebus and not be removed unless part of a major version update (e.g., 1.x.x -> 2.0.0).
+
+### Releasing
+
+New releases are automatically drafted when merging into `main` with a pull-request labeled `release`. The version tag is taken from the title of the pull-request, and the release body is taken from the body of the pull-request.
