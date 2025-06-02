@@ -1,0 +1,27 @@
+name: Releases
+
+on: 
+  pull_request:
+    types: 
+      - synchronize
+      - labeled
+    branches:
+      - main
+jobs:
+  build:
+    uses: ./.github/workflows/build_package.yaml
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ github.ref != 'refs/heads/main' && contains(github.event.pull_request.labels.*.name, 'release') }}
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "erebus.zip"
+        body: ${{ github.event.pull_request.body }}
+        tag: ${{ github.event.pull_request.title }}
+        name: Version ${{ github.event.pull_request.title }}
+        draft: true
