@@ -1,6 +1,6 @@
 import sys
 import os
-directory = os.path.abspath(os.path.dirname(os.getcwd()) + "/src")
+directory = os.path.abspath(os.path.dirname(os.getcwd()) + "/src/erebus")
 sys.path.append(directory)
 print(directory)
 
