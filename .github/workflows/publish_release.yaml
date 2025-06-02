@@ -19,15 +19,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Get version from pyproject.toml
+      uses: SebRollen/toml-action@v1.2.0
       id: get_version
-      run: |
-        pip install toml
-        version=$(python3 -c "
-        import toml
-        pyproject = toml.load('pyproject.toml')
-        print(pyproject['version'])
-        ")
-        echo "Version=$version" >> $GITHUB_OUTPUT
+      with:
+        file: 'pyproject.toml'
+        field: 'package.version'
     - name: Check if tag already exists
       uses: mukunku/tag-exists-action@v1.6.0
       id: check-tag
@@ -35,7 +31,7 @@ jobs:
         tag: ${{ github.event.pull_request.title }}
     - name: Check version match
       run: |
-        if [[ "${{ steps.get_version.outputs.Version }}" != "${{ github.event.pull_request.title }}" ]]; then
+        if [[ "${{ steps.get_version.outputs.value }}" != "${{ github.event.pull_request.title }}" ]]; then
           echo "Version number in pyproject.toml does not match PR title"
           exit 1
         fi
