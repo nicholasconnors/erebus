@@ -590,6 +590,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#releasing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Releasing
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -682,6 +691,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#releasing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Releasing
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -722,6 +740,8 @@ pip install griffe-pydantic
 <p>Before making a pull request, run all manual tests locally on your branch and ensure they all work as expected and without logging errors. Similarly any maintainer should run all manual tests locally before merging a pull request after providing a thorough code review.</p>
 <h3 id="semantic-versioning">Semantic versioning</h3>
 <p>Semantic versioning or <a href="https://semver.org/">semver</a> is a simple set of rules for interpreting version numbers. Whenever making an update to Erebus we should strive to ensure there is backwards compatibility, and only when that is no longer tenable should we make a major release. Any deprecated functionality must remain in Erebus and not be removed unless part of a major version update (e.g., 1.x.x -&gt; 2.0.0).</p>
+<h3 id="releasing">Releasing</h3>
+<p>New releases are automatically drafted when merging into <code>main</code> with a pull-request labeled <code>release</code>. The version tag is taken from the title of the pull-request, and the release body is taken from the body of the pull-request.</p>
 
 
 
