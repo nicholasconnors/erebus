@@ -18,6 +18,21 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v4
+    - name: Get version from pyproject.toml
+      id: get_version
+      run: |
+        version=$(python3 -c "
+        import toml
+        pyproject = toml.load('pyproject.toml')
+        print(pyproject['version'])
+        ")
+        echo "Version=$version" >> $GITHUB_OUTPUT
+    - name: Check version match
+      run: |
+        if [[ "${{ steps.get_version.outputs.Version }}" != ${{ github.event.pull_request.title }} ]]; then
+          echo "Version number in pyproject.toml does not match PR title"
+          exit 1
+        fi
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "erebus.zip"
