@@ -1,0 +1,2308 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../api_fnpca/">
+      
+      
+        <link rel="next" href="../contributing/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>Results - Erebus Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api-viewing-results" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Erebus Documentation" class="md-header__button md-logo" aria-label="Erebus Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Erebus Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Results
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/nicholasconnors/erebus" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Erebus Documentation" class="md-nav__button md-logo" aria-label="Erebus Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Erebus Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/nicholasconnors/erebus" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/full_pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Full pipeline example
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/fnpca_systematic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Frame Normalized PCA example
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Running
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_fnpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FN-PCA
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Results
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Results
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults" class="md-nav__link">
+    <span class="md-ellipsis">
+      IndividualFitResults
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IndividualFitResults">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.config" class="md-nav__link">
+    <span class="md-ellipsis">
+      config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.config_hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      config_hash
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.eigenvalues" class="md-nav__link">
+    <span class="md-ellipsis">
+      eigenvalues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.eigenvectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      eigenvectors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.flux_model" class="md-nav__link">
+    <span class="md-ellipsis">
+      flux_model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.frames" class="md-nav__link">
+    <span class="md-ellipsis">
+      frames
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.order" class="md-nav__link">
+    <span class="md-ellipsis">
+      order
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.pca_variance_ratios" class="md-nav__link">
+    <span class="md-ellipsis">
+      pca_variance_ratios
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.planet_name" class="md-nav__link">
+    <span class="md-ellipsis">
+      planet_name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.raw_flux" class="md-nav__link">
+    <span class="md-ellipsis">
+      raw_flux
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.results" class="md-nav__link">
+    <span class="md-ellipsis">
+      results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.start_time" class="md-nav__link">
+    <span class="md-ellipsis">
+      start_time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.systematic_factor" class="md-nav__link">
+    <span class="md-ellipsis">
+      systematic_factor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.time" class="md-nav__link">
+    <span class="md-ellipsis">
+      time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.visit_name" class="md-nav__link">
+    <span class="md-ellipsis">
+      visit_name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults" class="md-nav__link">
+    <span class="md-ellipsis">
+      JointFitResults
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="JointFitResults">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.config" class="md-nav__link">
+    <span class="md-ellipsis">
+      config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.config_hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      config_hash
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.detrended_flux_per_visit" class="md-nav__link">
+    <span class="md-ellipsis">
+      detrended_flux_per_visit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.joint_eigenvalues" class="md-nav__link">
+    <span class="md-ellipsis">
+      joint_eigenvalues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.joint_eigenvectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      joint_eigenvectors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.model_flux_per_visit" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_flux_per_visit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.model_time_per_visit" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_time_per_visit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.pca_variance_ratios" class="md-nav__link">
+    <span class="md-ellipsis">
+      pca_variance_ratios
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.planet_name" class="md-nav__link">
+    <span class="md-ellipsis">
+      planet_name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.raw_flux" class="md-nav__link">
+    <span class="md-ellipsis">
+      raw_flux
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.relative_time_per_visit" class="md-nav__link">
+    <span class="md-ellipsis">
+      relative_time_per_visit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.results" class="md-nav__link">
+    <span class="md-ellipsis">
+      results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.time" class="md-nav__link">
+    <span class="md-ellipsis">
+      time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plotting" class="md-nav__link">
+    <span class="md-ellipsis">
+      plotting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="plotting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plotting.chain_plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      chain_plot
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting.corner_plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      corner_plot
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting.plot_eigenvectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      plot_eigenvectors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting.plot_fnpca_individual_fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      plot_fnpca_individual_fit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting.plot_joint_fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      plot_joint_fit
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../copyright/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    License
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults" class="md-nav__link">
+    <span class="md-ellipsis">
+      IndividualFitResults
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IndividualFitResults">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.config" class="md-nav__link">
+    <span class="md-ellipsis">
+      config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.config_hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      config_hash
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.eigenvalues" class="md-nav__link">
+    <span class="md-ellipsis">
+      eigenvalues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.eigenvectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      eigenvectors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.flux_model" class="md-nav__link">
+    <span class="md-ellipsis">
+      flux_model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.frames" class="md-nav__link">
+    <span class="md-ellipsis">
+      frames
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.order" class="md-nav__link">
+    <span class="md-ellipsis">
+      order
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.pca_variance_ratios" class="md-nav__link">
+    <span class="md-ellipsis">
+      pca_variance_ratios
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.planet_name" class="md-nav__link">
+    <span class="md-ellipsis">
+      planet_name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.raw_flux" class="md-nav__link">
+    <span class="md-ellipsis">
+      raw_flux
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.results" class="md-nav__link">
+    <span class="md-ellipsis">
+      results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.start_time" class="md-nav__link">
+    <span class="md-ellipsis">
+      start_time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.systematic_factor" class="md-nav__link">
+    <span class="md-ellipsis">
+      systematic_factor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.time" class="md-nav__link">
+    <span class="md-ellipsis">
+      time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.visit_name" class="md-nav__link">
+    <span class="md-ellipsis">
+      visit_name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual_fit_results.IndividualFitResults.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults" class="md-nav__link">
+    <span class="md-ellipsis">
+      JointFitResults
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="JointFitResults">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.config" class="md-nav__link">
+    <span class="md-ellipsis">
+      config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.config_hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      config_hash
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.detrended_flux_per_visit" class="md-nav__link">
+    <span class="md-ellipsis">
+      detrended_flux_per_visit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.joint_eigenvalues" class="md-nav__link">
+    <span class="md-ellipsis">
+      joint_eigenvalues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.joint_eigenvectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      joint_eigenvectors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.model_flux_per_visit" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_flux_per_visit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.model_time_per_visit" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_time_per_visit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.pca_variance_ratios" class="md-nav__link">
+    <span class="md-ellipsis">
+      pca_variance_ratios
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.planet_name" class="md-nav__link">
+    <span class="md-ellipsis">
+      planet_name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.raw_flux" class="md-nav__link">
+    <span class="md-ellipsis">
+      raw_flux
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.relative_time_per_visit" class="md-nav__link">
+    <span class="md-ellipsis">
+      relative_time_per_visit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.results" class="md-nav__link">
+    <span class="md-ellipsis">
+      results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.time" class="md-nav__link">
+    <span class="md-ellipsis">
+      time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fit_results.JointFitResults.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plotting" class="md-nav__link">
+    <span class="md-ellipsis">
+      plotting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="plotting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plotting.chain_plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      chain_plot
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting.corner_plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      corner_plot
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting.plot_eigenvectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      plot_eigenvectors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting.plot_fnpca_individual_fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      plot_fnpca_individual_fit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting.plot_joint_fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      plot_joint_fit
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="api-viewing-results">API - Viewing results</h1>
+<p>After running an instance of the <code>Erebus</code> pipeline, a folder of results files are generated. These can be loaded in later in order to plot and otherwise visualize your results.</p>
+<p style="font-size: 24px;">IndividualFitResults</p>
+<blockquote>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="individual_fit_results.IndividualFitResults" class="doc doc-heading">
+            <code>individual_fit_results.IndividualFitResults</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="erebus">erebus</span>.<span title="erebus.utility">utility</span>.<span title="erebus.utility.h5_serializable_file">h5_serializable_file</span>.<span title="erebus.utility.h5_serializable_file.H5Serializable">H5Serializable</span></code></p>
+
+
+        <p>Class containing the results of an individual fit run</p>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">config</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">config</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The config file used to create this run</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.config_hash" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">config_hash</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">config_hash</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The unique hash of the config file. Used for naming cache files.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.eigenvalues" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">eigenvalues</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">eigenvalues</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>For each principal component, the eigenvalue. The first 5 are used as the FN-PCA systematic model.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.eigenvectors" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">eigenvectors</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>For each principal component, this is its eigenimage.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.flux_model" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">flux_model</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">fit_method</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="o">*</span><span class="n">res_nominal_values</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The best fit detrended lightcurve.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.frames" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">frames</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">photometry_data</span><span class="o">.</span><span class="n">normalized_frames</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The frames which aperture photometry was performed on for the fit.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.order" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">order</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">order</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>If there were other visits observed, this is the numerical ordering they occuring in.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.pca_variance_ratios" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">pca_variance_ratios</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">pca_variance_ratios</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>For each principal component, how much of the variance does it explain.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.planet_name" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">planet_name</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">planet_name</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The name of the planet observed</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.raw_flux" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">raw_flux</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">raw_flux</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Light curve that is not yet detrended.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.results" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">results</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">results</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A dictionary of results for the fit parameters (e.g., eclipse depth)</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.start_time" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">start_time</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">start_time</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The BJD date the observation started on.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.systematic_factor" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">systematic_factor</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">systematic_model</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="o">*</span><span class="n">systematic_params</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The systematic factor which was divided out of the raw lightcurve to get the detrended one.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.time" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">time</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">time</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The time values that the model was fit on. Starts at 0.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="individual_fit_results.IndividualFitResults.visit_name" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">visit_name</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">visit_name</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The unique visit name as read on MAST.</p>
+
+    </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="individual_fit_results.IndividualFitResults.load" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>After running an Erebus instance, the results file can be loaded later using this method.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div></blockquote>
+<hr />
+<p style="font-size: 24px;">JointFitResults</p>
+<blockquote>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="joint_fit_results.JointFitResults" class="doc doc-heading">
+            <code>joint_fit_results.JointFitResults</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="erebus">erebus</span>.<span title="erebus.utility">utility</span>.<span title="erebus.utility.h5_serializable_file">h5_serializable_file</span>.<span title="erebus.utility.h5_serializable_file.H5Serializable">H5Serializable</span></code></p>
+
+
+        <p>Class containing the results of an individual fit run</p>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">config</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">config</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The config file used to create this run</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.config_hash" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">config_hash</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">config_hash</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The unique hash of the config file. Used for naming cache files.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.detrended_flux_per_visit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">detrended_flux_per_visit</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A list containing the detrended lightcurves of each visit.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.joint_eigenvalues" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">joint_eigenvalues</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">joint_eigenvalues</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A list of eigenvalue lists per visit. Index first by vist number than by principal component number.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.joint_eigenvectors" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">joint_eigenvectors</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">joint_eigenvectors</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A list of eigenvector lists per visit. Index first by vist number than by principal component number.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.model_flux_per_visit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">model_flux_per_visit</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The best fit detrended lightcurves per visit.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.model_time_per_visit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">model_time_per_visit</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A list containing the time values corresponding to model_flux_per_visit</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.pca_variance_ratios" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">pca_variance_ratios</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">pca_variance_ratios</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A list of PCA explained variance ratio lists per visit. Index first by vist number than by principal component number.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.planet_name" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">planet_name</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">planet_name</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The name of the planet observed</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.raw_flux" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">raw_flux</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">raw_flux</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A list containing the raw (not yet detrended) lightcurves of each visit.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.relative_time_per_visit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">relative_time_per_visit</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A list containing the time values corresponding to detrended_flux_per_visit</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.results" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">results</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">results</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A dictionary of results for the fit parameters (e.g., eclipse depth)</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="joint_fit_results.JointFitResults.time" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">time</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">time</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A list of time values for each visit.</p>
+
+    </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="joint_fit_results.JointFitResults.load" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>After running an Erebus instance, the results file can be loaded later using this method.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div></blockquote>
+<hr />
+<p style="font-size: 24px;">Plotting helper methods</p>
+<blockquote>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="plotting" class="doc doc-heading">
+            <code>plotting</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="plotting.chain_plot" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">chain_plot</span><span class="p">(</span><span class="n">mcmc</span><span class="p">:</span> <span class="n">WrappedMCMC</span><span class="p">,</span> <span class="n">save_to_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Call this on an MCMC model after it has run in order to show and optionally save a chain plot.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="plotting.corner_plot" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">corner_plot</span><span class="p">(</span><span class="n">mcmc</span><span class="p">:</span> <span class="n">WrappedMCMC</span><span class="p">,</span> <span class="n">save_to_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Call this on an MCMC model after it has run in order to show and optionally save a corner plot.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="plotting.plot_eigenvectors" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plot_eigenvectors</span><span class="p">(</span><span class="n">individual_fit</span><span class="p">:</span> <span class="n">IndividualFit</span><span class="p">,</span> <span class="n">save_to_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Plots the 5 highest ranked eigenimages to a given folder (if provided).</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="plotting.plot_fnpca_individual_fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plot_fnpca_individual_fit</span><span class="p">(</span><span class="n">individual_fit</span><span class="p">:</span> <span class="n">IndividualFit</span> <span class="o">|</span> <span class="n">IndividualFitResults</span><span class="p">,</span> <span class="n">save_to_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Creates an informative plot for an individual fit. Will save both a png and a pdf.
+Expects the individual fit to be done with fnpca/exponential and a linear component.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="plotting.plot_joint_fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plot_joint_fit</span><span class="p">(</span><span class="n">joint_fit</span><span class="p">:</span> <span class="n">JointFit</span> <span class="o">|</span> <span class="n">JointFitResults</span><span class="p">,</span> <span class="n">save_to_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Creates an informative plot for the joint fit results. Saves as a png and a pdf.</p>
+<p>File name starts with true/false for if FNPCA was used, then planet name, then visit name,
+then unique hash of config file settings.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div></blockquote>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2025 Nicholas Connors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+    
+  </body>
+</html>
