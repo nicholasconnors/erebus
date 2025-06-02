@@ -1,4 +1,4 @@
-name: Build dev package artifact
+name: Publish dev artifact
 on: 
   push:
     branches-ignore:
