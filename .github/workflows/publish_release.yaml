@@ -40,7 +40,7 @@ jobs:
         fi
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "erebus.zip"
+        artifacts: "erebus"
         body: ${{ github.event.pull_request.body }}
         tag: ${{ github.event.pull_request.title }}
         name: Version ${{ github.event.pull_request.title }}
