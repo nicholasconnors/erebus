@@ -1,11 +1,11 @@
 import sys
 import os
-directory = os.path.abspath(os.path.dirname(os.getcwd()) + "/src/erebus")
+directory = os.path.abspath(os.path.dirname(os.getcwd()) + "/src/erebus/utility")
 sys.path.append(directory)
 print(directory)
 
-from utility.planet import Planet
-from utility.run_cfg import ErebusRunConfig
+from planet import Planet
+from run_cfg import ErebusRunConfig
 
-Planet._save_schema(directory + "/erebus/src/erebus/schema/planet_schema.json")
-ErebusRunConfig._save_schema(directory + "/erebus/src/erebus/schema/run_cfg_schema.json")
+Planet._save_schema(os.path.dirname(os.getcwd()) + "/src/erebus/schema/planet_schema.json")
+ErebusRunConfig._save_schema(os.path.dirname(os.getcwd()) + "/src/erebus/schema/run_cfg_schema.json")
