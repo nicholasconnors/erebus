@@ -27,11 +27,19 @@ jobs:
         print(pyproject['version'])
         ")
         echo "Version=$version" >> $GITHUB_OUTPUT
+    - name: Check if tag already exists
+      uses: mukunku/tag-exists-action@v1.6.0
+      id: check-tag
+      with: 
+        tag: ${{ github.event.pull_request.title }}
     - name: Check version match
       run: |
-        if [[ "${{ steps.get_version.outputs.Version }}" != ${{ github.event.pull_request.title }} ]]; then
+        if [[ "${{ steps.get_version.outputs.Version }}" != "${{ github.event.pull_request.title" }} ]]; then
           echo "Version number in pyproject.toml does not match PR title"
           exit 1
+        fi
+        if [[ "${{ steps.check-tag.outputs.exists }}" != 'true' ]]; then
+          echo "Version number already belongs to an existing tag, if that release is not a draft this will do nothing."
         fi
     - uses: ncipollo/release-action@v1
       with:
@@ -40,3 +48,5 @@ jobs:
         tag: ${{ github.event.pull_request.title }}
         name: Version ${{ github.event.pull_request.title }}
         draft: true
+        updateOnlyUnreleased: true
+        allowUpdates: true
