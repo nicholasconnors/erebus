@@ -1,5 +1,5 @@
 {
-  "description": "Serialized YAML representation of a Planet for the Erebus pipeline\n\nPlanet parameters with optional uncertainties are represented as lists of up to 3 floats\n1 float = no uncertainty, 2 floats = symmetric error, 3 floats = asymmetric error\n\nAttributes:\n    name        Name of the planet\n    t0          Midpoint time of reference transit\n    a_rstar     Semi-major axis in units of stellar radii\n    p           Orbital period in days\n    rp_rstar    Radius of the exoplanet in units of stellar radii\n    inc         Inclination in degrees\n    ecc         Eccentricity\n    w           Argument of periastron in degrees   ",
+  "description": "Serialized YAML representation of a Planet for the Erebus pipeline.\n\nPlanet parameters with optional uncertainties are represented as lists of up to 3 floats\n1 float = no uncertainty, 2 floats = symmetric error, 3 floats = asymmetric error.\n\nAttributes:\n    name        Name of the planet\n    t0          Midpoint time of reference transit\n    a_rstar     Semi-major axis in units of stellar radii\n    p           Orbital period in days\n    rp_rstar    Radius of the exoplanet in units of stellar radii\n    inc         Inclination in degrees\n    ecc         Eccentricity\n    w           Argument of periastron in degrees   ",
   "properties": {
     "name": {
       "title": "Name",
