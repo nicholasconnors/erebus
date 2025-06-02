@@ -258,7 +258,7 @@ def corner_plot(mcmc : WrappedMCMC, save_to_path : str = None, show : bool = Fal
     '''
     
     if mcmc.sampler is None:
-        print("Cannot make corner plot: fitting was not yet run!")
+        print("Cannot make corner plot: MCMC run data isn't cached yet")
         return
     
     labels = mcmc.get_free_params()
@@ -280,7 +280,7 @@ def chain_plot(mcmc : WrappedMCMC, save_to_path : str = None, show : bool = Fals
 
     '''
     if mcmc.sampler is None:
-        print("Cannot make chain plot: fitting was not yet run!")
+        print("Cannot make chain plot: MCMC run data isn't cached yet")
         return
     samples = mcmc.sampler.get_chain()
     labels = mcmc.get_free_params()
