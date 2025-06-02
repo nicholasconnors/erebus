@@ -10,8 +10,12 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/build_package.yaml
+  schema:
+    uses: ./.github/workflows/generate_schemas.yaml
   release:
-    needs: build
+    needs: 
+      - build
+      - schema
     runs-on: ubuntu-latest
     if: ${{ github.ref != 'refs/heads/main' && contains(github.event.pull_request.labels.*.name, 'release') }}
     permissions:
