@@ -4,7 +4,7 @@ import os
 import glob
 from jwst.datamodels import dqflags
 import re
-import tqdm
+from tqdm import tqdm
 
 def get_fits_files_visits_in_folder(folder : str):
     '''
@@ -64,9 +64,7 @@ def load_all_calints_for_visit(folder : str, visit_name : str):
             combined_data.append(d)
         for t in int_starts:
             combined_times.append(t)
-        
-        print(f"Loaded segment {segment_number}")
-        
+                
     # Sort the data by time
     print("Sorting data")
     

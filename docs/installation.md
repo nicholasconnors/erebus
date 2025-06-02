@@ -1,8 +1,6 @@
 # Erebus installation
 
-It is recommended to use erebus in a dedicated Anaconda environment.
-
-Todo: add conda installation instructions.
+It is recommended to use erebus in a dedicated Anaconda environment. For instructions on how to install Anaconda, read their [docs](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html). For the quickest setup use [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/install#quickstart-install-instructions).
 
 Next, create a new conda environment on Python 3.12 by running the following in the terminal (feel free to rename the environment).
 
@@ -14,7 +12,7 @@ conda install python=3.12
 
 ### Installation using pip
 
-Todo
+Todo, once Erebus has been added to PyPI.
 
 ### Manual installation
 
@@ -27,6 +25,10 @@ Navigate to the folder containing the archive file and run the following from yo
 ```
 pip install erebus-x.y.z.tar.gz
 ```
+
+### Installing from cloned repo
+
+If you are installing Erebus for local development, see the [Contributing](contributing.md) page for how to build from the source code.
 
 ### Running Jupyter Notebook demos
 

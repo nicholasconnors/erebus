@@ -29,9 +29,9 @@ class PhotometryData(H5Serializable):
             self._cache_file = override_cache_path
         else:
             # The cache folder name is based on a hash of the source folder
-            self.visit_name : str = visit_name
+            self.visit_name : str = fits_file.visit_name
             '''The unique name of the visit being observed.'''
-            self.source_folder : str = source_folder
+            self.source_folder : str = fits_file.source_folder
             '''The directory containing the files this WrappedFits is based on'''
             
             source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()

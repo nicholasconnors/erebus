@@ -252,7 +252,7 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     
     plt.close()
 
-def corner_plot(mcmc : WrappedMCMC, save_to_path : str = None):
+def corner_plot(mcmc : WrappedMCMC, save_to_path : str = None, show : bool = False):
     '''
     Call this on an MCMC model after it has run in order to show and optionally save a corner plot.
     '''
@@ -268,9 +268,13 @@ def corner_plot(mcmc : WrappedMCMC, save_to_path : str = None):
     
     if save_to_path is not None:
         plt.savefig(save_to_path)
+        
+    if show:
+        plt.show()
+        
     plt.close()
 
-def chain_plot(mcmc : WrappedMCMC, save_to_path : str = None):
+def chain_plot(mcmc : WrappedMCMC, save_to_path : str = None, show : bool = False):
     '''
     Call this on an MCMC model after it has run in order to show and optionally save a chain plot.
 
@@ -294,4 +298,8 @@ def chain_plot(mcmc : WrappedMCMC, save_to_path : str = None):
 
     if save_to_path is not None:
         plt.savefig(save_to_path)
+    
+    if show:
+        plt.show()
+        
     plt.close()

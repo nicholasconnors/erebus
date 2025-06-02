@@ -11,7 +11,6 @@ from erebus.frame_normalized_pca import perform_fn_pca_on_aperture
 from erebus.utility.h5_serializable_file import H5Serializable
 import batman
 import json
-import erebus.plotting as plotting
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -194,13 +193,3 @@ class IndividualFit(H5Serializable):
         self.iterations = self.mcmc.iterations
         
         self.save_to_path(self._cache_file)
-        
-        if not os.path.exists("./figures"):
-            os.makedirs("./figures")
-        
-        plotting.corner_plot(self.mcmc, f"./figures/{self.planet_name}_{self.visit_name}_{self.config_hash}_corner.pdf")
-        plotting.chain_plot(self.mcmc, f"./figures/{self.planet_name}_{self.visit_name}_{self.config_hash}_chain.pdf")
-    
-    def plot_initial_guess(self):
-        # TODO: Initial guess and first frame
-        pass

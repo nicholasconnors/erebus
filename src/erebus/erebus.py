@@ -13,7 +13,7 @@ import json
 from datetime import datetime
 from erebus.joint_fit_results import JointFitResults
 from erebus.individual_fit_results import IndividualFitResults
-from erebus.plotting import *
+import erebus.plotting as plotting
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -152,8 +152,11 @@ class Erebus(H5Serializable):
                     fit.run()
                 else:
                     print("Skipping " + fit.visit_name + ": already ran")
-                plot_fnpca_individual_fit(fit, figure_folder)
-                plot_eigenvectors(fit, eigenvec_folder)
+                plotting.plot_fnpca_individual_fit(fit, figure_folder)
+                plotting.plot_eigenvectors(fit, eigenvec_folder)        
+                plotting.corner_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_corner.pdf")
+                plotting.chain_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_chain.pdf")
+    
                 IndividualFitResults(fit).save_to_path(output_folder + self.planet.name + "_visit_" + str(fit.order) + "_" + fit.visit_name + ".h5")
         
         if self.config.perform_joint_fit:
@@ -162,7 +165,10 @@ class Erebus(H5Serializable):
                 self.joint_fit.run()
             else:
                 print("Skipping joint fit: already ran")
-            plot_joint_fit(self.joint_fit, figure_folder)
+            plotting.plot_joint_fit(self.joint_fit, figure_folder)
+            plotting.corner_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_corner.pdf")
+            plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.pdf")
+    
             JointFitResults(self.joint_fit).save_to_path(output_folder + self.planet.name + "_joint_fit.h5")
         
         
