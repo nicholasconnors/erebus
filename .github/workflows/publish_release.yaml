@@ -34,7 +34,7 @@ jobs:
         tag: ${{ github.event.pull_request.title }}
     - name: Check version match
       run: |
-        if [[ "${{ steps.get_version.outputs.Version }}" != "${{ github.event.pull_request.title" }} ]]; then
+        if [[ "${{ steps.get_version.outputs.Version }}" != "${{ github.event.pull_request.title }}" ]]; then
           echo "Version number in pyproject.toml does not match PR title"
           exit 1
         fi
