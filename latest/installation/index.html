@@ -362,6 +362,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#installing-from-cloned-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing from cloned repo
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#running-jupyter-notebook-demos" class="md-nav__link">
     <span class="md-ellipsis">
       Running Jupyter Notebook demos
@@ -414,7 +423,7 @@
   
   
   <span class="md-ellipsis">
-    FNPCA standalone demo
+    Frame Normalized PCA example
     
   </span>
   
@@ -438,9 +447,20 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../api/" class="md-nav__link">
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -449,7 +469,111 @@
   </span>
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Running
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_fnpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FN-PCA
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Results
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -543,6 +667,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#installing-from-cloned-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing from cloned repo
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#running-jupyter-notebook-demos" class="md-nav__link">
     <span class="md-ellipsis">
       Running Jupyter Notebook demos
@@ -571,21 +704,22 @@
 
 
 <h1 id="erebus-installation">Erebus installation</h1>
-<p>It is recommended to use erebus in a dedicated Anaconda environment.</p>
-<p>Todo: add conda installation instructions.</p>
+<p>It is recommended to use erebus in a dedicated Anaconda environment. For instructions on how to install Anaconda, read their <a href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">docs</a>. For the quickest setup use <a href="https://www.anaconda.com/docs/getting-started/miniconda/install#quickstart-install-instructions">Miniconda</a>.</p>
 <p>Next, create a new conda environment on Python 3.12 by running the following in the terminal (feel free to rename the environment).</p>
 <pre><code>conda create --name erebus_env
 conda activate erebus_env
 conda install python=3.12
 </code></pre>
 <h3 id="installation-using-pip">Installation using pip</h3>
-<p>Todo</p>
+<p>Todo, once Erebus has been added to PyPI.</p>
 <h3 id="manual-installation">Manual installation</h3>
 <p>Download the Erebus installation file on the GitHub repo from the latest release or from an action artifact (Actions tab, build dev package artifact, erebus file at the bottom).</p>
 <p>If using the action artifact, unzip <code>erebus.zip</code> to get access to the <code>.tar.gz</code> file</p>
 <p>Navigate to the folder containing the archive file and run the following from your conda environment (substituting in the actual file name):</p>
 <pre><code>pip install erebus-x.y.z.tar.gz
 </code></pre>
+<h3 id="installing-from-cloned-repo">Installing from cloned repo</h3>
+<p>If you are installing Erebus for local development, see the <a href="../contributing/">Contributing</a> page for how to build from the source code.</p>
 <h3 id="running-jupyter-notebook-demos">Running Jupyter Notebook demos</h3>
 <p>Demo notebooks can be found at https://github.com/nicholasconnors/erebus/docs/demos</p>
 <p>To set up Jupyter to run in your conda environment, run:</p>
@@ -626,7 +760,7 @@ jupyter notebook
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright 2025 Erebus developers
+      Copyright 2025 Nicholas Connors
     </div>
   
   

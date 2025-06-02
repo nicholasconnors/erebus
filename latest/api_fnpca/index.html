@@ -9,6 +9,10 @@
       
       
       
+        <link rel="prev" href="../api_run/">
+      
+      
+        <link rel="next" href="../api_results/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -16,7 +20,7 @@
     
     
       
-        <title>Index - Erebus Documentation</title>
+        <title>FN-PCA - Erebus Documentation</title>
       
     
     
@@ -67,6 +71,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#api-frame-normalized-pca" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -103,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Index
+              FN-PCA
             
           </span>
         </div>
@@ -306,7 +315,7 @@
   
   
     <li class="md-nav__item">
-      <a href="full_pipeline/" class="md-nav__link">
+      <a href="../demos/full_pipeline/" class="md-nav__link">
         
   
   
@@ -329,12 +338,12 @@
   
   
     <li class="md-nav__item">
-      <a href="fnpca_systematic/" class="md-nav__link">
+      <a href="../demos/fnpca_systematic/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    FNPCA standalone demo
+    Frame Normalized PCA example
     
   </span>
   
@@ -356,11 +365,24 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../api/" class="md-nav__link">
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -369,7 +391,186 @@
   </span>
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Running
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    FN-PCA
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    FN-PCA
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#frame_normalized_pca" class="md-nav__link">
+    <span class="md-ellipsis">
+      frame_normalized_pca
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="frame_normalized_pca">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frame_normalized_pca.perform_fn_pca_on_aperture" class="md-nav__link">
+    <span class="md-ellipsis">
+      perform_fn_pca_on_aperture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frame_normalized_pca.perform_fnpca_on_full_frame" class="md-nav__link">
+    <span class="md-ellipsis">
+      perform_fnpca_on_full_frame
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Results
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -435,6 +636,49 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#frame_normalized_pca" class="md-nav__link">
+    <span class="md-ellipsis">
+      frame_normalized_pca
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="frame_normalized_pca">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frame_normalized_pca.perform_fn_pca_on_aperture" class="md-nav__link">
+    <span class="md-ellipsis">
+      perform_fn_pca_on_aperture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frame_normalized_pca.perform_fnpca_on_full_frame" class="md-nav__link">
+    <span class="md-ellipsis">
+      perform_fnpca_on_full_frame
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -453,9 +697,90 @@
   
 
 
-  <h1>Index</h1>
+<h1 id="api-frame-normalized-pca">API - Frame Normalized PCA</h1>
+<p>The <code>frame_normalized_pca.py</code> file contains helper methods for doing FN-PCA as part of or outside of the Erebus pipeline.</p>
+<blockquote>
 
 
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="frame_normalized_pca" class="doc doc-heading">
+            <code>frame_normalized_pca</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="frame_normalized_pca.perform_fn_pca_on_aperture" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">perform_fn_pca_on_aperture</span><span class="p">(</span><span class="n">aperture_frames</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Performs Frame-Normalized PCA on a photometric time series data set. Expects the star to be centered
+on each frame. Expects each frame to already be normalized and background subtracted, with pixels outside
+the aperture set to 0.</p>
+<p>Returns the eigenvalue-eigenimage pairs and ratios of explained variance.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="frame_normalized_pca.perform_fnpca_on_full_frame" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">perform_fnpca_on_full_frame</span><span class="p">(</span><span class="n">frames</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">annulus_start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">annulus_end</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Performs Frame-Normalized PCA on a photometric time series data set. Expects the star to be centered
+on each frame.</p>
+<p>Returns the eigenvalue-eigenimage pairs and ratios of explained variance.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div></blockquote>
+<hr />
 
 
 
@@ -485,7 +810,7 @@
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright 2025 Erebus developers
+      Copyright 2025 Nicholas Connors
     </div>
   
   

@@ -1,0 +1,2433 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../api_config/">
+      
+      
+        <link rel="next" href="../api_fnpca/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>Running - Erebus Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api-running-the-tool" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Erebus Documentation" class="md-header__button md-logo" aria-label="Erebus Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Erebus Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Running
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/nicholasconnors/erebus" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Erebus Documentation" class="md-nav__button md-logo" aria-label="Erebus Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Erebus Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/nicholasconnors/erebus" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/full_pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Full pipeline example
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/fnpca_systematic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Frame Normalized PCA example
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Running
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Running
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#erebus.Erebus" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erebus
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Erebus">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.config" class="md-nav__link">
+    <span class="md-ellipsis">
+      config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.individual_fits" class="md-nav__link">
+    <span class="md-ellipsis">
+      individual_fits
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.joint_fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      joint_fit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.photometry" class="md-nav__link">
+    <span class="md-ellipsis">
+      photometry
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.planet" class="md-nav__link">
+    <span class="md-ellipsis">
+      planet
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.visit_names" class="md-nav__link">
+    <span class="md-ellipsis">
+      visit_names
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.run" class="md-nav__link">
+    <span class="md-ellipsis">
+      run
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits" class="md-nav__link">
+    <span class="md-ellipsis">
+      WrappedFits
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WrappedFits">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.frames" class="md-nav__link">
+    <span class="md-ellipsis">
+      frames
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.raw_frames" class="md-nav__link">
+    <span class="md-ellipsis">
+      raw_frames
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.source_folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      source_folder
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.time" class="md-nav__link">
+    <span class="md-ellipsis">
+      time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.visit_name" class="md-nav__link">
+    <span class="md-ellipsis">
+      visit_name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData" class="md-nav__link">
+    <span class="md-ellipsis">
+      PhotometryData
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PhotometryData">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.annulus_end" class="md-nav__link">
+    <span class="md-ellipsis">
+      annulus_end
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.annulus_start" class="md-nav__link">
+    <span class="md-ellipsis">
+      annulus_start
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.fits_file_location" class="md-nav__link">
+    <span class="md-ellipsis">
+      fits_file_location
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.normalized_frames" class="md-nav__link">
+    <span class="md-ellipsis">
+      normalized_frames
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.radius" class="md-nav__link">
+    <span class="md-ellipsis">
+      radius
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.raw_flux" class="md-nav__link">
+    <span class="md-ellipsis">
+      raw_flux
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.source_folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      source_folder
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.time" class="md-nav__link">
+    <span class="md-ellipsis">
+      time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.visit_name" class="md-nav__link">
+    <span class="md-ellipsis">
+      visit_name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC" class="md-nav__link">
+    <span class="md-ellipsis">
+      WrappedMCMC
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WrappedMCMC">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.auto_correlation" class="md-nav__link">
+    <span class="md-ellipsis">
+      auto_correlation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.iterations" class="md-nav__link">
+    <span class="md-ellipsis">
+      iterations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.model_function" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_function
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.params" class="md-nav__link">
+    <span class="md-ellipsis">
+      params
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.results" class="md-nav__link">
+    <span class="md-ellipsis">
+      results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.sampler" class="md-nav__link">
+    <span class="md-ellipsis">
+      sampler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.add_parameter" class="md-nav__link">
+    <span class="md-ellipsis">
+      add_parameter
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.evaluate_model" class="md-nav__link">
+    <span class="md-ellipsis">
+      evaluate_model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.get_free_params" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_free_params
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.log_likelihood" class="md-nav__link">
+    <span class="md-ellipsis">
+      log_likelihood
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.run" class="md-nav__link">
+    <span class="md-ellipsis">
+      run
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.set_method" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_method
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_fnpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FN-PCA
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Results
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../copyright/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    License
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#erebus.Erebus" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erebus
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Erebus">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.config" class="md-nav__link">
+    <span class="md-ellipsis">
+      config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.individual_fits" class="md-nav__link">
+    <span class="md-ellipsis">
+      individual_fits
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.joint_fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      joint_fit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.photometry" class="md-nav__link">
+    <span class="md-ellipsis">
+      photometry
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.planet" class="md-nav__link">
+    <span class="md-ellipsis">
+      planet
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.visit_names" class="md-nav__link">
+    <span class="md-ellipsis">
+      visit_names
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.run" class="md-nav__link">
+    <span class="md-ellipsis">
+      run
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits" class="md-nav__link">
+    <span class="md-ellipsis">
+      WrappedFits
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WrappedFits">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.frames" class="md-nav__link">
+    <span class="md-ellipsis">
+      frames
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.raw_frames" class="md-nav__link">
+    <span class="md-ellipsis">
+      raw_frames
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.source_folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      source_folder
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.time" class="md-nav__link">
+    <span class="md-ellipsis">
+      time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.visit_name" class="md-nav__link">
+    <span class="md-ellipsis">
+      visit_name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapped_fits.WrappedFits.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData" class="md-nav__link">
+    <span class="md-ellipsis">
+      PhotometryData
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PhotometryData">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.annulus_end" class="md-nav__link">
+    <span class="md-ellipsis">
+      annulus_end
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.annulus_start" class="md-nav__link">
+    <span class="md-ellipsis">
+      annulus_start
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.fits_file_location" class="md-nav__link">
+    <span class="md-ellipsis">
+      fits_file_location
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.normalized_frames" class="md-nav__link">
+    <span class="md-ellipsis">
+      normalized_frames
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.radius" class="md-nav__link">
+    <span class="md-ellipsis">
+      radius
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.raw_flux" class="md-nav__link">
+    <span class="md-ellipsis">
+      raw_flux
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.source_folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      source_folder
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.time" class="md-nav__link">
+    <span class="md-ellipsis">
+      time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.visit_name" class="md-nav__link">
+    <span class="md-ellipsis">
+      visit_name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#photometry_data.PhotometryData.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC" class="md-nav__link">
+    <span class="md-ellipsis">
+      WrappedMCMC
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WrappedMCMC">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.auto_correlation" class="md-nav__link">
+    <span class="md-ellipsis">
+      auto_correlation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.iterations" class="md-nav__link">
+    <span class="md-ellipsis">
+      iterations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.model_function" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_function
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.params" class="md-nav__link">
+    <span class="md-ellipsis">
+      params
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.results" class="md-nav__link">
+    <span class="md-ellipsis">
+      results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.sampler" class="md-nav__link">
+    <span class="md-ellipsis">
+      sampler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.add_parameter" class="md-nav__link">
+    <span class="md-ellipsis">
+      add_parameter
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.evaluate_model" class="md-nav__link">
+    <span class="md-ellipsis">
+      evaluate_model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.get_free_params" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_free_params
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.log_likelihood" class="md-nav__link">
+    <span class="md-ellipsis">
+      log_likelihood
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.run" class="md-nav__link">
+    <span class="md-ellipsis">
+      run
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.set_method" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_method
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="api-running-the-tool">API - Running the tool</h1>
+<p>For normal use it should suffice to use only the <code>Erebus</code> class. The <code>WrappedFits</code>, <code>PhotometryData</code>, and <code>WrappedMCMC</code> classes give control over each step of the process.</p>
+<p style="font-size: 24px;">Erebus</p>
+<blockquote>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="erebus.Erebus" class="doc doc-heading">
+            <code>erebus.Erebus</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="erebus">erebus</span>.<span title="erebus.utility">utility</span>.<span title="erebus.utility.h5_serializable_file">h5_serializable_file</span>.<span title="erebus.utility.h5_serializable_file.H5Serializable">H5Serializable</span></code></p>
+
+
+        <p>Object instance for running the full pipeline, starting from calints files.</p>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="erebus.Erebus.config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">config</span><span class="p">:</span> <span class="n">ErebusRunConfig</span> <span class="o">=</span> <span class="n">run_cfg</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The configuration file used for this instance of the Erebus pipeline.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="erebus.Erebus.individual_fits" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">individual_fits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">IndividualFit</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The individual fit instances of each visit.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="erebus.Erebus.joint_fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">joint_fit</span><span class="p">:</span> <span class="n">JointFit</span> <span class="o">=</span> <span class="kc">None</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The joint fit instance.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="erebus.Erebus.photometry" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">photometry</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PhotometryData</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The photometry data of each visit.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="erebus.Erebus.planet" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">planet</span> <span class="o">=</span> <span class="n">Planet</span><span class="p">(</span><span class="n">planet_path</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The planet configuration file used for this instance of the pipeline</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="erebus.Erebus.visit_names" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">visit_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The unique names of each visit.</p>
+
+    </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="erebus.Erebus.load" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Helper method to directly load an Erebus instance cache file.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="erebus.Erebus.run" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">force_clear_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">output_folder</span><span class="o">=</span><span class="s1">&#39;./output_</span><span class="si">{DATE}</span><span class="s1">/&#39;</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Performs all individual and joint fits. Results and plots are saved to the given folder.
+Output folder can optionally include the current time by writing {DATE}</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div></blockquote>
+<hr />
+<p style="font-size: 24px;">WrappedFits</p>
+<blockquote>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="wrapped_fits.WrappedFits" class="doc doc-heading">
+            <code>wrapped_fits.WrappedFits</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="erebus">erebus</span>.<span title="erebus.utility">utility</span>.<span title="erebus.utility.h5_serializable_file">h5_serializable_file</span>.<span title="erebus.utility.h5_serializable_file.H5Serializable">H5Serializable</span></code></p>
+
+
+        <p>A class wrapping the flux and time data from the calints fits files of a single visit
+If the star pixel position is not provided we will fit for it
+Contains the flux in a 127x127 pixel region centered around the star
+Performs outerlier rejection and interpolation of bad pixels.</p>
+<p>Acts as the equivalent to a JWST Stage 3 input to the Erebus pipeline.</p>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="wrapped_fits.WrappedFits.frames" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">frames</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>3D array respresenting time series images making up this observation.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="wrapped_fits.WrappedFits.raw_frames" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">raw_frames</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>3D array respresenting time series images making up this observation, before performing outlier and nan rejection.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="wrapped_fits.WrappedFits.source_folder" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">source_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">source_folder</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The directory containing the files this WrappedFits is based on</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="wrapped_fits.WrappedFits.time" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">time</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The time values loaded from the corresponding fits files</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="wrapped_fits.WrappedFits.visit_name" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">visit_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">visit_name</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The unique name of the visit being observed.</p>
+
+    </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="wrapped_fits.WrappedFits.load" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Helper method to directly load a WrappedFits instance cache file.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div></blockquote>
+<hr />
+<p style="font-size: 24px;">PhotometryData</p>
+<blockquote>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="photometry_data.PhotometryData" class="doc doc-heading">
+            <code>photometry_data.PhotometryData</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="erebus">erebus</span>.<span title="erebus.utility">utility</span>.<span title="erebus.utility.h5_serializable_file">h5_serializable_file</span>.<span title="erebus.utility.h5_serializable_file.H5Serializable">H5Serializable</span></code></p>
+
+
+        <p>A class representing the photometric data from a single visit loaded from a calints fits file
+with a specific aperture and annulus</p>
+<p>Also prepares frames for FN PCA</p>
+<p>Acts as Stage 3 of the Erebus pipeline</p>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="photometry_data.PhotometryData.annulus_end" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">annulus_end</span> <span class="o">=</span> <span class="n">annulus</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Outer pixel radius of the annulus used for background subtraction when doing aperture photometry.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="photometry_data.PhotometryData.annulus_start" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">annulus_start</span> <span class="o">=</span> <span class="n">annulus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Inner pixel radius of the annulus used for background subtraction when doing aperture photometry.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="photometry_data.PhotometryData.fits_file_location" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fits_file_location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">fits_file</span><span class="o">.</span><span class="n">_cache_file</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Absolute path of the cache file for the fits file that aperture photometry was performed on.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="photometry_data.PhotometryData.normalized_frames" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">normalized_frames</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Normalized and background subtracted frames used for performing FN-PCA.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="photometry_data.PhotometryData.radius" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Pixel radius used for aperture photometry.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="photometry_data.PhotometryData.raw_flux" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">raw_flux</span> <span class="o">=</span> <span class="p">[]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Raw flux from the star after performing background subtraction.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="photometry_data.PhotometryData.source_folder" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">source_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">fits_file</span><span class="o">.</span><span class="n">source_folder</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The directory containing the files this WrappedFits is based on</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="photometry_data.PhotometryData.time" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">time</span> <span class="o">=</span> <span class="n">fits_file</span><span class="o">.</span><span class="n">time</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The time values loaded from the corresponding fits files.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="photometry_data.PhotometryData.visit_name" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">visit_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">fits_file</span><span class="o">.</span><span class="n">visit_name</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The unique name of the visit being observed.</p>
+
+    </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="photometry_data.PhotometryData.load" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Helper method to directly load a PhotometryData instance cache file.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div></blockquote>
+<hr />
+<p style="font-size: 24px;">WrappedMCMC</p>
+<blockquote>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="mcmc_model.WrappedMCMC" class="doc doc-heading">
+            <code>mcmc_model.WrappedMCMC</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents first">
+
+
+        <p>Wrapper class for emcee
+User can define a method that is to be fit and parameters with Bayesian priors
+The model will always fit for a Gaussian noise parameter "y_err"</p>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="mcmc_model.WrappedMCMC.auto_correlation" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">auto_correlation</span> <span class="o">=</span> <span class="mi">0</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The integrated autocorrelation time after the MCMC has finished running</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="mcmc_model.WrappedMCMC.iterations" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>How many iterations this MCMC ran for before stopping.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="mcmc_model.WrappedMCMC.model_function" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">model_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The function to be fit</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="mcmc_model.WrappedMCMC.params" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Dictionary of parameters. Each is a bayesian_parameter instance.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="mcmc_model.WrappedMCMC.results" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">results</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Dictionary of results after fitting</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="mcmc_model.WrappedMCMC.sampler" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">sampler</span><span class="p">:</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span> <span class="o">=</span> <span class="kc">None</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The emcee EnsembleSampler which this class wrapped</p>
+
+    </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="mcmc_model.WrappedMCMC.add_parameter" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="n">Parameter</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Adds bayesian parameters to our method, must be called before set_method</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="mcmc_model.WrappedMCMC.evaluate_model" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">evaluate_model</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Evaluates the model with the given x input and parameters</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="mcmc_model.WrappedMCMC.get_free_params" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_free_params</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns the keys of any parameter that isn't fixed i.e., will be fitted for</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="mcmc_model.WrappedMCMC.log_likelihood" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">log_likelihood</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Given the parameters theta and the x and y values, calculates the Bayesian log likelihood.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="mcmc_model.WrappedMCMC.run" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">walkers</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Runs the MCMC, gets the results (with errors), ensemble sampler instance, autocorrelation time, and interation count</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="mcmc_model.WrappedMCMC.set_method" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_method</span><span class="p">(</span><span class="n">method</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">float</span><span class="p">])</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Updates the method which will be fit for, and verifies that the method signature matches the parameters specified
+First parameter must be 'x'
+After that the order which parameters were added in must match their positions in the method signature</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div></blockquote>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2025 Nicholas Connors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+    
+  </body>
+</html>
