@@ -6,6 +6,7 @@ on:
       - src/utility/planet.py
       - src/utility/run_cfg.py
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   generate_schemas:
