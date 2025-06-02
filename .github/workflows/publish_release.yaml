@@ -23,7 +23,7 @@ jobs:
       id: get_version
       with:
         file: 'pyproject.toml'
-        field: 'package.version'
+        field: 'project.version'
     - name: Check if tag already exists
       uses: mukunku/tag-exists-action@v1.6.0
       id: check-tag
