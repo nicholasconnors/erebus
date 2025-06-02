@@ -1,0 +1,42 @@
+name: Releases
+
+on: 
+  pull_request:
+    types: 
+      - synchronize
+      - labeled
+    branches:
+      - main
+jobs:
+  build:
+    uses: ./.github/workflows/build_package.yaml
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ github.ref != 'refs/heads/main' && contains(github.event.pull_request.labels.*.name, 'release') }}
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Get version from pyproject.toml
+      id: get_version
+      run: |
+        version=$(python3 -c "
+        import toml
+        pyproject = toml.load('pyproject.toml')
+        print(pyproject['version'])
+        ")
+        echo "Version=$version" >> $GITHUB_OUTPUT
+    - name: Check version match
+      run: |
+        if [[ "${{ steps.get_version.outputs.Version }}" != ${{ github.event.pull_request.title }} ]]; then
+          echo "Version number in pyproject.toml does not match PR title"
+          exit 1
+        fi
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "erebus.zip"
+        body: ${{ github.event.pull_request.body }}
+        tag: ${{ github.event.pull_request.title }}
+        name: Version ${{ github.event.pull_request.title }}
+        draft: true
