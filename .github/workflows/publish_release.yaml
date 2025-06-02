@@ -38,9 +38,20 @@ jobs:
         if [[ "${{ steps.check-tag.outputs.exists }}" != 'true' ]]; then
           echo "Version number already belongs to an existing tag, if that release is not a draft this will do nothing."
         fi
+    - name: Download Asset
+      uses: actions/download-artifact@v4
+      with:
+        name: erebus
+        path: erebus_artifact
+    - name: Zip Asset
+      run: |
+        cd erebus_artifact/
+        zip -r erebus.zip *
+        mv erebus.zip ..
+        cd ..
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "erebus"
+        artifacts: "erebus.zip"
         body: ${{ github.event.pull_request.body }}
         tag: ${{ github.event.pull_request.title }}
         name: Version ${{ github.event.pull_request.title }}
