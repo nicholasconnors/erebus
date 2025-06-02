@@ -11,7 +11,7 @@ jobs:
   build:
     uses: ./.github/workflows/build_package.yaml
   schema:
-    uses: ./.github/workflows/generate_schemas.yaml
+    uses: ./.github/workflows/generate_schemas.yml
   release:
     needs: 
       - build
