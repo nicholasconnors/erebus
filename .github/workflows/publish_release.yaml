@@ -11,7 +11,8 @@ jobs:
   build:
     uses: ./.github/workflows/build_package.yaml
   release:
-    needs: build
+    needs: 
+      - build
     runs-on: ubuntu-latest
     if: ${{ github.ref != 'refs/heads/main' && contains(github.event.pull_request.labels.*.name, 'release') }}
     permissions:
@@ -19,14 +20,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Get version from pyproject.toml
+      uses: SebRollen/toml-action@v1.2.0
       id: get_version
-      run: |
-        version=$(python3 -c "
-        import toml
-        pyproject = toml.load('pyproject.toml')
-        print(pyproject['version'])
-        ")
-        echo "Version=$version" >> $GITHUB_OUTPUT
+      with:
+        file: 'pyproject.toml'
+        field: 'project.version'
     - name: Check if tag already exists
       uses: mukunku/tag-exists-action@v1.6.0
       id: check-tag
@@ -34,13 +32,24 @@ jobs:
         tag: ${{ github.event.pull_request.title }}
     - name: Check version match
       run: |
-        if [[ "${{ steps.get_version.outputs.Version }}" != "${{ github.event.pull_request.title" }} ]]; then
+        if [[ "${{ steps.get_version.outputs.value }}" != "${{ github.event.pull_request.title }}" ]]; then
           echo "Version number in pyproject.toml does not match PR title"
           exit 1
         fi
         if [[ "${{ steps.check-tag.outputs.exists }}" != 'true' ]]; then
           echo "Version number already belongs to an existing tag, if that release is not a draft this will do nothing."
         fi
+    - name: Download Asset
+      uses: actions/download-artifact@v4
+      with:
+        name: erebus
+        path: erebus_artifact
+    - name: Zip Asset
+      run: |
+        cd erebus_artifact/
+        zip -r erebus.zip *
+        mv erebus.zip ..
+        cd ..
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "erebus.zip"

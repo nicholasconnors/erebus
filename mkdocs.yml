@@ -40,9 +40,6 @@ plugins:
           show_special_members: ["__init__"]
           filters:
           - "!^_"
-        extensions:
-          - griffe_pydantic:
-              schema: true
 - search
 - mkdocs-jupyter
 
