@@ -21,6 +21,7 @@ jobs:
     - name: Get version from pyproject.toml
       id: get_version
       run: |
+        pip install toml
         version=$(python3 -c "
         import toml
         pyproject = toml.load('pyproject.toml')
