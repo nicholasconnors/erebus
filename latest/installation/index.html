@@ -704,8 +704,8 @@
 
 
 <h1 id="erebus-installation">Erebus installation</h1>
-<p>It is recommended to use erebus in a dedicated Anaconda environment. For instructions on how to install Anaconda, read their <a href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">docs</a>. For the quickest setup use <a href="https://www.anaconda.com/docs/getting-started/miniconda/install#quickstart-install-instructions">Miniconda</a>.</p>
-<p>Next, create a new conda environment on Python 3.12 by running the following in the terminal (feel free to rename the environment).</p>
+<p>It is recommended to use Erebus in a dedicated Anaconda environment. For instructions on how to install Anaconda, read their <a href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">docs</a>. For the quickest setup use <a href="https://www.anaconda.com/docs/getting-started/miniconda/install#quickstart-install-instructions">Miniconda</a>.</p>
+<p>Next, create a new Anaconda environment on Python 3.12 by running the following in the terminal (feel free to rename the environment).</p>
 <pre><code>conda create --name erebus_env
 conda activate erebus_env
 conda install python=3.12
@@ -713,16 +713,16 @@ conda install python=3.12
 <h3 id="installation-using-pip">Installation using pip</h3>
 <p>Todo, once Erebus has been added to PyPI.</p>
 <h3 id="manual-installation">Manual installation</h3>
-<p>Download the Erebus installation file on the GitHub repo from the latest release or from an action artifact (Actions tab, build dev package artifact, erebus file at the bottom).</p>
-<p>If using the action artifact, unzip <code>erebus.zip</code> to get access to the <code>.tar.gz</code> file</p>
-<p>Navigate to the folder containing the archive file and run the following from your conda environment (substituting in the actual file name):</p>
+<p>Download the Erebus installation file on the GitHub repo from the <a href="https://github.com/nicholasconnors/erebus/releases">latest release</a> or from a development <a href="https://github.com/nicholasconnors/erebus/actions/workflows/publish_dev_artifact.yaml">workflow artifact</a>.</p>
+<p>Unzip <code>erebus.zip</code> (it will contain the archive file <code>erebus-x.y.z.tar.gz</code>).</p>
+<p>From the terminal, vavigate to the folder containing the archive file and run the following from your Anaconda environment (substituting in the actual file name):</p>
 <pre><code>pip install erebus-x.y.z.tar.gz
 </code></pre>
 <h3 id="installing-from-cloned-repo">Installing from cloned repo</h3>
-<p>If you are installing Erebus for local development, see the <a href="../contributing/">Contributing</a> page for how to build from the source code.</p>
+<p>If you are installing Erebus for local development, see the <a href="../contributing/">contributing</a> page for how to build and install Erebus from its source code.</p>
 <h3 id="running-jupyter-notebook-demos">Running Jupyter Notebook demos</h3>
 <p>Demo notebooks can be found at https://github.com/nicholasconnors/erebus/docs/demos</p>
-<p>To set up Jupyter to run in your conda environment, run:</p>
+<p>To set up Jupyter to run in your Anaconda environment, run:</p>
 <pre><code>conda install jupyter
 conda install -c anaconda ipykernel
 python -m ipykernel install --user --name=erebus_env
