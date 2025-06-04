@@ -1,0 +1,50 @@
+---
+title: 'Erebus: An exoplanet secondary-eclipse photometry data reduction pipeline'
+tags:
+    - Python
+    - astronomy
+    - exoplanets
+authors:
+    - name: Nicholas Connors
+      orcid: 0000-0001-5848-6750
+      affiliation: "1"
+affiliations:
+    - name: Department of Physics and Trottier Institute for Research on Exoplanets, Universite de Montreal, Montreal, QC, Canada
+date: 4 June 2025
+bibliography: paper.bib
+---
+
+# Summary
+
+The James Webb Space Telescope (JWST) is uniquely suited to probing the mid-infra red wavelengths of light, enabling exoplanet research to be performed that was previously impossible. By observing rocky exoplanet photometry at 15 microns using its Mid Infrared Instrument (MIRI) astrophysicists can infer the presense or absense of an atmosphere by comparing the dip in brightness as an exoplanet passes behind its star (the secondary eclipse) against theoretical values determined using surface and atmospheric models.
+
+`Erebus` is a pipeline for analyzing time-series secondary-eclipse photometry data from MIRI with a focus on detrending pixel-level detector systematic effects in order to determine the magnitude of these lightcurve dips (eclipse depths). `Erebus` performs aperture photometry to retrieve the brightness of the star system over time (the lightcurve) and uses a Markov Chain Monte Carlo to fit for the eclipse depth while detrending against inter-pixel systematics found using frame-normalized Principal Component Analysis (FN-PCA). By performing PCA on the normalized time-series of image frames, all astrophysical signals (seen as uniform increases/decreases in brightness across the entire detector) are removed leaving behind only inter-pixel systematic effects to be detrended against. `Erebus` is configured using simple yaml files describing the physical parameters of the planets and the specifications of each run, and outputs an h5 file containing all relevant information as well as creating informative plots. Alternatively, `Erebus` provides utility functions for analyzing MIRI detector systematics using FN-PCA which can then be used as a part of another data reduction pipeline.
+
+# Statement of need
+
+The existing literature on detrending and analyzing secondary-eclipse MIRI photometry varies in its methods and source code availability. `Erebus` provides a uniform method for analyzing this data that is specifically tailored around the MIRI instrument, while being easy to use and open source to further enable collaboration as more JWST 15 micron data is released. 
+
+# Documentation
+
+`Erebus` documentation can be found at [https://nicholasconnors.github.io/erebus/latest/](https://nicholasconnors.github.io/erebus/latest/). It includes information on the API, the settings available in all yaml configuration files, and example Jupyter notebooks for how to use the software.
+
+# Uses in scientific literature
+
+`Erebus` was used to perform a uniform reanalysis of existing MIRI 15 micron rocky exoplanet photometry in Connors et al (in prep).
+
+# Similar tools
+
+Tools similar to `Erebus` include:
+
+- `jwst` (Bushouse et al. 2022) and `Eureka!` (Bell et al. 2022): General-purpose end-to-end pipelines for reduction of JWST data including a broader range of instruments.
+- Todo: others
+
+Unlike `jwst` or `Eureka!`, `Erebus` does not provide an end-to-end reduction of JWST MIRI data, and must be ran on data that was pre-processed with either software (up to Stage 2). `Erebus` differs from similar softwares in how it performs detrending of the exoplanet lightcurve using frame-normalized principal component analysis.
+
+# Acknowledgements
+
+`Erebus` was built using `astropy` (Astropy Collaboration et al. 2013, 2018, 2022), `emcee` (Foreman-Mackey et al. 2013), `NumPy` (Harris et al. 2020), `batman` (Kreidberg 2015), `sklearn` (Pedregosa et al. 2011), `matplotlib` (Hunter 2007), `h5py` (Collette 2013), `SciPy` (Virtanen et al. 2020), `corner` (Foreman-Mackey 2016), `uncertainties`, and `pydantic`.
+
+NC acknowledges financial support from the University of Montreal. This work was made with the support of the Institut Trottier de Recherche sur les Exoplanetes (iREx).
+
+# References
