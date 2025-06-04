@@ -562,6 +562,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.set_custom_systematic_model" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_custom_systematic_model
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1073,6 +1082,15 @@
   <a href="#erebus.Erebus.run" class="md-nav__link">
     <span class="md-ellipsis">
       run
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erebus.Erebus.set_custom_systematic_model" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_custom_systematic_model
     </span>
   </a>
   
@@ -1609,6 +1627,29 @@
 
         <p>Performs all individual and joint fits. Results and plots are saved to the given folder.
 Output folder can optionally include the current time by writing {DATE}</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="erebus.Erebus.set_custom_systematic_model" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_custom_systematic_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Optionally provide a callable function and dictionary of Parameter objects for bayesian priors.</p>
+<p>Order of parameters must match their order in the model method signature.</p>
+<p>Params are given as a dictionary of their names (matching the method signature) to a Parameter object.</p>
+<p>Model method signature must start with x.</p>
+<p>When used in conjunction with built-in fitting model provided by Erebus this model will be multiplied 
+by those fitting models and a best-fit y-offset applied.</p>
 
 
     </div>
