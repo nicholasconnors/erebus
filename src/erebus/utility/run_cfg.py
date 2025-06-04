@@ -12,6 +12,8 @@ from pydantic_yaml import to_yaml_file
 
 import numpy as np
 
+from erebus.utility.bayesian_parameter import Parameter
+
 class ErebusRunConfig(BaseModel):
     '''
     Settings for running through the entire Erebus pipeline.
@@ -47,6 +49,9 @@ class ErebusRunConfig(BaseModel):
     trim_integrations : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     star_position : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     path : Optional[str] = Field(None, exclude=True)
+    
+    _custom_systematic_model = None
+    _custom_parameters : dict = None
     
     def load(path : str):
         config = parse_yaml_file_as(ErebusRunConfig, path)
