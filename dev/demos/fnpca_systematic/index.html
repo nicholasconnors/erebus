@@ -1109,7 +1109,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="frame-normalized-pca-example">Frame Normalized PCA example<a class="anchor-link" href="#frame-normalized-pca-example">¶</a></h1><p>The Erebus pipeline uses Principal Component Analysis (PCA) on the normalized time-series frames of an exoplanet eclipse observation, in order to remove the effects of astrophysical sources and be left only with pixel-level systematic effects (see Connors et al 2025). Principal component analysis is a dimensionality reduction technique: read more on <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">Wikipedia</a>.</p>
+<h1 id="frame-normalized-pca-example">Frame Normalized PCA example<a class="anchor-link" href="#frame-normalized-pca-example">¶</a></h1><p>The Erebus pipeline uses Principal Component Analysis (PCA) on the normalized time-series frames of an exoplanet eclipse observation, in order to remove the effects of astrophysical sources and be left only with pixel-level systematic effects (see Connors et al in prep). Principal component analysis is a dimensionality reduction technique: read more on <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">Wikipedia</a>.</p>
 <p>There are many custom exoplanet eclipse reduction pipelines, and rather than requiring you use the entire Erebus pipeline you can simply use it's FN-PCA functionality in your own code.</p>
 </div>
 </div>
@@ -1122,7 +1122,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="loading-fits-data-with-erebus-skip-if-you-have-your-own-file-loading-implementation">Loading fits data with Erebus (skip if you have your own file loading implementation)<a class="anchor-link" href="#loading-fits-data-with-erebus-skip-if-you-have-your-own-file-loading-implementation">¶</a></h3><p>First we will extract a 3D array of the time-series frames captured by JWST. For this we will use Erebus, which offers the <code>WrappedFits</code> object to load the frames and time information from a JWST pipeline <code>calints.fits</code> file, and the <code>fits_file_utils</code> script that includes helper methods for parsing <code>.fits</code> data.</p>
-<p>The WrappedFits file also performs outlier and nan removal as described in Connors et al 2025.</p>
+<p>The WrappedFits file also performs outlier and NaN removal.</p>
 </div>
 </div>
 </div>
