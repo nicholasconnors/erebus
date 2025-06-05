@@ -10,9 +10,15 @@ conda activate erebus_env
 conda install python=3.12
 ```
 
-### Installation using pip
+### Installation from PyPI
 
-Todo, once Erebus has been added to PyPI.
+From your newly created Conda environment simply run
+
+```
+pip install erebus-exoplanet
+```
+
+in order to install Erebus.
 
 ### Manual installation
 
