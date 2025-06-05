@@ -32,7 +32,7 @@ The existing literature on detrending and analyzing secondary-eclipse MIRI photo
 
 # Uses in scientific literature
 
-`Erebus` was used to perform a uniform reanalysis of existing MIRI 15 micron rocky exoplanet photometry in Connors et al (in prep).
+`Erebus` was used to perform a uniform reanalysis of existing MIRI 15 micron rocky exoplanet photometry in Connors et al (in prep). It was made in preparation for the 500 hour rocky worlds Director's Discretionary Time survey scheduled for JWST which will observe dozens of planets at 15 microns during secondary eclipses.
 
 # Similar tools
 
