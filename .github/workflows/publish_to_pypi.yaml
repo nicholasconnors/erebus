@@ -1,0 +1,28 @@
+name: Publish Python 🐍 distribution 📦 to PyPI
+
+on: 
+  workflow_dispatch
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_package.yaml
+
+  publish-to-pypi:
+    name: >-
+      Publish Python 🐍 distribution 📦 to PyPI
+    needs: 
+      - build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/Erebus
+    permissions:
+      id-token: write 
+    steps:
+      - name: Download Asset
+        uses: actions/download-artifact@v4
+        with:
+          name: erebus
+          path: dist/
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
