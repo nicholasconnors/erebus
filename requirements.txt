@@ -5,10 +5,10 @@ emcee==3.1.6
 h5py==3.12.1
 jwst==1.15.1
 matplotlib==3.10.3
-numpy
+numpy==1.26.4
 pydantic==2.11.5
 pydantic_yaml==1.4.0
 scikit_learn==1.6.1
 scipy==1.15.3
 uncertainties==3.2.2
-tqdm
+tqdm==4.66.4
