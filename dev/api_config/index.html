@@ -475,6 +475,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#utility.run_cfg.ErebusRunConfig.set_custom_systematic_model" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_custom_systematic_model
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -643,6 +652,15 @@
   <a href="#utility.run_cfg.ErebusRunConfig" class="md-nav__link">
     <span class="md-ellipsis">
       ErebusRunConfig
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility.run_cfg.ErebusRunConfig.set_custom_systematic_model" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_custom_systematic_model
     </span>
   </a>
   
@@ -1006,6 +1024,27 @@ be true else the run will not do anything.</p>
 
 
 
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="set_custom_systematic_model(model, params) (utility.run_cfg.ErebusRunConfig.set_custom_systematic_model)" href="#utility.run_cfg.ErebusRunConfig.set_custom_systematic_model">set_custom_systematic_model</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Optionally provide a callable function and dictionary of Parameter objects for bayesian priors.</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
 
 
 
@@ -1019,6 +1058,29 @@ be true else the run will not do anything.</p>
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="utility.run_cfg.ErebusRunConfig.set_custom_systematic_model" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_custom_systematic_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Optionally provide a callable function and dictionary of Parameter objects for bayesian priors.</p>
+<p>Order of parameters must match their order in the model method signature.</p>
+<p>Params are given as a dictionary of their names (matching the method signature) to a Parameter object.</p>
+<p>Model method signature must start with x.</p>
+<p>When used in conjunction with built-in fitting model provided by Erebus this model will be multiplied 
+by those fitting models and a best-fit y-offset applied.</p>
+
+
+    </div>
+
+</div>
 
 
 

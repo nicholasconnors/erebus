@@ -562,15 +562,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#erebus.Erebus.set_custom_systematic_model" class="md-nav__link">
-    <span class="md-ellipsis">
-      set_custom_systematic_model
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1082,15 +1073,6 @@
   <a href="#erebus.Erebus.run" class="md-nav__link">
     <span class="md-ellipsis">
       run
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#erebus.Erebus.set_custom_systematic_model" class="md-nav__link">
-    <span class="md-ellipsis">
-      set_custom_systematic_model
     </span>
   </a>
   
@@ -1627,29 +1609,6 @@
 
         <p>Performs all individual and joint fits. Results and plots are saved to the given folder.
 Output folder can optionally include the current time by writing {DATE}</p>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="erebus.Erebus.set_custom_systematic_model" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_custom_systematic_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span></code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Optionally provide a callable function and dictionary of Parameter objects for bayesian priors.</p>
-<p>Order of parameters must match their order in the model method signature.</p>
-<p>Params are given as a dictionary of their names (matching the method signature) to a Parameter object.</p>
-<p>Model method signature must start with x.</p>
-<p>When used in conjunction with built-in fitting model provided by Erebus this model will be multiplied 
-by those fitting models and a best-fit y-offset applied.</p>
 
 
     </div>
@@ -2370,7 +2329,7 @@ The model will always fit for a Gaussian noise parameter "y_err"</p>
 
 
 <h3 id="mcmc_model.WrappedMCMC.run" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">walkers</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">200000</span><span class="p">,</span> <span class="n">walkers</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span></code>
 
 </h3>
 
