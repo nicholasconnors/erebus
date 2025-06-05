@@ -38,7 +38,7 @@ The existing literature on detrending and analyzing secondary-eclipse MIRI photo
 
 Open source tools similar to `Erebus` include:
 
-- `jwst` (Bushouse et al. 2022) and `Eureka!` (Bell et al. 2022): General-purpose end-to-end pipelines for reduction of JWST data including a broader range of instruments.
+- `jwst` [@jwst_pipeline] and `Eureka!` (Bell et al. 2022): General-purpose end-to-end pipelines for reduction of JWST data including a broader range of instruments.
 - `TransitSpectroscopy` (Espinoza, N. 2022): A Python package with routines for reduction of both exoplanet transit and secondary eclipse observations, with support for spectroscopy and photometry.
 - `juliet` (Espinoza et al. 2019): A tool for fitting exoplanet transit photometry. Also supports fitting radial velocity data.
 
