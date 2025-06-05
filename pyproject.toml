@@ -20,7 +20,3 @@ dependencies = {file = ["requirements.txt"]}
 Homepage = "https://github.com/nicholasconnors/erebus"
 Documentation = "https://nicholasconnors.github.io/erebus"
 Issues = "https://github.com/nicholasconnors/erebus/issues"
-
-[build-system]
-requires = ["setuptools >= 77.0.3"]
-build-backend = "setuptools.build_meta"
