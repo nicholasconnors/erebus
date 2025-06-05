@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/Erebus
+      url: https://pypi.org/p/erebus-exoplanet
     permissions:
       id-token: write 
     steps:
