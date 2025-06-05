@@ -12,6 +12,8 @@ from pydantic_yaml import to_yaml_file
 
 import numpy as np
 
+from erebus.utility.bayesian_parameter import Parameter
+
 class ErebusRunConfig(BaseModel):
     '''
     Settings for running through the entire Erebus pipeline.
@@ -47,6 +49,26 @@ class ErebusRunConfig(BaseModel):
     trim_integrations : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     star_position : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     path : Optional[str] = Field(None, exclude=True)
+    
+    _custom_systematic_model = None
+    _custom_parameters : dict = None
+    
+    def set_custom_systematic_model(self, model, params):
+        '''
+        Optionally provide a callable function and dictionary of Parameter objects for bayesian priors.
+        
+        Order of parameters must match their order in the model method signature.
+        
+        Params are given as a dictionary of their names (matching the method signature) to a Parameter object.
+        
+        Model method signature must start with x.
+        
+        When used in conjunction with built-in fitting model provided by Erebus this model will be multiplied 
+        by those fitting models and a best-fit y-offset applied.
+        '''
+        self._custom_systematic_model = model
+        self._custom_parameters = params
+        print("Registered custom systematic model")
     
     def load(path : str):
         config = parse_yaml_file_as(ErebusRunConfig, path)

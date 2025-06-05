@@ -1,10 +1,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nicholasconnors/erebus/refs/heads/main/src/erebus/schema/planet_schema.json
 
-name: LHS1478b
-t0: [2458786.75425, 0.00042]
-p: [1.9495378, 0.0000041]
-rp_rstar: [0.0462, 0.0011]
-a_rstar: [16.119, 0.094]
-inc: [87.452, 0.052]
+name: LHS1140c
+t0: [2458389.2939, 0.0002]
+p: [3.777940, 0.000002]
+rp_rstar: [0.05486, 0.00013]
+a_rstar: [26.57, 0.05]
+inc: [89.90, 0.19]
 ecc: [0]
 w: [0]
