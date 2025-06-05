@@ -11,17 +11,19 @@ from erebus.frame_normalized_pca import perform_fn_pca_on_aperture
 from erebus.utility.h5_serializable_file import H5Serializable
 import batman
 import json
+from erebus.utility.utils import create_method_signature
+import copy
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
 class IndividualFit(H5Serializable):
-    instance = None
+    __instance = None
     
     def _exclude_keys(self):
         '''
         Excluded from serialization
         '''
-        return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', 'instance', 'photometry_data']
+        return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', '__instance', 'photometry_data']
     
     def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None):
@@ -104,12 +106,14 @@ class IndividualFit(H5Serializable):
             
         mcmc.add_parameter("b", Parameter.uniform_prior(1e-6, -0.01, 0.01))
             
-        mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))
-        
-        mcmc.set_method(IndividualFit.__mcmc_fit_method)
-        
+        if self.config._custom_parameters is not None:
+            for key in self.config._custom_parameters:
+                mcmc.add_parameter(key, copy.deepcopy(self.config._custom_parameters[key]))
+        # y_err always goes last
+        mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))      
+                  
         self.mcmc = mcmc
-                
+                                
         if os.path.isfile(self._cache_file) and not force_clear_cache:
             self.load_from_path(self._cache_file)
         else:
@@ -143,7 +147,7 @@ class IndividualFit(H5Serializable):
         return flux_model
     
     def systematic_model(self, x : List[float], pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float, 
-                         exp1 : float, exp2 : float, a : float, b : float) -> List[float]:
+                         exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
         systematic = np.ones_like(x)
         if self.config.fit_fnpca:
             coeffs = np.array([pc1, pc2, pc3, pc4, pc5])
@@ -155,35 +159,39 @@ class IndividualFit(H5Serializable):
             systematic *= (exp1 * np.exp(exp2 * x)) + 1
         if self.config.fit_linear:
             systematic *= (a * x) + 1
+        if self.config._custom_systematic_model is not None:
+            flat_args = np.array(extra_params).flatten()
+            systematic *= self.config._custom_systematic_model(x, *flat_args)
         
         systematic += b
         
         return systematic
         
-    # TODO: would be nice to generate this dynamically
-    def fit_method(self, x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
+    @staticmethod
+    def __fit_method(x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float, 
                        pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float,
-                       exp1 : float, exp2 : float, a : float, b : float) -> List[float]:
-        systematic = self.systematic_model(x, pc1, pc2, pc3, pc4, pc5, exp1, exp2, a, b)
-        physical = self.physical_model(x, t_sec, fp, t0, rp_rstar, a_rstar, p, inc, ecc, w)
+                       exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
+        systematic = IndividualFit.__instance.systematic_model(x, pc1, pc2, pc3, pc4, pc5, exp1, exp2, a, b, extra_params)
+        physical = IndividualFit.__instance.physical_model(x, t_sec, fp, t0, rp_rstar, a_rstar, p, inc, ecc, w)
         return physical * systematic 
     
-    def __mcmc_fit_method(x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
-                       a_rstar : float, p : float, inc : float, ecc : float, w : float, 
-                       pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float,
-                       exp1 : float, exp2 : float, a : float, b : float) -> List[float]:
+    def fit_method(self, x : List[float], *args) -> List[float]:
         '''
-        MCMC method input must be static
+        For external use, calls the method used for fitting (*args is a list of the parameters)
         '''
-        return IndividualFit.instance.fit_method(x, t_sec, fp, t0, rp_rstar,
-                                                           a_rstar, p, inc, ecc, w,
-                                                           pc1, pc2, pc3, pc4, pc5,
-                                                           exp1, exp2, a, b)
+        IndividualFit.__instance = self
+        return IndividualFit.__fit_method(x, *args)
 
     def run(self):
         # Since the MCMC runs off a static method set the static instance to this object first
-        IndividualFit.instance = self
+        IndividualFit.__instance = self
+        
+        # Build the method here based on fit_method and custom systematic parameters
+        args = ["x"] + [key for key in self.mcmc.params][:-1]
+        fit_method = create_method_signature(IndividualFit.__fit_method, args)
+        self.mcmc.set_method(fit_method)
+
         self.mcmc.run(self.time, self.raw_flux)
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)

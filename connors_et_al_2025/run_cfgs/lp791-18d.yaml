@@ -4,9 +4,8 @@ fit_fnpca: true
 fit_linear: true
 perform_individual_fits: true
 perform_joint_fit: true
-calints_path: /home/nconnors/Research/LHS1478b/JWST
-planet_path: ../planets/lhs1478b.yaml
+calints_path: /home/nconnors/Research/LP791-18d_Eureka/Calibrated
+planet_path: ../planets/lp791-18d.yaml
 aperture_radius: 5
 annulus_start: 12
 annulus_end: 20
-trim_integrations: [10, 40]

@@ -62,6 +62,63 @@ def create_method_signature(method : Callable, args : List[str]) -> Callable:
     method_with_signature = function_globals["func"]
     return method_with_signature
 
+def merge_functions(func1, func2):
+    sig1 = inspect.signature(func1)
+    sig2 = inspect.signature(func2)
+
+    merged_params = OrderedDict()
+
+    # Add parameters from func1
+    for name, param in sig1.parameters.items():
+        merged_params[name] = param
+
+    # Add parameters from func2 (if not already in)
+    for name, param in sig2.parameters.items():
+        if name not in merged_params:
+            merged_params[name] = param
+        else:
+            if param != merged_params[name]:
+                raise ValueError(f"Conflict in parameter '{name}'")
+
+    # Create the merged signature
+    merged_signature = inspect.Signature(parameters=merged_params.values())
+
+    # Define the actual callable function
+    def merged_func_template(*args, **kwargs):
+        bound = merged_signature.bind(*args, **kwargs)
+        bound.apply_defaults()
+
+        # Call original functions with their specific arguments
+        func1_args = {
+            name: bound.arguments[name]
+            for name in sig1.parameters if name in bound.arguments
+        }
+        func2_args = {
+            name: bound.arguments[name]
+            for name in sig2.parameters if name in bound.arguments
+        }
+
+        print("Calling func1...")
+        result1 = func1(**func1_args)
+        print("Calling func2...")
+        result2 = func2(**func2_args)
+
+        return result1, result2  # Or do something custom here
+
+    # Assign the signature to the new function
+    merged_func = FunctionType(
+        merged_func_template.__code__,
+        globals(),
+        name='merged_func',
+        argdefs=merged_func_template.__defaults__,
+        closure=merged_func_template.__closure__
+    )
+    merged_func.__signature__ = merged_signature
+    merged_func.__name__ = f"merged_{func1.__name__}_{func2.__name__}"
+    merged_func.__doc__ = f"Merged function of `{func1.__name__}` and `{func2.__name__}`."
+
+    return merged_func
+
 def get_eclipse_duration(inc : float, a_rstar : float, rp_rstar : float, per : float) -> float:
     '''
     Length of the eclipse in the same units as the period

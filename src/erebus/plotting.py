@@ -195,8 +195,7 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     '''
     Creates an informative plot for the joint fit results. Saves as a png and a pdf.
     
-    File name starts with true/false for if FNPCA was used, then planet name, then visit name,
-    then unique hash of config file settings.
+    File name starts with planet name, then visit name, then unique hash of config file settings.
     '''
     if isinstance(joint_fit, JointFit):
         joint_fit = JointFitResults(joint_fit)
@@ -243,7 +242,7 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     plt.gca().text(0.5, 0.95, f"Eclipse depth: {fp*1e6:0.0f}+/-{fp_err*1e6:0.0f}ppm", horizontalalignment='center', verticalalignment='top', transform=plt.gca().transAxes)
     
     if save_to_directory is not None:
-        path = f"{save_to_directory}/{joint_fit.config.fit_fnpca}_{joint_fit.planet_name}_joint_fit_{joint_fit.config_hash}"
+        path = f"{save_to_directory}/{joint_fit.planet_name}_joint_fit_{joint_fit.config_hash}"
         plt.savefig(path + ".png", bbox_inches='tight')
         plt.savefig(path + ".pdf", bbox_inches='tight')
         

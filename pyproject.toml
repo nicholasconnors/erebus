@@ -1,6 +1,6 @@
 [project]
 name = "erebus"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
   { name="Nicholas Connors", email="nicholas.connors@umontreal.ca" },
 ]
@@ -18,4 +18,9 @@ dependencies = {file = ["requirements.txt"]}
 
 [project.urls]
 Homepage = "https://github.com/nicholasconnors/erebus"
+Documentation = "https://nicholasconnors.github.io/erebus"
 Issues = "https://github.com/nicholasconnors/erebus/issues"
+
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"

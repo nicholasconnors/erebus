@@ -43,9 +43,11 @@ class JointFitResults(H5Serializable):
             '''A list containing the time values corresponding to model_flux_per_visit'''
 
             args = [x.nominal_value for x in list(fit.results.values())]
-            number_of_physical_args = len(inspect.getfullargspec(fit.physical_model).args) - 2
+
+            number_of_physical_args = fit.get_number_of_physical_args()
+            number_of_systematic_args = fit.get_number_of_systematic_args()
+
             physical_args = args[0:number_of_physical_args]
-            number_of_systematic_args = len(inspect.getfullargspec(fit.systematic_model).args) - 2
             visit_indices = np.array([fit.get_visit_index_from_time(xi) for xi in fit.time])
             for visit_index in range(0, len(fit.photometry_data_list)):
                 filt = visit_indices == visit_index
