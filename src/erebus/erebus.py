@@ -122,23 +122,6 @@ class Erebus(H5Serializable):
         
         self.save_to_path(self._cache_file)
     
-    def set_custom_systematic_model(self, model, params):
-        '''
-        Optionally provide a callable function and dictionary of Parameter objects for bayesian priors.
-        
-        Order of parameters must match their order in the model method signature.
-        
-        Params are given as a dictionary of their names (matching the method signature) to a Parameter object.
-        
-        Model method signature must start with x.
-        
-        When used in conjunction with built-in fitting model provided by Erebus this model will be multiplied 
-        by those fitting models and a best-fit y-offset applied.
-        '''
-        self.config._custom_systematic_model = model
-        self.config._custom_parameters = params
-        print("Registered custom systematic model")
-    
     def run(self, force_clear_cache : bool = False, output_folder="./output_{DATE}/"):
         '''
         Performs all individual and joint fits. Results and plots are saved to the given folder.

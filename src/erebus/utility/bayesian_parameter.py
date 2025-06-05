@@ -37,6 +37,9 @@ class Parameter:
             if self.type == 'uniform':
                 # Update the initial guess so that the walkers don't get stuck in impossible areas
                 self.initial_guess_variation = np.min([value - self.minimum, self.maximum - value]) / 4
+                
+    def __str__(self):
+        return f"{self.type} - Initial value: {self.value}"
     
     @classmethod
     def prior_from_ufloat(cls, parameter : float | UFloat, force_fixed : bool = False):

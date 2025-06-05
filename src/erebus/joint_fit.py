@@ -16,6 +16,7 @@ from uncertainties import ufloat
 from erebus.utility.utils import create_method_signature
 import inspect
 from erebus.utility.utils import bin_data
+import copy
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -149,6 +150,10 @@ class JointFit(H5Serializable):
                 
             mcmc.add_parameter(f"b_{visit_index}", Parameter.uniform_prior(1e-6, -0.01, 0.01))
             
+            if self.config._custom_parameters is not None:
+                for key in self.config._custom_parameters:
+                    mcmc.add_parameter(f"{key}_{visit_index}", copy.deepcopy(self.config._custom_parameters[key]))
+            
         mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))
         
         args = ["x"] + [key for key in mcmc.params][:-1]
@@ -195,7 +200,7 @@ class JointFit(H5Serializable):
         return flux_model
     
     def systematic_model(self, x : List[float], pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float, 
-                         exp1 : float, exp2 : float, a : float, b : float) -> List[float]:
+                         exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
         '''
         Assumes all x are from the same visit
         '''
@@ -214,22 +219,36 @@ class JointFit(H5Serializable):
             systematic *= (exp1 * np.exp(exp2 * time)) + 1
         if self.config.fit_linear:
             systematic *= (a * time) + 1
+        if self.config._custom_systematic_model is not None:
+            flat_args = np.array(extra_params).flatten()
+            systematic *= self.config._custom_systematic_model(x, *flat_args)
         
         systematic += b
         
         return systematic
+    
+    def get_number_of_systematic_args(self):
+        number_of_systematic_args = len(inspect.getfullargspec(self.systematic_model).args) - 2
+        if self.config._custom_parameters is not None:
+            number_of_systematic_args += len(self.config._custom_parameters)
+        return number_of_systematic_args
+        
+    def get_number_of_physical_args(self):
+        # Excluding self and x
+        number_of_physical_args = len(inspect.getfullargspec(self.physical_model).args) - 2
+        return number_of_physical_args
         
     def fit_method(self, *args) -> List[float]:
         '''
         Fits for the output lightcurve given the list of arguments
         '''
         x = np.array(args[0])
-        # Excluding self and x
-        number_of_physical_args = len(inspect.getfullargspec(self.physical_model).args) - 2
+
+        number_of_physical_args = self.get_number_of_physical_args()
+        number_of_systematic_args = self.get_number_of_systematic_args()
+        
         physical_args = args[1:number_of_physical_args + 1]
-        
-        number_of_systematic_args = len(inspect.getfullargspec(self.systematic_model).args) - 2
-        
+                
         # Systematic arguments we're actually using will depend on the x value
         # x is a list of times
         visit_indices = np.array([self.get_visit_index_from_time(xi) for xi in x])
@@ -249,7 +268,7 @@ class JointFit(H5Serializable):
 
     def run(self):
         '''
-        Performs the joint fit via MCMC. Caches the results to the disk and creates corner and chain plots.
+        Performs the joint fit via MCMC. Caches the results to the disk.
         '''
         self.mcmc.run(self.time, self.raw_flux, walkers = 80)
         self.results = self.mcmc.results

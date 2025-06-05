@@ -12,6 +12,7 @@ from erebus.utility.h5_serializable_file import H5Serializable
 import batman
 import json
 from erebus.utility.utils import create_method_signature
+import copy
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -105,24 +106,18 @@ class IndividualFit(H5Serializable):
             
         mcmc.add_parameter("b", Parameter.uniform_prior(1e-6, -0.01, 0.01))
             
-        self.__post_initialized = False
-                
+        if self.config._custom_parameters is not None:
+            for key in self.config._custom_parameters:
+                mcmc.add_parameter(key, copy.deepcopy(self.config._custom_parameters[key]))
+        # y_err always goes last
+        mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))      
+                  
         self.mcmc = mcmc
                                 
         if os.path.isfile(self._cache_file) and not force_clear_cache:
             self.load_from_path(self._cache_file)
         else:
             self.save_to_path(self._cache_file)
-    
-    def __post_init(self):
-        if not self.__post_initialized:
-            if self.config._custom_parameters is not None:
-                for key in self.config._custom_parameters:
-                    self.mcmc.add_parameter(key, self.config._custom_parameters[key])
-            # y_err always goes last
-            self.mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))
-            self.__post_initialized = True
-            print("Finished run post init")
     
     def physical_model(self, x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
@@ -165,7 +160,8 @@ class IndividualFit(H5Serializable):
         if self.config.fit_linear:
             systematic *= (a * x) + 1
         if self.config._custom_systematic_model is not None:
-            systematic *= self.config._custom_systematic_model(x, *extra_params)
+            flat_args = np.array(extra_params).flatten()
+            systematic *= self.config._custom_systematic_model(x, *flat_args)
         
         systematic += b
         
@@ -190,8 +186,6 @@ class IndividualFit(H5Serializable):
     def run(self):
         # Since the MCMC runs off a static method set the static instance to this object first
         IndividualFit.__instance = self
-        
-        self.__post_init()
         
         # Build the method here based on fit_method and custom systematic parameters
         args = ["x"] + [key for key in self.mcmc.params][:-1]
