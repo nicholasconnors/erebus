@@ -38,15 +38,15 @@ The existing literature on detrending and analyzing secondary-eclipse MIRI photo
 
 Open source tools similar to `Erebus` include:
 
-- `jwst` [@jwst_pipeline] and `Eureka!` (Bell et al. 2022): General-purpose end-to-end pipelines for reduction of JWST data including a broader range of instruments.
-- `TransitSpectroscopy` (Espinoza, N. 2022): A Python package with routines for reduction of both exoplanet transit and secondary eclipse observations, with support for spectroscopy and photometry.
-- `juliet` (Espinoza et al. 2019): A tool for fitting exoplanet transit photometry. Also supports fitting radial velocity data.
+- `jwst` [@jwst_pipeline] and `Eureka!` [@Bell2022]: General-purpose end-to-end pipelines for reduction of JWST data including a broader range of instruments.
+- `TransitSpectroscopy` [@espinoza_nestor_2022_6960924]: A Python package with routines for reduction of both exoplanet transit and secondary eclipse observations, with support for spectroscopy and photometry.
+- `juliet` [@2019MNRAS.490.2262E]: A tool for fitting exoplanet transit photometry. Also supports fitting radial velocity data.
 
 Unlike `jwst` or `Eureka!`, `Erebus` does not provide an end-to-end reduction of JWST MIRI data, and must be ran on data that was pre-processed with either software (up to Stage 2). `Erebus` differs from similar softwares in how it performs detrending of the exoplanet lightcurve using frame-normalized principal component analysis, and its specific focus on exoplanet secondary eclipse observations.
 
 # Acknowledgements
 
-`Erebus` was built using `astropy` (Astropy Collaboration et al. 2013, 2018, 2022), `emcee` (Foreman-Mackey et al. 2013), `NumPy` (Harris et al. 2020), `batman` (Kreidberg 2015), `sklearn` (Pedregosa et al. 2011), `matplotlib` (Hunter 2007), `h5py` (Collette 2013), `SciPy` (Virtanen et al. 2020), `corner` (Foreman-Mackey 2016), `uncertainties`, and `pydantic`.
+`Erebus` was built using `astropy` [@astropy:2013, astropy:2018, astropy:2022], `emcee` [@Foreman_Mackey_2013], `NumPy` [@harris2020array], `batman` [@batman], `sklearn` [@scikit-learn], `matplotlib` [@matplotlib], `h5py` [@collette_python_hdf5_2014], `SciPy` [@2020SciPy-NMeth], `corner` [@corner], `uncertainties`, and `pydantic`.
 
 NC acknowledges financial support from the University of Montreal. This work was made with the support of the Institut Trottier de Recherche sur les Exoplanetes (iREx).
 
