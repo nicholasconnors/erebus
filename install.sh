@@ -6,6 +6,9 @@ if [ ! -d "build" ]; then
     mkdir "build"
 fi
 
+// Remove any existing builds
+rm ./build/dist/*
+
 cd "build"
 
 echo "Installing depdencies"
