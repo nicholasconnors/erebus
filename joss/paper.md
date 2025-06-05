@@ -46,7 +46,7 @@ Unlike `jwst` or `Eureka!`, `Erebus` does not provide an end-to-end reduction of
 
 # Acknowledgements
 
-`Erebus` was built using `astropy` [@astropy:2013 @astropy:2018 @astropy:2022], `emcee` [@Foreman_Mackey_2013], `NumPy` [@harris2020array], `batman` [@batman], `sklearn` [@scikit-learn], `matplotlib` [@matplotlib], `h5py` [@collette_python_hdf5_2014], `SciPy` [@2020SciPy-NMeth], `corner` [@corner], `uncertainties`, and `pydantic`.
+`Erebus` was built using `astropy` [@astropy:2013; @astropy:2018; @astropy:2022], `emcee` [@Foreman_Mackey_2013], `NumPy` [@harris2020array], `batman` [@batman], `sklearn` [@scikit-learn], `matplotlib` [@matplotlib], `h5py` [@collette_python_hdf5_2014], `SciPy` [@2020SciPy-NMeth], `corner` [@corner], `uncertainties`, and `pydantic`.
 
 NC acknowledges financial support from the University of Montreal. This work was made with the support of the Institut Trottier de Recherche sur les Exoplanetes (iREx).
 
