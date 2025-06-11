@@ -1,6 +1,7 @@
 from typing import Callable, List
 import numpy as np
 from scipy.stats import binned_statistic
+import json as json
 
 def gaussian_2D(xy, a : float, mu_x : float, mu_y : float, sigma : float, offset : float) -> list[float]:
     '''
@@ -137,3 +138,7 @@ def get_predicted_t_sec(planet, photometry_data) -> float:
     nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
     predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
     return predicted_t_sec 
+
+def save_dict_to_json(dict, path):
+    with open(path, "w") as file:
+        json.dump(dict, file, indent=4)

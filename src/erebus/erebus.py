@@ -3,6 +3,7 @@ import hashlib
 import numpy as np
 from erebus.utility.h5_serializable_file import H5Serializable
 from erebus.utility.run_cfg import ErebusRunConfig
+from erebus.utility import utils as utils
 from erebus.photometry_data import PhotometryData
 from erebus.wrapped_fits import WrappedFits
 from erebus.utility.planet import Planet
@@ -157,8 +158,13 @@ class Erebus(H5Serializable):
                 plotting.corner_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_corner.pdf")
                 plotting.chain_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_chain.pdf")
     
-                IndividualFitResults(fit).save_to_path(output_folder + self.planet.name + "_visit_" + str(fit.order) + "_" + fit.visit_name + ".h5")
-        
+                path = output_folder + self.planet.name + "_visit_" + str(fit.order) + "_" + fit.visit_name
+                IndividualFitResults(fit).save_to_path(path + ".h5")
+                
+                dict = fit.results.copy()
+                dict['auto_corr'] = fit.auto_correlation
+                utils.save_dict_to_json(dict, path + ".json")
+
         if self.config.perform_joint_fit:
             has_run = 'fp' in self.joint_fit.results
             if not has_run or force_clear_cache:
@@ -169,6 +175,11 @@ class Erebus(H5Serializable):
             plotting.corner_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_corner.pdf")
             plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.pdf")
     
-            JointFitResults(self.joint_fit).save_to_path(output_folder + self.planet.name + "_joint_fit.h5")
+            path = output_folder + self.planet.name + "_joint_fit"
+            JointFitResults(self.joint_fit).save_to_path(path + ".h5")
+            
+            dict = self.joint_fit.results.copy()
+            dict['auto_corr'] = fit.auto_correlation
+            utils.save_dict_to_json(dict, path + ".json")
         
         
