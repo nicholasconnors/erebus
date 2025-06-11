@@ -22,6 +22,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
         individual_fit = IndividualFitResults(individual_fit)
     
     yerr = individual_fit.results['y_err'].nominal_value
+    t_sec_offset = individual_fit['t_sec'].nominal_value
     t_sec = individual_fit.predicted_t_sec
     rp = individual_fit.results['rp_rstar'].nominal_value
     inc = individual_fit.results['inc'].nominal_value
@@ -42,6 +43,8 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     bin_flux, _ = bin_data(flux, bin_size)
     bin_yerr = yerr / np.sqrt(bin_size)
     duration = get_eclipse_duration(inc, a, rp, per) * 24
+    eclipse_start = t_sec_offset - duration / 2
+    eclipse_end = t_sec_offset + duration / 2
     
     fig = plt.figure(figsize=(9, 5.5))
     grid = fig.add_gridspec(4, 2)
@@ -76,7 +79,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     # Raw Flux
     flux_axs[0].errorbar(time, flux, yerr, linestyle='', marker='.', alpha = 0.2, color='gray')
     flux_axs[0].errorbar(bin_time, bin_flux, bin_yerr, linestyle='', marker='.', color='black', zorder=3)
-    flux_axs[0].axvspan(- duration / 2, duration / 2, color='red', alpha=0.2)
+    flux_axs[0].axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
     flux_axs[0].plot(time, flux_model, color='red')
     flux_axs[0].set_ylabel("Raw flux\n(ppm)")
 
@@ -85,7 +88,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     bin_detrended_flux, _ = bin_data(detrended_flux, bin_size)
     flux_axs[1].errorbar(time, detrended_flux, yerr, linestyle='', marker='.', alpha = 0.2, color='gray')
     flux_axs[1].errorbar(bin_time, bin_detrended_flux, bin_yerr, linestyle='', marker='.', color='black', zorder=3)
-    flux_axs[1].axvspan(- duration / 2, duration / 2, color='red', alpha=0.2)
+    flux_axs[1].axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
     flux_axs[1].plot(time, flux_model / systematic_factor, color='red')
     flux_axs[1].set_ylabel("Detrended flux\n(ppm)")
     flux_axs[1].text(0.5, 0.95, f"Eclipse depth: {fp*1e6:0.0f}+/-{fp_err*1e6:0.0f}ppm", horizontalalignment='center', verticalalignment='top', transform=flux_axs[1].transAxes)
@@ -94,7 +97,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     linear_component = individual_fit.results['a'].nominal_value * raw_time + individual_fit.results['b'].nominal_value + 1
     flux_axs[2].plot(time, systematic_factor, color='red')
     flux_axs[2].plot(time, linear_component, color='black', linestyle='--', label='Linear component')
-    flux_axs[2].axvspan(- duration / 2, duration / 2, color='red', alpha=0.2)
+    flux_axs[2].axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
     flux_axs[2].legend()
     flux_axs[2].set_ylabel("Systematc factor\n(ppm)")
 
@@ -152,7 +155,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
         im = eigenimage_axs[i+1].imshow(eigenimage, cmap='bwr', interpolation='nearest', norm = colors.SymLogNorm(0.5, vmin=-1, vmax=1))
 
     for ax in eigenvalue_axs:
-        ax.axvspan(- duration / 2, duration / 2, color='red', alpha=0.2)
+        ax.axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
     
     for ax in eigenimage_axs:
         ax.set_yticks([])
