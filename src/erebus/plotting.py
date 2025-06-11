@@ -43,8 +43,8 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     bin_flux, _ = bin_data(flux, bin_size)
     bin_yerr = yerr / np.sqrt(bin_size)
     duration = get_eclipse_duration(inc, a, rp, per) * 24
-    eclipse_start = t_sec_offset - duration / 2
-    eclipse_end = t_sec_offset + duration / 2
+    eclipse_start = -t_sec_offset - duration / 2
+    eclipse_end = -t_sec_offset + duration / 2
     
     fig = plt.figure(figsize=(9, 5.5))
     grid = fig.add_gridspec(4, 2)
