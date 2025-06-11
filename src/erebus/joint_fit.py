@@ -77,7 +77,7 @@ class JointFit(H5Serializable):
         self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
         
         # For the joint fit we bin the data to speed up convergence
-        self.bin_size = 4
+        self.bin_size = 6
         self.time = np.concatenate([bin_data(data.time[self.start_trim:self.end_trim], self.bin_size)[0] for data in photometry_data_list])
         self.starting_times = np.sort(np.array([np.min(data.time) for data in photometry_data_list]))
         self.raw_flux = np.concatenate([bin_data(data.raw_flux[self.start_trim:self.end_trim], self.bin_size)[0] for data in photometry_data_list])
@@ -111,8 +111,8 @@ class JointFit(H5Serializable):
         if isinstance(planet.ecc, float) and planet.ecc == 0:
             print("Circular orbit: using gaussian prior for t_sec_offset")
             predicted_t_sec = self.get_predicted_t_sec_of_visit(0)
-            ten_minutes = 10 / 60 / 24
-            mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(0, -ten_minutes, ten_minutes))
+            window = 10 / 60 / 24
+            mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(0, -window, window))
         else:
             print("Eccentric orbit: using uniform prior for t_sec_offset")
             duration = np.max(photometry_data_list[0].time - np.min(photometry_data_list[0].time))
