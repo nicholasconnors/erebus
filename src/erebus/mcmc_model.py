@@ -116,7 +116,7 @@ class WrappedMCMC:
         pos = [None] * nchains
         for i in range(0, nchains):
             pos[i] = np.array(initial_guess) + (np.array(initial_guess_var) * (2 * np.random.rand(walkers, len(initial_guess)) - 1))
-            pos[i], _, _ = sampler[i].run_mcmc(pos[i], 1000, skip_initial_state_check=True)
+            pos[i], _, _ = sampler[i].run_mcmc(pos[i], 1000, skip_initial_state_check=True, progress=True)
             sampler[i].reset()
         pos = np.array(pos)
 
