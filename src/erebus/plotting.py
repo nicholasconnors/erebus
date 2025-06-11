@@ -22,7 +22,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
         individual_fit = IndividualFitResults(individual_fit)
     
     yerr = individual_fit.results['y_err'].nominal_value
-    t_sec_offset = individual_fit['t_sec'].nominal_value
+    t_sec_offset = individual_fit.results['t_sec'].nominal_value
     t_sec = individual_fit.predicted_t_sec
     rp = individual_fit.results['rp_rstar'].nominal_value
     inc = individual_fit.results['inc'].nominal_value
