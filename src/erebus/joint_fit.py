@@ -192,9 +192,8 @@ class JointFit(H5Serializable):
         params.ecc = ecc
         params.w = w
                 
-        # Tried saving the transit model instance but it was causing it to stop returning the light curve?
-        #if visit_index not in self.transit_models:
-        self.transit_models[visit_index] = batman.TransitModel(params, x, transittype="secondary")
+        if visit_index not in self.transit_models or self.transit_models[visit_index] is None:
+            self.transit_models[visit_index] = batman.TransitModel(params, x, transittype="secondary")
 
         flux_model = self.transit_models[visit_index].light_curve(params)
         return flux_model
