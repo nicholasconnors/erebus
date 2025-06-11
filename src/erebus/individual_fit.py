@@ -60,6 +60,7 @@ class IndividualFit(H5Serializable):
         
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
         predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
+        predicted_t_sec = predicted_t_sec.nominal_value
         flag_impossible_t_sec = predicted_t_sec > np.max(photometry_data.time) - np.min(photometry_data.time)
 
         if flag_impossible_t_sec:
