@@ -111,8 +111,8 @@ class JointFit(H5Serializable):
         if isinstance(planet.ecc, float) and planet.ecc == 0:
             print("Circular orbit: using gaussian prior for t_sec_offset")
             predicted_t_sec = self.get_predicted_t_sec_of_visit(0)
-            t_sec_offset = ufloat(0, predicted_t_sec.std_dev)
-            mcmc.add_parameter("t_sec_offset", Parameter.prior_from_ufloat(t_sec_offset, True))
+            ten_minutes = 10 / 60 / 24
+            mcmc.add_parameter("t_sec_offset", Parameter.uniform(0, -ten_minutes, ten_minutes))
         else:
             print("Eccentric orbit: using uniform prior for t_sec_offset")
             duration = np.max(photometry_data_list[0].time - np.min(photometry_data_list[0].time))

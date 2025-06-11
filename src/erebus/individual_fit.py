@@ -65,16 +65,10 @@ class IndividualFit(H5Serializable):
         if flag_impossible_t_sec:
             print("Impossible t_sec!", predicted_t_sec, ">", np.max(photometry_data.time) - np.min(photometry_data.time))
 
-        # For circular orbit predict the eclipse time, else use a uniform prior
-        if not flag_impossible_t_sec and isinstance(planet.ecc, float) and planet.ecc == 0:
-            print("Circular orbit: using gaussian prior for t_sec")
-
-            mcmc.add_parameter("t_sec", Parameter.prior_from_ufloat(predicted_t_sec))
-            print("Predicted t_sec:", predicted_t_sec, "days from the start of the observation")
-        else:
-            print("Eccentric orbit or impossible t_sec: using uniform prior for t_sec")
-            duration = np.max(photometry_data.time - np.min(photometry_data.time))
-            mcmc.add_parameter("t_sec", Parameter.uniform_prior(duration / 2.0, duration / 6.0, duration * 5.0 / 6.0))
+        # Allow fitting eclipse time (predicted +/- 10 min)
+        ten_minutes = 10 / 60 / 24
+        mcmc.add_parameter("t_sec", Parameter.uniform_prior(predicted_t_sec, predicted_t_sec - ten_minutes, predicted_t_sec + ten_minutes))
+        self.predicted_t_sec = predicted_t_sec
         
         mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
         mcmc.add_parameter("t0", Parameter.prior_from_ufloat(planet.t0))

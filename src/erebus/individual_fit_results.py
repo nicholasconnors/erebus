@@ -34,6 +34,8 @@ class IndividualFitResults(H5Serializable):
             '''The unique hash of the config file. Used for naming cache files.'''
             self.frames = fit.photometry_data.normalized_frames
             '''The frames which aperture photometry was performed on for the fit.'''
+            self.predicted_t_sec = fit.predicted_t_sec
+            '''The predicted 0.5 phase eclipse time'''
             
             res_nominal_values = [fit.results[k].nominal_value for k in fit.results][:-1]
             systematic_params = res_nominal_values[9:]
