@@ -66,9 +66,9 @@ class IndividualFit(H5Serializable):
         if flag_impossible_t_sec:
             print("Impossible t_sec!", predicted_t_sec, ">", np.max(photometry_data.time) - np.min(photometry_data.time))
 
-        # Allow fitting eclipse time (predicted +/- 10 min)
-        ten_minutes = 10 / 60 / 24
-        mcmc.add_parameter("t_sec", Parameter.uniform_prior(predicted_t_sec, predicted_t_sec - ten_minutes, predicted_t_sec + ten_minutes))
+        # Allow fitting eclipse time (predicted +/- 5 min)
+        window = 5 / 60 / 24
+        mcmc.add_parameter("t_sec", Parameter.uniform_prior(predicted_t_sec, predicted_t_sec - window, predicted_t_sec + window))
         self.predicted_t_sec = predicted_t_sec
         
         mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
