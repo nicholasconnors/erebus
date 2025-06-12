@@ -6,7 +6,6 @@ import inspect
 from erebus.utility.bayesian_parameter import Parameter
 from uncertainties import ufloat
 
-# TODO: Save/load using emcee.backends.HDFBackend + H5Serializable
 class WrappedMCMC:
     '''
     Wrapper class for emcee
@@ -93,10 +92,16 @@ class WrappedMCMC:
         # Value should always be negative
         return lp + self.log_likelihood(theta, x, y)
 
-    def run(self, x, y, max_steps = 200000, walkers = 64) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
+    def run(self, x, y, max_steps = 200000, walkers = 64, cache_file = None) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
         '''
         Runs the MCMC, gets the results (with errors), ensemble sampler instance, autocorrelation time, and interation count
         '''   
+        
+        if cache_file is not None:
+            backend = emcee.backends.HDFBackend(cache_file)
+        else:
+            backend = None
+        
         # The initial guess will be whatever the free parameters were initially set to
         initial_guess = [self.params[p].value for p in self.get_free_params()]
         
@@ -110,13 +115,13 @@ class WrappedMCMC:
         
         sampler = [None] * nchains
         for i in range(0, nchains):
-            sampler[i] = emcee.EnsembleSampler(walkers, ndim, self.__log_probability, args=(x, y))
+            sampler[i] = emcee.EnsembleSampler(walkers, ndim, self.__log_probability, args=(x, y), backend=backend)
     
         # Let walkers get away from starting positions
         pos = [None] * nchains
         for i in range(0, nchains):
             pos[i] = np.array(initial_guess) + (np.array(initial_guess_var) * (2 * np.random.rand(walkers, len(initial_guess)) - 1))
-            pos[i], _, _ = sampler[i].run_mcmc(pos[i], 1000, skip_initial_state_check=True)
+            pos[i], _, _ = sampler[i].run_mcmc(pos[i], 1000, skip_initial_state_check=True, progress=True)
             sampler[i].reset()
         pos = np.array(pos)
 
@@ -159,12 +164,9 @@ class WrappedMCMC:
         epsilon = 0.04
         # Run chain until the chain has converged
         while loopcriteria:
+            # Check convergence
             for jj in range(0, nchains):
-                print("process chain %d" % jj)
-                for result in sampler[jj].sample(pos[jj], iterations=chainstep, rstate0=rstate[jj], progress=True, skip_initial_state_check=True):
-                    pos[jj] = result[0]
-                    rstate[jj] = result[2]
-                    # Use the second half of the chain for convergence test
+                # Use the second half of the chain for convergence test
                 chain_length_per_walker = int(sampler[jj].chain.shape[1])
                 chainsamples = sampler[jj].chain[:, int(chain_length_per_walker/2):, :]\
                                         .reshape((-1, ndim))
@@ -189,6 +191,15 @@ class WrappedMCMC:
             print("Iterations:", iteration_counter, "Max steps:", max_steps)
             print("Continue looping?", loopcriteria)
             
+            if not loopcriteria:
+                break
+            
+            # Run chain
+            for jj in range(0, nchains):
+                print("process chain %d" % jj)
+                for result in sampler[jj].sample(pos[jj], iterations=chainstep, rstate0=rstate[jj], progress=True, skip_initial_state_check=True):
+                    pos[jj] = result[0]
+                    rstate[jj] = result[2]
             chainstep = ichaincheck
             iteration_counter += chainstep
         

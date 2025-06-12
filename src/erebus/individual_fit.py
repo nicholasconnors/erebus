@@ -60,16 +60,13 @@ class IndividualFit(H5Serializable):
         
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
         predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
-        predicted_t_sec = predicted_t_sec.nominal_value
         flag_impossible_t_sec = predicted_t_sec > np.max(photometry_data.time) - np.min(photometry_data.time)
 
         if flag_impossible_t_sec:
             print("Impossible t_sec!", predicted_t_sec, ">", np.max(photometry_data.time) - np.min(photometry_data.time))
 
-        # Allow fitting eclipse time (predicted +/- 5 min)
-        window = 5 / 60 / 24
-        mcmc.add_parameter("t_sec", Parameter.uniform_prior(predicted_t_sec, predicted_t_sec - window, predicted_t_sec + window))
-        self.predicted_t_sec = predicted_t_sec
+        mcmc.add_parameter("t_sec", Parameter.prior_from_ufloat(predicted_t_sec))
+        self.predicted_t_sec = predicted_t_sec.nominal_value
         
         mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
         mcmc.add_parameter("t0", Parameter.prior_from_ufloat(planet.t0))
@@ -187,7 +184,7 @@ class IndividualFit(H5Serializable):
         fit_method = create_method_signature(IndividualFit.__fit_method, args)
         self.mcmc.set_method(fit_method)
 
-        self.mcmc.run(self.time, self.raw_flux)
+        self.mcmc.run(self.time, self.raw_flux, cache_file = self._cache_file.replace(".h5", "_mcmc.h5"))
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
         print(self.mcmc.results)
