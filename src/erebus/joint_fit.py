@@ -39,6 +39,9 @@ class JointFit(H5Serializable):
         planet = self.planet
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
         predicted_t_sec = (planet.t0 - self.starting_times[index] - 2400000.5 + planet.p / 2.0) % nominal_period
+        number_of_periods = (planet.t0.nominal_value - self.starting_times[index] - 2400000.5) / planet.p.nominal_value
+        std_dev = np.sqrt(planet.t0.std_dev**2 + (number_of_periods * planet.p.std_dev)**2)
+        predicted_t_sec.std_dev = std_dev
         return predicted_t_sec
     
     def get_visit_index_from_time(self, time : float):
@@ -271,7 +274,7 @@ class JointFit(H5Serializable):
         Performs the joint fit via MCMC. Caches the results to the disk.
         '''
         self.mcmc.run(self.time, self.raw_flux, walkers = 80, 
-                      cache_file = self._cache_file.replace(".h5", "_mcmc.h5"),
+                      cache_file = None if self.config.skip_emcee_backend_cache else self._cache_file.replace(".h5", "_mcmc.h5"),
                       force_clear_cache=self._force_clear_cache)
         
         self.results = self.mcmc.results
