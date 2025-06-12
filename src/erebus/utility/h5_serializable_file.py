@@ -9,31 +9,13 @@ from uncertainties import ufloat
 import types
 from pydantic import BaseModel
 from pydantic_core import from_json
+from utility.utils import _JSONDecoder
+from utility.utils import _JSONEncoder
 
-class H5Serializable:
+class H5Serializable:   
     '''
     A class that can be serialized to/from an h5 file. Does not support groups.
     '''
-    class __JSONEncoder(json.JSONEncoder):
-        '''
-        JSON encoder that supports ufloats
-        '''
-        def default(self, obj):
-            if isinstance(obj, UFloat):
-                return {'__ufloat__': True, 'nominal_value': obj.nominal_value, 'std_dev': obj.std_dev}
-            return super().default(obj)
-    
-    class __JSONDecoder(json.JSONDecoder):
-        '''
-        JSON decoder that supports ufloats
-        '''
-        def __init__(self, *args, **kwargs):
-            json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-        def object_hook(self, d):
-            if "__ufloat__" in d:
-                return ufloat(float(d['nominal_value']), float(d['std_dev']))
-            return d
-    
     def _exclude_keys(self) -> List[str]:
         '''
         Excluded from serialization
@@ -54,7 +36,7 @@ class H5Serializable:
                 # Dictionaries and ufloats have custom serialization to strings
                 if isinstance(value, str):
                     if value.startswith("JSON"):
-                        value = json.loads(value[4:], cls=H5Serializable.__JSONDecoder)
+                        value = json.loads(value[4:], cls=_JSONDecoder)
                     elif value.startswith("UFLOAT"):
                         nominal_value, std_dev = value[6:].split("+/-")
                         value = ufloat(float(nominal_value), float(std_dev))
@@ -101,7 +83,7 @@ class H5Serializable:
                         value = str(value)
                     # dictionaries don't serialize either so we go through json
                     elif isinstance(value, dict):
-                        value = "JSON" + json.dumps(value, cls=H5Serializable.__JSONEncoder)
+                        value = "JSON" + json.dumps(value, cls=_JSONEncoder)
                     elif isinstance(value, UFloat):
                         value = f"UFLOAT{value.nominal_value}+/-{value.std_dev}"
                     
@@ -109,7 +91,7 @@ class H5Serializable:
                         value = [str(v) if isinstance(v, np.str_) else v for v in value]
                         hf.create_dataset(name, data = value)
                     elif isinstance(value, BaseModel):
-                        value = "PYDANTIC" + json.dumps(value.model_dump(mode='json'), cls=H5Serializable.__JSONEncoder)
+                        value = "PYDANTIC" + json.dumps(value.model_dump(mode='json'), cls=_JSONEncoder)
                     elif not inspect.ismethod(value):
                         hf.attrs[name] = value
                 except Exception as e:

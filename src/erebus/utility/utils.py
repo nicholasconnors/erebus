@@ -2,6 +2,8 @@ from typing import Callable, List
 import numpy as np
 from scipy.stats import binned_statistic
 import json as json
+from uncertainties.core import Variable as UFloat
+from uncertainties import ufloat
 
 def gaussian_2D(xy, a : float, mu_x : float, mu_y : float, sigma : float, offset : float) -> list[float]:
     '''
@@ -141,4 +143,24 @@ def get_predicted_t_sec(planet, photometry_data) -> float:
 
 def save_dict_to_json(dict, path):
     with open(path, "w") as file:
-        json.dump(dict, file, indent=4)
+        json.dump(dict, file, indent=4, cls=_JSONEncoder)
+        
+class _JSONEncoder(json.JSONEncoder):
+    '''
+    JSON encoder that supports ufloats
+    '''
+    def default(self, obj):
+        if isinstance(obj, UFloat):
+            return {'__ufloat__': True, 'nominal_value': obj.nominal_value, 'std_dev': obj.std_dev}
+        return super().default(obj)
+
+class _JSONDecoder(json.JSONDecoder):
+    '''
+    JSON decoder that supports ufloats
+    '''
+    def __init__(self, *args, **kwargs):
+        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+    def object_hook(self, d):
+        if "__ufloat__" in d:
+            return ufloat(float(d['nominal_value']), float(d['std_dev']))
+        return d
