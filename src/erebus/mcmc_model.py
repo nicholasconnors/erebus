@@ -6,6 +6,7 @@ import inspect
 from erebus.utility.bayesian_parameter import Parameter
 from uncertainties import ufloat
 
+# TODO: Save/load using emcee.backends.HDFBackend + H5Serializable
 class WrappedMCMC:
     '''
     Wrapper class for emcee
@@ -164,9 +165,11 @@ class WrappedMCMC:
         epsilon = 0.04
         # Run chain until the chain has converged
         while loopcriteria:
-            # Check convergence
             for jj in range(0, nchains):
-                # Use the second half of the chain for convergence test
+                print("process chain %d" % jj)
+                for result in sampler[jj].sample(pos[jj], iterations=chainstep, rstate0=rstate[jj], progress=True, skip_initial_state_check=True):
+                    pos[jj] = result[0]
+                    rstate[jj] = result[2]
                 chain_length_per_walker = int(sampler[jj].chain.shape[1])
                 chainsamples = sampler[jj].chain[:, int(chain_length_per_walker/2):, :]\
                                         .reshape((-1, ndim))
@@ -191,15 +194,6 @@ class WrappedMCMC:
             print("Iterations:", iteration_counter, "Max steps:", max_steps)
             print("Continue looping?", loopcriteria)
             
-            if not loopcriteria:
-                break
-            
-            # Run chain
-            for jj in range(0, nchains):
-                print("process chain %d" % jj)
-                for result in sampler[jj].sample(pos[jj], iterations=chainstep, rstate0=rstate[jj], progress=True, skip_initial_state_check=True):
-                    pos[jj] = result[0]
-                    rstate[jj] = result[2]
             chainstep = ichaincheck
             iteration_counter += chainstep
         
