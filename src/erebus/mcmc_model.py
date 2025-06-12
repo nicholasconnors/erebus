@@ -6,6 +6,19 @@ import inspect
 from erebus.utility.bayesian_parameter import Parameter
 from uncertainties import ufloat
 
+import multiprocessing as mp
+
+import dill
+import emcee
+
+# Make it use dill instead of pickle so it can handle more complex objects (priors)
+# We run separat chains in parallel
+# We cannot use the built-in pool parameter of emcee because serialization is the bottleneck
+# (running a single chain on multiple cores is slower than doing it normally)
+from multiprocessing.reduction import ForkingPickler
+ForkingPickler.dumps = dill.dumps
+ForkingPickler.loads = dill.loads
+
 # TODO: Save/load using emcee.backends.HDFBackend + H5Serializable
 class WrappedMCMC:
     '''
@@ -93,15 +106,10 @@ class WrappedMCMC:
         # Value should always be negative
         return lp + self.log_likelihood(theta, x, y)
 
-    def run(self, x, y, max_steps = 200000, walkers = 64, cache_file = None) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
+    def run(self, x, y, max_steps = 200000, walkers = 64, cache_file = None, force_clear_cache = False) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
         '''
         Runs the MCMC, gets the results (with errors), ensemble sampler instance, autocorrelation time, and interation count
         '''   
-        
-        if cache_file is not None:
-            backend = emcee.backends.HDFBackend(cache_file)
-        else:
-            backend = None
         
         # The initial guess will be whatever the free parameters were initially set to
         initial_guess = [self.params[p].value for p in self.get_free_params()]
@@ -110,33 +118,59 @@ class WrappedMCMC:
         ndim = len(initial_guess_var)
         nchains = 2
         
-        print("Initial guesses:", initial_guess, "variation:", initial_guess_var)
-        print("Initial likelihood:", self.log_likelihood(initial_guess, x, y))
-        print(f"Fitting for {len(initial_guess)} parameters")
-        
+        backends = [None] * nchains        
         sampler = [None] * nchains
         for i in range(0, nchains):
-            sampler[i] = emcee.EnsembleSampler(walkers, ndim, self.__log_probability, args=(x, y), backend=backend)
+            if cache_file is not None:
+                # Must be separate files to prevent saving race conditions
+                backends[i] = emcee.backends.HDFBackend(cache_file.replace(".h5", "_chain%d.h5" % i))
+                if force_clear_cache:
+                    backends[i].reset(walkers, ndim)
+            sampler[i] = emcee.EnsembleSampler(walkers, ndim, self.__log_probability, 
+                                                args=(x, y), backend=backends[i])
     
         # Let walkers get away from starting positions
         pos = [None] * nchains
-        for i in range(0, nchains):
-            pos[i] = np.array(initial_guess) + (np.array(initial_guess_var) * (2 * np.random.rand(walkers, len(initial_guess)) - 1))
-            pos[i], _, _ = sampler[i].run_mcmc(pos[i], 1000, skip_initial_state_check=True, progress=True)
+        
+        burn_in = 1000
+        
+        def start_chain(i):
+            pos = np.array(initial_guess) + (np.array(initial_guess_var) * (2 * np.random.rand(walkers, len(initial_guess)) - 1))
+            pos, _, _ = sampler[i].run_mcmc(pos, burn_in, skip_initial_state_check=True, 
+                                            store=True, progress=True)
             sampler[i].reset()
-        pos = np.array(pos)
-
-        print("Moved away from starting positions")
+            print("Moved away from starting positions for chain #", i)
+            return pos
         
-        print("Initial guesses shape:", pos.shape)
+        # Unclear how to determine if backend has data except for checking for an exception
+        has_backend = True
+        if cache_file is not None:
+            try:
+                backends[0].get_last_sample()
+            except:
+                print("No currently saved data")
+                has_backend = False
+        else:
+            has_backend = False
         
-        initial_guess_likelihoods = np.array([self.log_likelihood(pos[i,j,:], x, y) for j in np.arange(0, walkers) for i in np.arange(0, nchains)])
-        mean_initial_guess_likelihood = np.mean(initial_guess_likelihoods)
+        if not has_backend:
+            print("Initial guesses:", initial_guess, "variation:", initial_guess_var)
+            print("Initial likelihood:", self.log_likelihood(initial_guess, x, y))
+            print(f"Fitting for {len(initial_guess)} parameters")
+            
+            with mp.Pool(processes=nchains) as pool:
+                pos = pool.map(start_chain, np.arange(0, nchains))
+            
+            pos = np.array(pos)
+            print("Initial guesses shape:", pos.shape)
+        
+            initial_guess_likelihoods = np.array([self.log_likelihood(pos[i,j,:], x, y) for j in np.arange(0, walkers) for i in np.arange(0, nchains)])
+            mean_initial_guess_likelihood = np.mean(initial_guess_likelihoods)
 
-        print("Mean likelihood after moving:", mean_initial_guess_likelihood)
+            print("Mean likelihood at start:", mean_initial_guess_likelihood)
 
-        if not np.isfinite(mean_initial_guess_likelihood):
-            raise Exception("Impossible starting positions")
+            if not np.isfinite(mean_initial_guess_likelihood):
+                raise Exception("Impossible starting positions")
         
         # https://mystatisticsblog.blogspot.com/2019/04/gelman-rubin-convergence-criteria-for.html
         
@@ -152,27 +186,39 @@ class WrappedMCMC:
         rstate = [None] * nchains
         for i in range(0, nchains):
             rstate[i] = np.random.get_state()
+            
+        if has_backend:
+            for i in range(0, nchains):
+                pos[i] = backends[i].get_last_sample()[0]
+                rstate[i] = backends[i].get_last_sample()[2]
         
         withinchainvar = np.zeros((nchains, ndim), dtype=np.float64)
         meanchain = np.zeros((nchains, ndim), dtype=np.float64)
-        scalereduction = np.array(ndim, dtype=np.float64)
 
         minlength = 10000
         ichaincheck = 10000
         chainstep = minlength
-        iteration_counter = minlength
+        iteration_counter = burn_in if backends[0] is None else np.min([backends[0].iteration, backends[1].iteration])
         loopcriteria = True
         epsilon = 0.04
+        
+        def run_chain(jj):
+            print("Processing chain #%d" % jj)
+            for result in sampler[jj].sample(pos[jj], iterations=chainstep, rstate0=rstate[jj],
+                                             progress=True, store=True, skip_initial_state_check=True):
+                result_pos = result[0]
+                result_rstate = result[2]
+            chain_length_per_walker = int(sampler[jj].get_chain().shape[1])
+            chainsamples = sampler[jj].chain[:, int(chain_length_per_walker/2):, :]\
+                                    .reshape((-1, ndim))
+            return result_pos, result_rstate, chainsamples
+
         # Run chain until the chain has converged
         while loopcriteria:
+            with mp.Pool(processes=nchains) as pool:
+                run_chain_res = pool.map(run_chain, np.arange(0, nchains))
             for jj in range(0, nchains):
-                print("process chain %d" % jj)
-                for result in sampler[jj].sample(pos[jj], iterations=chainstep, rstate0=rstate[jj], progress=True, skip_initial_state_check=True):
-                    pos[jj] = result[0]
-                    rstate[jj] = result[2]
-                chain_length_per_walker = int(sampler[jj].chain.shape[1])
-                chainsamples = sampler[jj].chain[:, int(chain_length_per_walker/2):, :]\
-                                        .reshape((-1, ndim))
+                pos[jj], rstate[jj], chainsamples = run_chain_res[jj]
                 chain_length = len(chainsamples)
                 # Variance for each parameter within one chain
                 withinchainvar[jj] = np.var(chainsamples, axis=0)

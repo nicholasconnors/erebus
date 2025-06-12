@@ -30,7 +30,7 @@ class JointFit(H5Serializable):
         Excluded from serialization
         '''
         return ['config', 'planet', 'photometry_data_list', 'time', 'raw_flux', 'params',
-                'transit_models', 'mcmc', "starting_times"]
+                'transit_models', 'mcmc', "starting_times", "_force_clear_cache"]
     
     def get_predicted_t_sec_of_visit(self, index : int):
         '''
@@ -39,6 +39,9 @@ class JointFit(H5Serializable):
         planet = self.planet
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
         predicted_t_sec = (planet.t0 - self.starting_times[index] - 2400000.5 + planet.p / 2.0) % nominal_period
+        number_of_periods = (planet.t0.nominal_value - self.starting_times[index] - 2400000.5) / planet.p.nominal_value
+        std_dev = np.sqrt(planet.t0.std_dev**2 + (number_of_periods * planet.p.std_dev)**2)
+        predicted_t_sec.std_dev = std_dev
         return predicted_t_sec
     
     def get_visit_index_from_time(self, time : float):
@@ -69,6 +72,8 @@ class JointFit(H5Serializable):
         
         if os.path.isfile(self._cache_file) and not force_clear_cache:
             self.load_from_path(self._cache_file)
+            
+        self._force_clear_cache = force_clear_cache
         
         self.planet = planet
         self.photometry_data_list = photometry_data_list
@@ -77,7 +82,7 @@ class JointFit(H5Serializable):
         self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
         
         # For the joint fit we bin the data to speed up convergence
-        self.bin_size = 6
+        self.bin_size = 4
         self.time = np.concatenate([bin_data(data.time[self.start_trim:self.end_trim], self.bin_size)[0] for data in photometry_data_list])
         self.starting_times = np.sort(np.array([np.min(data.time) for data in photometry_data_list]))
         self.raw_flux = np.concatenate([bin_data(data.raw_flux[self.start_trim:self.end_trim], self.bin_size)[0] for data in photometry_data_list])
@@ -268,7 +273,10 @@ class JointFit(H5Serializable):
         '''
         Performs the joint fit via MCMC. Caches the results to the disk.
         '''
-        self.mcmc.run(self.time, self.raw_flux, walkers = 80, cache_file = self._cache_file.replace(".h5", "_mcmc.h5"))
+        self.mcmc.run(self.time, self.raw_flux, walkers = 80, 
+                      cache_file = None if self.config.skip_emcee_backend_cache else self._cache_file.replace(".h5", "_mcmc.h5"),
+                      force_clear_cache=self._force_clear_cache)
+        
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
         print(self.mcmc.results)

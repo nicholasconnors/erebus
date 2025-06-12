@@ -23,7 +23,8 @@ class IndividualFit(H5Serializable):
         '''
         Excluded from serialization
         '''
-        return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', '__instance', 'photometry_data']
+        return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', '__instance', 
+                'photometry_data', '_force_clear_cache']
     
     def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None):
@@ -60,6 +61,10 @@ class IndividualFit(H5Serializable):
         
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
         predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
+        number_of_periods = (planet.t0.nominal_value - np.min(photometry_data.time) - 2400000.5) / nominal_period
+        std_dev = np.sqrt(planet.t0.std_dev**2 + (number_of_periods * planet.p.std_dev)**2)
+        predicted_t_sec.std_dev = std_dev
+        
         flag_impossible_t_sec = predicted_t_sec > np.max(photometry_data.time) - np.min(photometry_data.time)
 
         if flag_impossible_t_sec:
@@ -110,6 +115,8 @@ class IndividualFit(H5Serializable):
             self.load_from_path(self._cache_file)
         else:
             self.save_to_path(self._cache_file)
+        
+        self._force_clear_cache = force_clear_cache
     
     def physical_model(self, x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
@@ -184,7 +191,9 @@ class IndividualFit(H5Serializable):
         fit_method = create_method_signature(IndividualFit.__fit_method, args)
         self.mcmc.set_method(fit_method)
 
-        self.mcmc.run(self.time, self.raw_flux, cache_file = self._cache_file.replace(".h5", "_mcmc.h5"))
+        self.mcmc.run(self.time, self.raw_flux, 
+                      cache_file = None if self.config.skip_emcee_backend_cache else self._cache_file.replace(".h5", "_mcmc.h5"),
+                      force_clear_cache=self._force_clear_cache)
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
         print(self.mcmc.results)
