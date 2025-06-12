@@ -60,16 +60,13 @@ class IndividualFit(H5Serializable):
         
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
         predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
-        predicted_t_sec = predicted_t_sec.nominal_value
         flag_impossible_t_sec = predicted_t_sec > np.max(photometry_data.time) - np.min(photometry_data.time)
 
         if flag_impossible_t_sec:
             print("Impossible t_sec!", predicted_t_sec, ">", np.max(photometry_data.time) - np.min(photometry_data.time))
 
-        # Allow fitting eclipse time (predicted +/- 5 min)
-        window = 5 / 60 / 24
-        mcmc.add_parameter("t_sec", Parameter.uniform_prior(predicted_t_sec, predicted_t_sec - window, predicted_t_sec + window))
-        self.predicted_t_sec = predicted_t_sec
+        mcmc.add_parameter("t_sec", Parameter.prior_from_ufloat(predicted_t_sec))
+        self.predicted_t_sec = predicted_t_sec.nominal_value
         
         mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
         mcmc.add_parameter("t0", Parameter.prior_from_ufloat(planet.t0))
