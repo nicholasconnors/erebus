@@ -79,7 +79,7 @@ class JointFit(H5Serializable):
         self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
         
         # For the joint fit we bin the data to speed up convergence
-        self.bin_size = 6
+        self.bin_size = 4
         self.time = np.concatenate([bin_data(data.time[self.start_trim:self.end_trim], self.bin_size)[0] for data in photometry_data_list])
         self.starting_times = np.sort(np.array([np.min(data.time) for data in photometry_data_list]))
         self.raw_flux = np.concatenate([bin_data(data.raw_flux[self.start_trim:self.end_trim], self.bin_size)[0] for data in photometry_data_list])
