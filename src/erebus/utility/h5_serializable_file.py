@@ -9,8 +9,8 @@ from uncertainties import ufloat
 import types
 from pydantic import BaseModel
 from pydantic_core import from_json
-from utility.utils import _JSONDecoder
-from utility.utils import _JSONEncoder
+from erebus.utility.utils import _JSONDecoder
+from erebus.utility.utils import _JSONEncoder
 
 class H5Serializable:   
     '''
