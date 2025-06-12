@@ -93,15 +93,10 @@ class WrappedMCMC:
         # Value should always be negative
         return lp + self.log_likelihood(theta, x, y)
 
-    def run(self, x, y, max_steps = 200000, walkers = 64, cache_file = None) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
+    def run(self, x, y, max_steps = 200000, walkers = 64, cache_file = None, force_clear_cache = False) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
         '''
         Runs the MCMC, gets the results (with errors), ensemble sampler instance, autocorrelation time, and interation count
         '''   
-        
-        if cache_file is not None:
-            backend = emcee.backends.HDFBackend(cache_file)
-        else:
-            backend = None
         
         # The initial guess will be whatever the free parameters were initially set to
         initial_guess = [self.params[p].value for p in self.get_free_params()]
@@ -114,26 +109,35 @@ class WrappedMCMC:
         print("Initial likelihood:", self.log_likelihood(initial_guess, x, y))
         print(f"Fitting for {len(initial_guess)} parameters")
         
+        backends = [None] * nchains        
         sampler = [None] * nchains
         for i in range(0, nchains):
-            sampler[i] = emcee.EnsembleSampler(walkers, ndim, self.__log_probability, args=(x, y), backend=backend)
+            if cache_file is not None:
+                backends[i] = emcee.backends.HDFBackend(cache_file, name="Chain" + i)
+                if force_clear_cache:
+                    backends[i].reset(walkers, ndim)
+            sampler[i] = emcee.EnsembleSampler(walkers, ndim, self.__log_probability, args=(x, y), backend=backends[i])
     
         # Let walkers get away from starting positions
         pos = [None] * nchains
+        
         for i in range(0, nchains):
-            pos[i] = np.array(initial_guess) + (np.array(initial_guess_var) * (2 * np.random.rand(walkers, len(initial_guess)) - 1))
-            pos[i], _, _ = sampler[i].run_mcmc(pos[i], 1000, skip_initial_state_check=True, progress=True)
-            sampler[i].reset()
+            if backends[i] is None:
+                pos[i] = np.array(initial_guess) + (np.array(initial_guess_var) * (2 * np.random.rand(walkers, len(initial_guess)) - 1))
+                pos[i], _, _ = sampler[i].run_mcmc(pos[i], 1000, skip_initial_state_check=True, progress=True)
+                sampler[i].reset()
+                print("Moved away from starting positions for chain #", i)
+            else:
+                print("Will load emcee state from backend for chain #", i)
+        
         pos = np.array(pos)
-
-        print("Moved away from starting positions")
         
         print("Initial guesses shape:", pos.shape)
         
         initial_guess_likelihoods = np.array([self.log_likelihood(pos[i,j,:], x, y) for j in np.arange(0, walkers) for i in np.arange(0, nchains)])
         mean_initial_guess_likelihood = np.mean(initial_guess_likelihoods)
 
-        print("Mean likelihood after moving:", mean_initial_guess_likelihood)
+        print("Mean likelihood at start:", mean_initial_guess_likelihood)
 
         if not np.isfinite(mean_initial_guess_likelihood):
             raise Exception("Impossible starting positions")
@@ -155,18 +159,17 @@ class WrappedMCMC:
         
         withinchainvar = np.zeros((nchains, ndim), dtype=np.float64)
         meanchain = np.zeros((nchains, ndim), dtype=np.float64)
-        scalereduction = np.array(ndim, dtype=np.float64)
 
         minlength = 10000
         ichaincheck = 10000
         chainstep = minlength
-        iteration_counter = minlength
+        iteration_counter = minlength if backends[0] is None else np.min([backends[0].iteration, backends[1].iteration])
         loopcriteria = True
         epsilon = 0.04
         # Run chain until the chain has converged
         while loopcriteria:
             for jj in range(0, nchains):
-                print("process chain %d" % jj)
+                print("Processing chain #%d" % jj)
                 for result in sampler[jj].sample(pos[jj], iterations=chainstep, rstate0=rstate[jj], progress=True, skip_initial_state_check=True):
                     pos[jj] = result[0]
                     rstate[jj] = result[2]

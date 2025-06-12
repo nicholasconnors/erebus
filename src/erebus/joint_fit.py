@@ -30,7 +30,7 @@ class JointFit(H5Serializable):
         Excluded from serialization
         '''
         return ['config', 'planet', 'photometry_data_list', 'time', 'raw_flux', 'params',
-                'transit_models', 'mcmc', "starting_times"]
+                'transit_models', 'mcmc', "starting_times", "_force_clear_cache"]
     
     def get_predicted_t_sec_of_visit(self, index : int):
         '''
@@ -69,6 +69,8 @@ class JointFit(H5Serializable):
         
         if os.path.isfile(self._cache_file) and not force_clear_cache:
             self.load_from_path(self._cache_file)
+            
+        self._force_clear_cache = force_clear_cache
         
         self.planet = planet
         self.photometry_data_list = photometry_data_list
@@ -268,7 +270,10 @@ class JointFit(H5Serializable):
         '''
         Performs the joint fit via MCMC. Caches the results to the disk.
         '''
-        self.mcmc.run(self.time, self.raw_flux, walkers = 80, cache_file = self._cache_file.replace(".h5", "_mcmc.h5"))
+        self.mcmc.run(self.time, self.raw_flux, walkers = 80, 
+                      cache_file = self._cache_file.replace(".h5", "_mcmc.h5"),
+                      force_clear_cache=self._force_clear_cache)
+        
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
         print(self.mcmc.results)
