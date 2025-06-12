@@ -187,7 +187,7 @@ class IndividualFit(H5Serializable):
         fit_method = create_method_signature(IndividualFit.__fit_method, args)
         self.mcmc.set_method(fit_method)
 
-        self.mcmc.run(self.time, self.raw_flux)
+        self.mcmc.run(self.time, self.raw_flux, cache_file = self._cache_file.replace(".h5", "_mcmc.h5"))
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
         print(self.mcmc.results)
