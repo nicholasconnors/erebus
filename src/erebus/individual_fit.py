@@ -13,6 +13,7 @@ import batman
 import json
 from erebus.utility.utils import create_method_signature
 import copy
+from uncertainties import ufloat
 
 EREBUS_CACHE_DIR = "erebus_cache"
 

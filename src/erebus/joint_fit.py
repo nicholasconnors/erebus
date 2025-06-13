@@ -17,6 +17,7 @@ from erebus.utility.utils import create_method_signature
 import inspect
 from erebus.utility.utils import bin_data
 import copy
+from uncertainties import ufloat
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
