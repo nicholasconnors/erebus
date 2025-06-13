@@ -39,7 +39,8 @@ class Planet:
     ecc : UFloat | float
     w : UFloat | float
     
-    class __PlanetYAML(BaseModel):
+    # Name mangling breaks pickle
+    class _PlanetYAML(BaseModel):
         '''
         Serialized YAML representation of a Planet for the Erebus pipeline.
         
@@ -76,7 +77,7 @@ class Planet:
         elif len(l) == 3:
             return ufloat(l[0], np.max(np.abs(l[1:])))
 
-    def __load_from_yaml(self, yaml : __PlanetYAML):
+    def __load_from_yaml(self, yaml : _PlanetYAML):
         self.name = yaml.name
         self.t0 = self.__ufloat_from_list(yaml.t0)
         self.a_rstar = self.__ufloat_from_list(yaml.a_rstar)
@@ -91,10 +92,10 @@ class Planet:
         to_yaml_file(path, self.__yaml)
     
     def __init__(self, yaml_path : str):
-        self.__load_from_yaml(parse_yaml_file_as(Planet.__PlanetYAML, yaml_path))
+        self.__load_from_yaml(parse_yaml_file_as(Planet._PlanetYAML, yaml_path))
     
     def _save_schema(path : str):
-        planet_schema = Planet.__PlanetYAML.model_json_schema()
+        planet_schema = Planet._PlanetYAML.model_json_schema()
         planet_schema_json = json.dumps(planet_schema, indent=2)
         with open(path, "w") as f:
             f.write(planet_schema_json)
