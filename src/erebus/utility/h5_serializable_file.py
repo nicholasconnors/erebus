@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from pydantic_core import from_json
 from erebus.utility.utils import _JSONDecoder
 from erebus.utility.utils import _JSONEncoder
+from erebus.utility.planet import Planet
 
 class H5Serializable:   
     '''
@@ -36,12 +37,15 @@ class H5Serializable:
                 # Dictionaries and ufloats have custom serialization to strings
                 if isinstance(value, str):
                     if value.startswith("JSON"):
-                        value = json.loads(value[4:], cls=_JSONDecoder)
+                        value = json.loads(value[len("JSON"):], cls=_JSONDecoder)
                     elif value.startswith("UFLOAT"):
-                        nominal_value, std_dev = value[6:].split("+/-")
+                        nominal_value, std_dev = value[len("UFLOAT"):].split("+/-")
                         value = ufloat(float(nominal_value), float(std_dev))
                     elif value.startswith("PYDANTIC"):
-                        value = from_json(value[8:])
+                        value = from_json(value[len("PYDANTIC"):])
+                    elif isinstance(value, Planet):
+                        value = from_json(value[len("PLANET"):])    
+                        value = Planet.__load_from_yaml(value)                
                     
                 self.__setattr__(name, value)
             for name, value in hf.items():
@@ -86,12 +90,14 @@ class H5Serializable:
                         value = "JSON" + json.dumps(value, cls=_JSONEncoder)
                     elif isinstance(value, UFloat):
                         value = f"UFLOAT{value.nominal_value}+/-{value.std_dev}"
-                    
+
                     if isinstance(value, list) or isinstance(value, np.ndarray):
                         value = [str(v) if isinstance(v, np.str_) else v for v in value]
                         hf.create_dataset(name, data = value)
                     elif isinstance(value, BaseModel):
                         value = "PYDANTIC" + json.dumps(value.model_dump(mode='json'), cls=_JSONEncoder)
+                    elif isinstance(value, Planet):
+                        value = "PLANET" + json.dumps(value._yaml.model_dump(mode='json'), cls=_JSONEncoder)
                     elif not inspect.ismethod(value):
                         hf.attrs[name] = value
                 except Exception as e:

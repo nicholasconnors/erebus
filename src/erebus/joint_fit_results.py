@@ -26,6 +26,8 @@ class JointFitResults(H5Serializable):
             '''The name of the planet observed'''
             self.config = fit.config
             '''The config file used to create this run'''
+            self.planet = fit.planet
+            '''The planet config file used to create this run'''
             self.config_hash = fit.config_hash
             '''The unique hash of the config file. Used for naming cache files.'''
 
