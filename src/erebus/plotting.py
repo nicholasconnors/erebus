@@ -22,15 +22,15 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
         individual_fit = IndividualFitResults(individual_fit)
     
     yerr = individual_fit.results['y_err'].nominal_value
-    t_sec_offset = individual_fit.results['t_sec'].nominal_value
     t_sec = individual_fit.predicted_t_sec
+    t_sec_offset = individual_fit.results['t_sec'].nominal_value - t_sec
     rp = individual_fit.results['rp_rstar'].nominal_value
     inc = individual_fit.results['inc'].nominal_value
     a = individual_fit.results['a_rstar'].nominal_value
     per = individual_fit.results['p'].nominal_value
     fp = individual_fit.results['fp'].nominal_value
     fp_err = individual_fit.results['fp'].std_dev
-    
+        
     flux_model = individual_fit.flux_model
     systematic_factor = individual_fit.systematic_factor
 
@@ -43,8 +43,8 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     bin_flux, _ = bin_data(flux, bin_size)
     bin_yerr = yerr / np.sqrt(bin_size)
     duration = get_eclipse_duration(inc, a, rp, per) * 24
-    eclipse_start = -t_sec_offset - duration / 2
-    eclipse_end = -t_sec_offset + duration / 2
+    eclipse_start = t_sec_offset * 24 - duration / 2
+    eclipse_end = t_sec_offset * 24 + duration / 2
     
     fig = plt.figure(figsize=(9, 5.5))
     grid = fig.add_gridspec(4, 2)

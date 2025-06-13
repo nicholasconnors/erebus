@@ -30,7 +30,7 @@ class JointFit(H5Serializable):
         '''
         Excluded from serialization
         '''
-        return ['config', 'planet', 'photometry_data_list', 'time', 'raw_flux', 'params',
+        return ['config', 'photometry_data_list', 'time', 'raw_flux', 'params',
                 'transit_models', 'mcmc', "starting_times", "_force_clear_cache"]
     
     def get_predicted_t_sec_of_visit(self, index : int):

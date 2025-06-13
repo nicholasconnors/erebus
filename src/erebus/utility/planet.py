@@ -86,10 +86,10 @@ class Planet:
         self.inc = self.__ufloat_from_list(yaml.inc)
         self.ecc = self.__ufloat_from_list(yaml.ecc)
         self.w = self.__ufloat_from_list(yaml.w)
-        self.__yaml = yaml
+        self._yaml = yaml
     
     def save(self, path : str):
-        to_yaml_file(path, self.__yaml)
+        to_yaml_file(path, self._yaml)
     
     def __init__(self, yaml_path : str):
         self.__load_from_yaml(parse_yaml_file_as(Planet._PlanetYAML, yaml_path))

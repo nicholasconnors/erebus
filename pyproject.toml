@@ -1,6 +1,6 @@
 [project]
 name = "erebus_exoplanet"
-version = "0.3.11"
+version = "0.3.12"
 authors = [
   { name="Nicholas Connors", email="nicholas.connors@umontreal.ca" },
 ]

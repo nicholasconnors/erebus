@@ -34,6 +34,7 @@ class IndividualFit(H5Serializable):
         source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
         self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
         self.planet_name = planet.name
+        self.planet = planet
         self.order = 'X'
         self.photometry_data = photometry_data
 

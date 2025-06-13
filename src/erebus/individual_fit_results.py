@@ -30,6 +30,8 @@ class IndividualFitResults(H5Serializable):
             '''The unique visit name as read on MAST.'''
             self.config = fit.config
             '''The config file used to create this run'''
+            self.planet = fit.planet
+            '''The planet config file used to create this run'''
             self.config_hash = fit.config_hash
             '''The unique hash of the config file. Used for naming cache files.'''
             self.frames = fit.photometry_data.normalized_frames
