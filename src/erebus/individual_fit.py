@@ -141,6 +141,7 @@ class IndividualFit(H5Serializable):
         params.ecc = ecc
         params.w = w
         
+        # TODO: if x ever changes since the first call, this breaks
         if self.transit_model is None:
             transit_model = batman.TransitModel(params, x, transittype="secondary")
 

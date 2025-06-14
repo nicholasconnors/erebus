@@ -197,8 +197,9 @@ class JointFit(H5Serializable):
         params.ecc = ecc
         params.w = w
                 
-        if visit_index not in self.transit_models or self.transit_models[visit_index] is None:
-            self.transit_models[visit_index] = batman.TransitModel(params, x, transittype="secondary")
+        # TODO: breaks when x changes (x does change for final result plotting so commentd out for now)
+        #if visit_index not in self.transit_models or self.transit_models[visit_index] is None:
+        self.transit_models[visit_index] = batman.TransitModel(params, x, transittype="secondary")
 
         flux_model = self.transit_models[visit_index].light_curve(params)
         return flux_model

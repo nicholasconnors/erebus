@@ -31,7 +31,6 @@ class JointFitResults(H5Serializable):
             self.config_hash = fit.config_hash
             '''The unique hash of the config file. Used for naming cache files.'''
 
-            
             # Time given relative to the predicted t_sec for that visit
             self.detrended_flux_per_visit = []
             '''A list containing the detrended lightcurves of each visit.'''
