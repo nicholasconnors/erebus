@@ -64,7 +64,7 @@ class Planet:
             return field_name
         
         name : str
-        t0 : Annotated[Optional[List[float]], Field(max_length=3, field_title_generator=__make_title)]
+        t0 : Optional[Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]]
         t0_lookup_path: Optional[str]
         a_rstar : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
         p : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
