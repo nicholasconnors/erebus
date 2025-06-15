@@ -6,3 +6,5 @@ Erebus is a rocky-exoplanet secondary eclipse aperture-photometry lightcurve fit
 For issue reporting or feedback suggestions click [here](https://github.com/nicholasconnors/erebus/issues).
 
 For the setup used when writing Connors et al. (in prep) click [here](https://github.com/nicholasconnors/erebus/tree/main/connors_et_al_2025).
+
+If you use Erebus in a scientific publication we will ask you cite our paper (information will be included here once it has been published).
