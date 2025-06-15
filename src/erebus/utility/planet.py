@@ -134,10 +134,10 @@ class Planet:
         else:            
             table = np.array(self._yaml.cache['t0_lookup'])
             t0s = table[:,0] + 2450000 - 2400000.5
-            lt_target = np.where(t0s < obs_start)
+            lt_target = np.argwhere(t0s < obs_start)
             if len(lt_target) == 0:
                 ind = 0
             else:
-                ind = np.argmax(lt_target)
+                ind = np.max(lt_target)
             return ufloat(table[ind,0] + 2450000 - 2400000.5, table[ind,1])
         
