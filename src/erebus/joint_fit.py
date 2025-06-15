@@ -39,9 +39,11 @@ class JointFit(H5Serializable):
         '''
         planet = self.planet
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
-        predicted_t_sec = (planet.t0 - self.starting_times[index] - 2400000.5 + planet.p / 2.0) % nominal_period
-        number_of_periods = np.abs(planet.t0.nominal_value - self.starting_times[index] - 2400000.5) / planet.p.nominal_value
-        std_dev = np.sqrt(planet.t0.std_dev**2 + (number_of_periods * planet.p.std_dev)**2)
+        start_time = self.starting_times[index]
+        t0 = planet.get_closest_t0(start_time)
+        predicted_t_sec = (t0 - start_time + planet.p / 2.0) % nominal_period
+        number_of_periods = np.abs(t0.nominal_value - start_time + planet.p.nominal_value / 2.0) / planet.p.nominal_value
+        std_dev = np.sqrt(t0.std_dev**2 + (number_of_periods * planet.p.std_dev)**2)
         predicted_t_sec = ufloat(predicted_t_sec.nominal_value, std_dev)
         return predicted_t_sec
     
@@ -125,7 +127,6 @@ class JointFit(H5Serializable):
         
         mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
         # For the joint fit we fix the orbital parameters
-        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(planet.t0, True))
         mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar, True))
         mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar, True))
         mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, True))
@@ -170,7 +171,7 @@ class JointFit(H5Serializable):
         
         self.save_to_path(self._cache_file)
     
-    def physical_model(self, x : List[float], t_sec_offset : float, fp : float, t0 : float, rp_rstar : float,
+    def physical_model(self, x : List[float], t_sec_offset : float, fp : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
         '''
         Model for the lightcurve using batman
@@ -187,7 +188,7 @@ class JointFit(H5Serializable):
             params.limb_dark = "quadratic"
             params.u = [0.3, 0.3]
         
-        params.t0 = t0
+        params.t0 = self.planet.get_closest_t0(x[0]).nominal_value
         params.t_secondary = t_sec
         params.fp = fp
         params.rp = rp_rstar

@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nicholasconnors/erebus/refs/heads/main/src/erebus/schema/planet_schema.json
+
+name: TRAPPIST-1b
+t0_lookup_path: "../connors_et_al_2025/trappist1b_t0.csv"
+p: [1.51088432, 0.00000015]
+rp_rstar: [0.08590, 0.00037]
+a_rstar: [20.843, 0.155]
+inc: [89.728, 0.165]
+ecc: [0]
+w: [0]
