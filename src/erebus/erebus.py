@@ -179,7 +179,7 @@ class Erebus(H5Serializable):
             JointFitResults(self.joint_fit).save_to_path(path + ".h5")
             
             dict = self.joint_fit.results.copy()
-            dict['auto_corr'] = fit.auto_correlation
+            dict['auto_corr'] = self.joint_fit.auto_correlation
             utils.save_dict_to_json(dict, path + ".json")
         
         
