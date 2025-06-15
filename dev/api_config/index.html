@@ -467,6 +467,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#utility.planet.Planet.get_closest_t0" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_closest_t0
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#utility.run_cfg.ErebusRunConfig" class="md-nav__link">
     <span class="md-ellipsis">
       ErebusRunConfig
@@ -649,6 +658,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#utility.planet.Planet.get_closest_t0" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_closest_t0
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#utility.run_cfg.ErebusRunConfig" class="md-nav__link">
     <span class="md-ellipsis">
       ErebusRunConfig
@@ -735,7 +753,18 @@ a third value is provided it is taken a the upper error.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The last known time of conjunction of the planet.</p>
+                <p>Midpoint time of reference transit in BJD</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="utility.planet.Planet.t0_lookup_path">t0_lookup_path</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional replacement for t0, relative path to csv file with calculated TTVs (Two columns: t0 in BJD-2,450,000, error)</p>
               </div>
             </td>
           </tr>
@@ -817,6 +846,27 @@ a third value is provided it is taken a the upper error.</p>
 
 
 
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="get_closest_t0(obs_start) (utility.planet.Planet.get_closest_t0)" href="#utility.planet.Planet.get_closest_t0">get_closest_t0</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Given a start time in BJD-2,400,000.5, use the lookup file to get the closest t0</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
 
 
 
@@ -830,6 +880,24 @@ a third value is provided it is taken a the upper error.</p>
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="utility.planet.Planet.get_closest_t0" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_closest_t0</span><span class="p">(</span><span class="n">obs_start</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Given a start time in BJD-2,400,000.5, use the lookup file to get the closest t0</p>
+
+
+    </div>
+
+</div>
 
 
 
