@@ -79,8 +79,10 @@ def get_predicted_t_sec(planet, photometry_data) -> float:
     '''
     Predicted t_sec given a perfectly circular orbit, given a planet and photometry data
     '''
+    start_time = np.min(photometry_data.time)
+    t0 = planet.get_closest_t0(start_time)
     nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
-    predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
+    predicted_t_sec = (t0 - start_time + planet.p / 2.0) % nominal_period
     return predicted_t_sec 
 
 def save_dict_to_json(dict, path):

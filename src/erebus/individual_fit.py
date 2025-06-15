@@ -79,7 +79,7 @@ class IndividualFit(H5Serializable):
         self.predicted_t_sec = predicted_t_sec.nominal_value
         
         mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))        
-        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(planet.t0))
+        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(t0))
         mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar))
         mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar))
         mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p))
