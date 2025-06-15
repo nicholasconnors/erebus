@@ -8,6 +8,7 @@
     "t0": {
       "anyOf": [
         {
+          "default": null,
           "items": {
             "type": "number"
           },
