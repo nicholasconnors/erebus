@@ -23,7 +23,7 @@ class Planet:
     
     Attributes:
         name (str): The name of the planet.
-        t0 (UFloat | float): The last known time of conjunction of the planet.
+        t0 (UFloat | float): Midpoint time of reference transit in BJD
         t0_lookup_path (str): Optional replacement for t0, relative path to csv file with calculated TTVs (Two columns: t0 in BJD-2,450,000, error)
         a_rstar (UFloat | float): The ratio of semi-major axis to star radius.
         p (UFloat | float): The period of the planet in days.
@@ -51,7 +51,7 @@ class Planet:
         
         Attributes:
             name            Name of the planet
-            t0              Midpoint time of reference transit
+            t0              Midpoint time of reference transit in BJD
             t0_lookup_path  Optional replacement for t0, relative path to file with calculated TTVs (Two columns: t0, error)
             a_rstar         Semi-major axis in units of stellar radii
             p               Orbital period in days
@@ -128,13 +128,16 @@ class Planet:
             f.write(planet_schema_json)
             
     def get_closest_t0(self, obs_start):
-        '''Given a start time in BJD-2,450,000, use the lookup file to get the closest t0'''
+        '''Given a start time in BJD-2,400,000.5, use the lookup file to get the closest t0'''
         if self.t0_lookup_path is None:
-            return self.t0 - 2450000
-        else:
+            return self.t0 - 2400000.5
+        else:            
             table = np.array(self._yaml.cache['t0_lookup'])
-            t0s = table[:,0]
+            t0s = table[:,0] + 2450000 - 2400000.5
             lt_target = np.where(t0s < obs_start)
-            ind = np.argmax(lt_target)
-            return ufloat(table[ind,0], table[ind,1])
+            if len(lt_target) == 0:
+                ind = 0
+            else:
+                ind = np.argmax(lt_target)
+            return ufloat(table[ind,0] + 2450000 - 2400000.5, table[ind,1])
         
