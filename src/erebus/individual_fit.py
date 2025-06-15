@@ -61,10 +61,13 @@ class IndividualFit(H5Serializable):
                 
         mcmc = WrappedMCMC()
         
+        start_time = np.min(photometry_data.time)
+        t0 = planet.get_closest_t0(start_time)
+        
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
-        predicted_t_sec = (planet.t0 - np.min(photometry_data.time) - 2400000.5 + planet.p / 2.0) % nominal_period
-        number_of_periods = np.abs(planet.t0.nominal_value - np.min(photometry_data.time) - 2400000.5) / nominal_period
-        std_dev = np.sqrt(planet.t0.std_dev**2 + (number_of_periods * planet.p.std_dev)**2)
+        predicted_t_sec = (t0 - start_time + planet.p / 2.0) % nominal_period
+        number_of_periods = np.abs(t0.nominal_value - start_time + planet.p.nominal_value / 2.0) / nominal_period
+        std_dev = np.sqrt(t0.std_dev**2 + (number_of_periods * planet.p.std_dev)**2)
         predicted_t_sec = ufloat(predicted_t_sec.nominal_value, std_dev)
         
         flag_impossible_t_sec = predicted_t_sec > np.max(photometry_data.time) - np.min(photometry_data.time)
@@ -75,7 +78,7 @@ class IndividualFit(H5Serializable):
         mcmc.add_parameter("t_sec", Parameter.prior_from_ufloat(predicted_t_sec))
         self.predicted_t_sec = predicted_t_sec.nominal_value
         
-        mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
+        mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))        
         mcmc.add_parameter("t0", Parameter.prior_from_ufloat(planet.t0))
         mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar))
         mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar))

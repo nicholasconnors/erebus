@@ -130,7 +130,7 @@ class Planet:
     def get_closest_t0(self, obs_start):
         '''Given a start time in BJD-2,450,000, use the lookup file to get the closest t0'''
         if self.t0_lookup_path is None:
-            return self.t0
+            return self.t0 - 2450000
         else:
             table = np.array(self._yaml.cache['t0_lookup'])
             t0s = table[:,0]
