@@ -1,6 +1,6 @@
 import json
 
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 
 from pydantic import BaseModel, Field
 from pydantic.fields import FieldInfo
@@ -23,6 +23,7 @@ class Planet:
     Attributes:
         name (str): The name of the planet.
         t0 (UFloat | float): The last known time of conjunction of the planet.
+        t0_lookup_path (str): Optional replacement for t0, path to csv file with calculated TTVs (Two columns: t0 in BJD-2,450,000, error)
         a_rstar (UFloat | float): The ratio of semi-major axis to star radius.
         p (UFloat | float): The period of the planet in days.
         rp_rstar (UFloat | float): The ratio of the planet's radius to the star's radius.
@@ -48,20 +49,22 @@ class Planet:
         1 float = no uncertainty, 2 floats = symmetric error, 3 floats = asymmetric error.
         
         Attributes:
-            name        Name of the planet
-            t0          Midpoint time of reference transit
-            a_rstar     Semi-major axis in units of stellar radii
-            p           Orbital period in days
-            rp_rstar    Radius of the exoplanet in units of stellar radii
-            inc         Inclination in degrees
-            ecc         Eccentricity
-            w           Argument of periastron in degrees   
+            name            Name of the planet
+            t0              Midpoint time of reference transit
+            t0_lookup_path  Optional replacement for t0, path to file with calculated TTVs (Two columns: t0, error)
+            a_rstar         Semi-major axis in units of stellar radii
+            p               Orbital period in days
+            rp_rstar        Radius of the exoplanet in units of stellar radii
+            inc             Inclination in degrees
+            ecc             Eccentricity
+            w               Argument of periastron in degrees   
         '''
         def __make_title(field_name: str, _: FieldInfo) -> str:
             return field_name
         
         name : str
-        t0 : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
+        t0 : Annotated[Optional[List[float]], Field(max_length=3, field_title_generator=__make_title)]
+        t0_lookup_path: Optional[str]
         a_rstar : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
         p : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
         rp_rstar : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
@@ -80,6 +83,7 @@ class Planet:
     def __load_from_yaml(self, yaml : _PlanetYAML):
         self.name = yaml.name
         self.t0 = self.__ufloat_from_list(yaml.t0)
+        self.t0_lookup_path = yaml.t0_lookup_path
         self.a_rstar = self.__ufloat_from_list(yaml.a_rstar)
         self.p = self.__ufloat_from_list(yaml.p)
         self.rp_rstar = self.__ufloat_from_list(yaml.rp_rstar)
