@@ -77,6 +77,8 @@ class JointFit(H5Serializable):
         
         self.__predicted_t_secs = {}
         '''Memoize predicted t_sec to save time'''
+        self.__closest_t0 = {}
+        '''Memoize t0 for each visit index to save time'''
         
         if override_cache_path is not None:
             self._cache_file = override_cache_path
@@ -196,7 +198,10 @@ class JointFit(H5Serializable):
             params.limb_dark = "quadratic"
             params.u = [0.3, 0.3]
         
-        params.t0 = self.planet.get_closest_t0(x[0]).nominal_value
+        if visit_index not in self.__closest_t0:
+            self.__closest_t0[visit_index] = self.planet.get_closest_t0(x[0]).nominal_value
+        
+        params.t0 = self.__closest_t0[visit_index]
         params.t_secondary = t_sec
         params.fp = fp
         params.rp = rp_rstar
