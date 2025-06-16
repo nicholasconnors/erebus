@@ -37,6 +37,9 @@ class JointFit(H5Serializable):
         '''
         Predicted t_sec given a perfectly circular orbit, for a given visit
         '''
+        if index in self.__predicted_t_secs:
+            return self.__predicted_t_secs[index]
+        
         planet = self.planet
         nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
         start_time = self.starting_times[index]
@@ -45,6 +48,8 @@ class JointFit(H5Serializable):
         number_of_periods = np.abs(t0.nominal_value - start_time + planet.p.nominal_value / 2.0) / planet.p.nominal_value
         std_dev = np.sqrt(t0.std_dev**2 + (number_of_periods * planet.p.std_dev)**2)
         predicted_t_sec = ufloat(predicted_t_sec.nominal_value, std_dev)
+        
+        self.__predicted_t_secs[index] = predicted_t_sec
         return predicted_t_sec
     
     def get_visit_index_from_time(self, time : float):
@@ -69,6 +74,9 @@ class JointFit(H5Serializable):
         self._cache_file = f"{EREBUS_CACHE_DIR}/{source_folder_hash}_{self.config_hash}_joint_fit.h5"
         
         self.results = {}
+        
+        self.__predicted_t_secs = {}
+        '''Memoize predicted t_sec to save time'''
         
         if override_cache_path is not None:
             self._cache_file = override_cache_path
