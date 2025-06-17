@@ -476,6 +476,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#utility.planet.Planet.get_next_t0" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_next_t0
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility.planet.Planet.get_predicted_tsec" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_predicted_tsec
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#utility.run_cfg.ErebusRunConfig" class="md-nav__link">
     <span class="md-ellipsis">
       ErebusRunConfig
@@ -661,6 +679,24 @@
   <a href="#utility.planet.Planet.get_closest_t0" class="md-nav__link">
     <span class="md-ellipsis">
       get_closest_t0
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility.planet.Planet.get_next_t0" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_next_t0
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility.planet.Planet.get_predicted_tsec" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_predicted_tsec
     </span>
   </a>
   
@@ -863,6 +899,22 @@ a third value is provided it is taken a the upper error.</p>
                 </div>
               </td>
             </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="get_next_t0(obs_start) (utility.planet.Planet.get_next_t0)" href="#utility.planet.Planet.get_next_t0">get_next_t0</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Given a start time in BJD-2,400,000.5, use the lookup file to get the following t0</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="get_predicted_tsec(obs_start) (utility.planet.Planet.get_predicted_tsec)" href="#utility.planet.Planet.get_predicted_tsec">get_predicted_tsec</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Given a start time in BJD-2,400,000.5, use the lookup file or t0 and P to get the next eclipse time</p>
+                </div>
+              </td>
+            </tr>
       </tbody>
     </table>
 
@@ -893,6 +945,42 @@ a third value is provided it is taken a the upper error.</p>
     <div class="doc doc-contents ">
 
         <p>Given a start time in BJD-2,400,000.5, use the lookup file to get the closest t0</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="utility.planet.Planet.get_next_t0" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_next_t0</span><span class="p">(</span><span class="n">obs_start</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Given a start time in BJD-2,400,000.5, use the lookup file to get the following t0</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="utility.planet.Planet.get_predicted_tsec" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_predicted_tsec</span><span class="p">(</span><span class="n">obs_start</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Given a start time in BJD-2,400,000.5, use the lookup file or t0 and P to get the next eclipse time</p>
 
 
     </div>
@@ -1088,6 +1176,17 @@ be true else the run will not do anything.</p>
             <td>
               <div class="doc-md-description">
                 <p>Optional bool to not save emcee backend. Speeds up run time but can lose progress during a run if stopped early.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="utility.run_cfg.ErebusRunConfig.fixed_t_sec_error">fixed_t_sec_error</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional value to fix t_sec error bars. Otherwise based on the errors on t0 and P</p>
               </div>
             </td>
           </tr>
