@@ -63,12 +63,9 @@ class IndividualFit(H5Serializable):
         
         start_time = np.min(photometry_data.time)
         t0 = planet.get_closest_t0(start_time)
-        
-        nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
-        predicted_t_sec = (t0 - start_time + planet.p / 2.0) % nominal_period
-        number_of_periods = np.abs(t0.nominal_value - start_time + planet.p.nominal_value / 2.0) / nominal_period
-        std_dev = np.sqrt(t0.std_dev**2 + (number_of_periods * planet.p.std_dev)**2)
-        predicted_t_sec = ufloat(predicted_t_sec.nominal_value, std_dev)
+        predicted_t_sec = planet.get_predicted_tsec(start_time)
+        if self.config.fixed_t_sec_error is not None:
+            predicted_t_sec = ufloat(predicted_t_sec.nominal_value, self.config.fixed_t_sec_error)
         
         flag_impossible_t_sec = predicted_t_sec > np.max(photometry_data.time) - np.min(photometry_data.time)
 

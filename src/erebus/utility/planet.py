@@ -140,4 +140,33 @@ class Planet:
             else:
                 ind = np.max(lt_target)
             return ufloat(table[ind,0] + 2450000 - 2400000.5, table[ind,1])
+    
+    def get_next_t0(self, obs_start):
+        '''Given a start time in BJD-2,400,000.5, use the lookup file to get the following t0'''
+        if self.t0_lookup_path is None:
+            return self.t0 + self.P - 2400000.5
+        else:            
+            table = np.array(self._yaml.cache['t0_lookup'])
+            t0s = table[:,0] + 2450000 - 2400000.5
+            lt_target = np.argwhere(t0s > obs_start)
+            if len(lt_target) == 0:
+                ind = 0
+            else:
+                ind = np.min(lt_target)
+            return ufloat(table[ind,0] + 2450000 - 2400000.5, table[ind,1])
+    
+    def get_predicted_tsec(self, obs_start):
+        '''Given a start time in BJD-2,400,000.5, use the lookup file or t0 and P to get the next eclipse time'''
+        t0 = self.get_closest_t0(obs_start)
+        tablePrediction = ((t0 + self.get_next_t0(obs_start)) / 2.0) - obs_start
+        
+        if tablePrediction < 0 or t0 > obs_start:
+            # Use P and propagate errors
+            predicted_t_sec = (t0 - obs_start + self.p / 2.0) % self.p.nominal_value
+            number_of_periods = np.abs(t0.nominal_value - obs_start + self.p.nominal_value / 2.0) / self.p.nominal_value
+            std_dev = np.sqrt(t0.std_dev**2 + (number_of_periods * self.p.std_dev)**2)
+            predicted_t_sec = ufloat(predicted_t_sec.nominal_value, std_dev)
+            return predicted_t_sec
+        else:
+            return tablePrediction
         
