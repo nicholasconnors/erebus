@@ -35,6 +35,7 @@ class ErebusRunConfig(BaseModel):
         trim_integrations (list[int]): Length-two list with the number of integrations to clip from the start and end. Optional.
         star_position (list[int]): X and y pixel coordinates of the star. Optional (will search for the star or assume its centered).
         skip_emcee_backend_cache (bool): Optional bool to not save emcee backend. Speeds up run time but can lose progress during a run if stopped early.
+        fixed_t_sec_error (float): Optional value to fix t_sec error bars. Otherwise based on the errors on t0 and P
     '''    
     fit_fnpca : Optional[bool] = False
     fit_exponential : Optional[bool] = False
@@ -51,6 +52,7 @@ class ErebusRunConfig(BaseModel):
     star_position : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     path : Optional[str] = Field(None, exclude=True)
     skip_emcee_backend_cache: Optional[bool] = False
+    fixed_t_sec_error: Optional[float] = None
     
     _custom_systematic_model = None
     _custom_parameters : dict = None

@@ -40,15 +40,9 @@ class JointFit(H5Serializable):
         if index in self.__predicted_t_secs:
             return self.__predicted_t_secs[index]
         
-        planet = self.planet
-        nominal_period = planet.p if isinstance(planet.p, float) else planet.p.nominal_value
         start_time = self.starting_times[index]
-        t0 = planet.get_closest_t0(start_time)
-        predicted_t_sec = (t0 - start_time + planet.p / 2.0) % nominal_period
-        number_of_periods = np.abs(t0.nominal_value - start_time + planet.p.nominal_value / 2.0) / planet.p.nominal_value
-        std_dev = np.sqrt(t0.std_dev**2 + (number_of_periods * planet.p.std_dev)**2)
-        predicted_t_sec = ufloat(predicted_t_sec.nominal_value, std_dev)
-        
+        predicted_t_sec = self.planet.get_predicted_tsec(start_time)
+
         self.__predicted_t_secs[index] = predicted_t_sec
         return predicted_t_sec
     
@@ -129,6 +123,8 @@ class JointFit(H5Serializable):
         if isinstance(planet.ecc, float) and planet.ecc == 0:
             print("Circular orbit: using gaussian prior for t_sec_offset")
             predicted_t_sec = self.get_predicted_t_sec_of_visit(0)
+            if self.config.fixed_t_sec_error is not None:
+                predicted_t_sec = ufloat(predicted_t_sec.nominal_value, self.config.fixed_t_sec_error)
             mcmc.add_parameter("t_sec_offset", Parameter.gaussian_prior(0, predicted_t_sec.std_dev))
         else:
             print("Eccentric orbit: using uniform prior for t_sec_offset")
