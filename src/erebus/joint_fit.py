@@ -82,10 +82,6 @@ class JointFit(H5Serializable):
             
         self._force_clear_cache = force_clear_cache
         
-        # Get the predicted eclipse times in advance
-        for n in range(0, len(photometry_data_list)):
-            self.get_predicted_t_sec_of_visit(n)
-        
         self.planet = planet
         self.photometry_data_list = photometry_data_list
         
@@ -119,6 +115,10 @@ class JointFit(H5Serializable):
             self.joint_eigenvalues.append(binned_eigenvalues)
             self.joint_eigenvectors.append(eigenvectors)
             self.pca_variance_ratios.append(variance_ratios)
+                
+        # Get the predicted eclipse times in advance
+        for n in range(0, len(photometry_data_list)):
+            self.get_predicted_t_sec_of_visit(n)
                 
         mcmc = WrappedMCMC()
         
