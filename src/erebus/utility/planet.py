@@ -71,7 +71,7 @@ class Planet:
         rp_rstar : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
         inc : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
         ecc : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
-        w : Annotated[List[float|None], Field(max_length=3, field_title_generator=__make_title)]
+        w : Annotated[List[Optional[float]], Field(max_length=3, field_title_generator=__make_title)]
         cache : Optional[dict] = Field(include_in_schema=False, default=None)
 
     def __ufloat_from_list(self, l : List[float]) -> UFloat | float:
@@ -144,7 +144,7 @@ class Planet:
     def get_next_t0(self, obs_start):
         '''Given a start time in BJD-2,400,000.5, use the lookup file to get the following t0'''
         if self.t0_lookup_path is None:
-            return self.t0 + self.P - 2400000.5
+            return self.t0 + self.p - 2400000.5
         else:            
             table = np.array(self._yaml.cache['t0_lookup'])
             t0s = table[:,0] + 2450000 - 2400000.5
