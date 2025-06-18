@@ -27,7 +27,7 @@ class IndividualFit(H5Serializable):
         Excluded from serialization
         '''
         return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', '__instance', 
-                'photometry_data', '_force_clear_cache']
+                'photometry_data', '_force_clear_cache', 'predicted_t_sec']
     
     def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None):
