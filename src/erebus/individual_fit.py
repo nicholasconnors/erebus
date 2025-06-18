@@ -67,13 +67,16 @@ class IndividualFit(H5Serializable):
         self.predicted_t_sec = planet.get_predicted_tsec(start_time)
         
         mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))        
-        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(t0))
-        mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar))
-        mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar))
-        mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p))
-        mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc))
-        mcmc.add_parameter("ecc", Parameter.prior_from_ufloat(planet.ecc))
-        mcmc.add_parameter("w", Parameter.prior_from_ufloat(planet.w))
+        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(t0, positive_only=True))
+        mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar, positive_only=True))
+        mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar, positive_only=True))
+        mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, positive_only=True))
+        mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc, positive_only=True))
+        mcmc.add_parameter("ecc", Parameter.prior_from_ufloat(planet.ecc, positive_only=True))
+        if planet.w is None:
+            mcmc.add_parameter("w", Parameter.uniform_prior(180, 0, 360))
+        else:
+            mcmc.add_parameter("w", Parameter.prior_from_ufloat(planet.w))
         
         if self.config.fit_fnpca:
             for i in range(0, 5):
@@ -130,7 +133,7 @@ class IndividualFit(H5Serializable):
         params.per = p
         params.a = a_rstar  
         params.ecc = ecc
-        params.w = w
+        params.w = w % 360
         
         # TODO: if x ever changes since the first call, this breaks
         if self.transit_model is None:

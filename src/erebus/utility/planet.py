@@ -71,7 +71,7 @@ class Planet:
         rp_rstar : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
         inc : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
         ecc : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
-        w : Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
+        w : Annotated[List[float|None], Field(max_length=3, field_title_generator=__make_title)]
         cache : Optional[dict] = Field(include_in_schema=False, default=None)
 
     def __ufloat_from_list(self, l : List[float]) -> UFloat | float:
