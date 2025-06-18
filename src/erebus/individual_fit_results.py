@@ -41,7 +41,7 @@ class IndividualFitResults(H5Serializable):
             '''The predicted 0.5 phase eclipse time'''
             
             res_nominal_values = [fit.results[k].nominal_value for k in fit.results][:-1]
-            systematic_params = res_nominal_values[9:]
+            systematic_params = res_nominal_values[8:]
             
             self.flux_model = fit.fit_method(fit.time, *res_nominal_values)
             '''The best fit detrended lightcurve.'''
