@@ -127,7 +127,7 @@ class IndividualFit(H5Serializable):
             params.u = [0.3, 0.3]
             
         params.t0 = t0
-        params.t_secondary = self.predicted_t_sec + 2 * p * ecc * umath.cos(w * np.pi / 180) / np.pi
+        params.t_secondary = self.predicted_t_sec.nominal_value + 2 * p * ecc * umath.cos(w * np.pi / 180) / np.pi
         params.fp = fp
         params.rp = rp_rstar
         params.inc = inc
