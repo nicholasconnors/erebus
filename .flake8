@@ -1,3 +1,4 @@
 [flake8]
 select = F
-exclude = .github,__pycache__,.ipynb_checkpoints,build,connors_et_al_2025,docs,joss,manual_tests,other,site
+path = src
+ignore = F401
