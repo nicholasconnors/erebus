@@ -83,7 +83,7 @@ class JointFit(H5Serializable):
         self._force_clear_cache = force_clear_cache
         
         # Get the predicted eclipse times in advance
-        for n in range(0, len(self.photometry_data_list)):
+        for n in range(0, len(photometry_data_list)):
             self.get_predicted_t_sec_of_visit(n)
         
         self.planet = planet
