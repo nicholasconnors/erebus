@@ -169,17 +169,17 @@ class Planet:
         and P to get the next eclipse time
         '''
         t0 = self.get_closest_t0(obs_start)
-        tablePrediction = ((t0 + self.get_next_t0(obs_start)) / 2.0) \
+        table_prediction = ((t0 + self.get_next_t0(obs_start)) / 2.0) \
             - obs_start
         
-        if tablePrediction < 0 or t0 > obs_start:
+        if table_prediction < 0 or t0 > obs_start:
             # Use P and propagate errors
             predicted_t_sec = (t0 - obs_start + self.p / 2.0) \
                 % self.p.nominal_value
             number_of_periods = np.abs(t0.nominal_value - obs_start + self.p.nominal_value / 2.0) / self.p.nominal_value
             std_dev = np.sqrt(t0.std_dev**2 + (number_of_periods * self.p.std_dev)**2)
-            predicted_t_sec = ufloat(predicted_t_sec.nominal_value, std_dev)
-            return predicted_t_sec
+            return ufloat(predicted_t_sec.nominal_value, std_dev)
         else:
-            return tablePrediction
+            # For some reason it thinks this isn't a ufloat when it is
+            return ufloat(table_prediction.nominal_value, table_prediction.std_dev)
         
