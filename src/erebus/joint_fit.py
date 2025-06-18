@@ -30,7 +30,8 @@ class JointFit(H5Serializable):
         Excluded from serialization
         '''
         return ['config', 'photometry_data_list', 'time', 'raw_flux', 'params',
-                'transit_models', 'mcmc', "starting_times", "_force_clear_cache"]
+                'transit_models', 'mcmc', "starting_times", "_force_clear_cache",
+                'predicted_t_secs']
     
     def get_predicted_t_sec_of_visit(self, index : int):
         '''
@@ -80,6 +81,10 @@ class JointFit(H5Serializable):
             self.load_from_path(self._cache_file)
             
         self._force_clear_cache = force_clear_cache
+        
+        # Get the predicted eclipse times in advance
+        for n in range(0, len(self.photometry_data_list)):
+            self.get_predicted_t_sec_of_visit(n)
         
         self.planet = planet
         self.photometry_data_list = photometry_data_list
