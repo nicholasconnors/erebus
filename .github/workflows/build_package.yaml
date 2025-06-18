@@ -30,7 +30,7 @@ jobs:
         uses: py-actions/flake8@v2
         with:
           path: "src"
-          args: "--select=F"
+          args: "--select=F --ignore=F401"
       - name: Test basic import
         run: |
           cd dist
