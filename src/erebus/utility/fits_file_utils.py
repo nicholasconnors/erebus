@@ -1,10 +1,11 @@
-import numpy as np
-import astropy
-import os
 import glob
+import os
+
+import astropy
+import numpy as np
 from jwst.datamodels import dqflags
-import re
 from tqdm import tqdm
+
 
 def get_fits_files_visits_in_folder(folder : str):
     '''
@@ -43,9 +44,6 @@ def load_all_calints_for_visit(folder : str, visit_name : str):
     print(f"Loading {len(calints_file_names)} segments")
     
     for file_name in tqdm(calints_file_names):
-        # Segment number is in the file name
-        segment_number = int(re.search("seg[0-9][0-9][0-9]", file_name).group().replace("seg", ""))
-        
         file = astropy.io.fits.open(file_name)
         data = file['SCI'].data
         time = file['INT_TIMES'].data

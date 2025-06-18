@@ -1,21 +1,21 @@
-from typing import Any, Callable
-import emcee
-import numpy as np
-from scipy.stats import norm
 import inspect
-from erebus.utility.bayesian_parameter import Parameter
-from uncertainties import ufloat
-
 import multiprocessing as mp
-
-import dill
-import emcee
 
 # Make it use dill instead of pickle so it can handle more complex objects (priors)
 # We run separat chains in parallel
 # We cannot use the built-in pool parameter of emcee because serialization is the bottleneck
 # (running a single chain on multiple cores is slower than doing it normally)
 from multiprocessing.reduction import ForkingPickler
+from typing import Any, Callable
+
+import dill
+import emcee
+import numpy as np
+from scipy.stats import norm
+from uncertainties import ufloat
+
+from erebus.utility.bayesian_parameter import Parameter
+
 ForkingPickler.dumps = dill.dumps
 ForkingPickler.loads = dill.loads
 

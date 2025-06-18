@@ -1,18 +1,9 @@
 import json
-
-from typing import Annotated, List, Optional, Tuple
+from typing import Annotated, List, Optional
 
 from pydantic import BaseModel, Field
-from pydantic.fields import FieldInfo
-from uncertainties import ufloat
-from uncertainties.core import Variable as UFloat
+from pydantic_yaml import parse_yaml_file_as, to_yaml_file
 
-from pydantic_yaml import parse_yaml_file_as
-from pydantic_yaml import to_yaml_file
-
-import numpy as np
-
-from erebus.utility.bayesian_parameter import Parameter
 
 class ErebusRunConfig(BaseModel):
     '''

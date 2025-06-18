@@ -1,7 +1,10 @@
 from typing import Tuple
-from sklearn.decomposition import PCA as NormalPCA
-import erebus.utility.aperture_photometry_utils as ap_utils
+
 import numpy as np
+from sklearn.decomposition import PCA as NormalPCA
+
+import erebus.utility.aperture_photometry_utils as ap_utils
+
 
 def perform_fnpca_on_full_frame(frames : np.ndarray, radius : int,
                                 annulus_start : int, annulus_end : int) -> Tuple[np.ndarray, np.ndarray]:
