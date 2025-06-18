@@ -18,6 +18,7 @@ import inspect
 from erebus.utility.utils import bin_data
 import copy
 from uncertainties import ufloat
+import uncertainties.umath as umath
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -37,13 +38,13 @@ class JointFit(H5Serializable):
         '''
         Predicted t_sec given a perfectly circular orbit, for a given visit
         '''
-        if index in self.__predicted_t_secs:
-            return self.__predicted_t_secs[index]
+        if index in self.predicted_t_secs:
+            return self.predicted_t_secs[index]
         
         start_time = self.starting_times[index]
         predicted_t_sec = self.planet.get_predicted_tsec(start_time)
 
-        self.__predicted_t_secs[index] = predicted_t_sec
+        self.predicted_t_secs[index] = predicted_t_sec
         return predicted_t_sec
     
     def get_visit_index_from_time(self, time : float):
@@ -69,7 +70,7 @@ class JointFit(H5Serializable):
         
         self.results = {}
         
-        self.__predicted_t_secs = {}
+        self.predicted_t_secs = {}
         '''Memoize predicted t_sec to save time'''
         self.__closest_t0 = {}
         '''Memoize t0 for each visit index to save time'''
@@ -118,19 +119,6 @@ class JointFit(H5Serializable):
                 
         mcmc = WrappedMCMC()
         
-        # For circular orbit predict the eclipse time, else use a uniform prior
-        # Joint fit represents t_sec as an offset from the predicted time for a circular orbit
-        if isinstance(planet.ecc, float) and planet.ecc == 0:
-            print("Circular orbit: using gaussian prior for t_sec_offset")
-            predicted_t_sec = self.get_predicted_t_sec_of_visit(0)
-            if self.config.fixed_t_sec_error is not None:
-                predicted_t_sec = ufloat(predicted_t_sec.nominal_value, self.config.fixed_t_sec_error)
-            mcmc.add_parameter("t_sec_offset", Parameter.gaussian_prior(0, predicted_t_sec.std_dev))
-        else:
-            print("Eccentric orbit: using uniform prior for t_sec_offset")
-            duration = np.max(photometry_data_list[0].time - np.min(photometry_data_list[0].time))
-            mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(0, -duration / 3.0, duration / 3.0))
-        
         mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
         # For the joint fit we fix the orbital parameters
         mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar, True))
@@ -177,7 +165,7 @@ class JointFit(H5Serializable):
         
         self.save_to_path(self._cache_file)
     
-    def physical_model(self, x : List[float], t_sec_offset : float, fp : float, rp_rstar : float,
+    def physical_model(self, x : List[float], fp : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
         '''
         Model for the lightcurve using batman
@@ -187,8 +175,8 @@ class JointFit(H5Serializable):
         visit_index = self.get_visit_index_from_time(x[0])
         # t_sec is relative to the start of the visit
         predicted_t_sec = self.get_predicted_t_sec_of_visit(visit_index).nominal_value
-        t_sec = predicted_t_sec + t_sec_offset + self.starting_times[visit_index]
-        
+        t_sec = predicted_t_sec + self.starting_times[visit_index] + 2 * p * ecc * umath.cos(w * np.pi / 180) / np.pi
+
         if self.params is None:
             params = batman.TransitParams()
             params.limb_dark = "quadratic"

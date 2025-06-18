@@ -22,15 +22,17 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
         individual_fit = IndividualFitResults(individual_fit)
     
     yerr = individual_fit.results['y_err'].nominal_value
-    t_sec = individual_fit.predicted_t_sec
-    t_sec_offset = individual_fit.results['t_sec'].nominal_value - t_sec
+    t_sec = individual_fit.predicted_t_sec.nominal_value
     rp = individual_fit.results['rp_rstar'].nominal_value
     inc = individual_fit.results['inc'].nominal_value
     a = individual_fit.results['a_rstar'].nominal_value
     per = individual_fit.results['p'].nominal_value
     fp = individual_fit.results['fp'].nominal_value
+    ecc = individual_fit.results['ecc'].nominal_value
+    w = individual_fit.results['w'].nominal_value
     fp_err = individual_fit.results['fp'].std_dev
-        
+    t_sec_offset = 2 * per * ecc * np.cos(w * np.pi / 180) / np.pi
+
     flux_model = individual_fit.flux_model
     systematic_factor = individual_fit.systematic_factor
 
@@ -209,7 +211,9 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     a = joint_fit.results["a_rstar"].nominal_value
     rp = joint_fit.results["rp_rstar"].nominal_value
     per = joint_fit.results["p"].nominal_value
-    offset = joint_fit.results["t_sec_offset"].nominal_value * 24
+    ecc = joint_fit.results["ecc"].nominal_value
+    w = joint_fit.results["w"].nominal_value
+    offset = (2 * per * ecc * np.cos(w * np.pi / 180) / np.pi) * 24
     duration = get_eclipse_duration(inc, a, rp, per) * 24
     print("Offset: ", offset, "hours")
     eclipse_start = offset - duration/2

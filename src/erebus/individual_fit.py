@@ -14,6 +14,7 @@ import json
 from erebus.utility.utils import create_method_signature
 import copy
 from uncertainties import ufloat
+import uncertainties.umath as umath
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -63,17 +64,7 @@ class IndividualFit(H5Serializable):
         
         start_time = np.min(photometry_data.time)
         t0 = planet.get_closest_t0(start_time)
-        predicted_t_sec = planet.get_predicted_tsec(start_time)
-        if self.config.fixed_t_sec_error is not None:
-            predicted_t_sec = ufloat(predicted_t_sec.nominal_value, self.config.fixed_t_sec_error)
-        
-        flag_impossible_t_sec = predicted_t_sec > np.max(photometry_data.time) - np.min(photometry_data.time)
-
-        if flag_impossible_t_sec:
-            print("Impossible t_sec!", predicted_t_sec, ">", np.max(photometry_data.time) - np.min(photometry_data.time))
-
-        mcmc.add_parameter("t_sec", Parameter.prior_from_ufloat(predicted_t_sec))
-        self.predicted_t_sec = predicted_t_sec.nominal_value
+        self.predicted_t_sec = planet.get_predicted_tsec(start_time)
         
         mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))        
         mcmc.add_parameter("t0", Parameter.prior_from_ufloat(t0))
@@ -120,7 +111,7 @@ class IndividualFit(H5Serializable):
         
         self._force_clear_cache = force_clear_cache
     
-    def physical_model(self, x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
+    def physical_model(self, x : List[float], fp : float, t0 : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
         '''
         Model for the lightcurve using batman
@@ -132,7 +123,7 @@ class IndividualFit(H5Serializable):
             params.u = [0.3, 0.3]
             
         params.t0 = t0
-        params.t_secondary = t_sec
+        params.t_secondary = self.predicted_t_sec + 2 * p * ecc * umath.cos(w * np.pi / 180) / np.pi
         params.fp = fp
         params.rp = rp_rstar
         params.inc = inc
@@ -170,12 +161,12 @@ class IndividualFit(H5Serializable):
         return systematic
         
     @staticmethod
-    def __fit_method(x : List[float], t_sec : float, fp : float, t0 : float, rp_rstar : float,
+    def __fit_method(x : List[float], fp : float, t0 : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, ecc : float, w : float, 
                        pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float,
                        exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
         systematic = IndividualFit.__instance.systematic_model(x, pc1, pc2, pc3, pc4, pc5, exp1, exp2, a, b, extra_params)
-        physical = IndividualFit.__instance.physical_model(x, t_sec, fp, t0, rp_rstar, a_rstar, p, inc, ecc, w)
+        physical = IndividualFit.__instance.physical_model(x, fp, t0, rp_rstar, a_rstar, p, inc, ecc, w)
         return physical * systematic 
     
     def fit_method(self, x : List[float], *args) -> List[float]:
