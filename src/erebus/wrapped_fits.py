@@ -1,8 +1,10 @@
-import numpy as np
-import os
 import hashlib
-import erebus.utility.fits_file_utils as f_utils
+import os
+
+import numpy as np
+
 import erebus.utility.aperture_photometry_utils as ap_utils
+import erebus.utility.fits_file_utils as f_utils
 import erebus.utility.utils as utils
 from erebus.utility.h5_serializable_file import H5Serializable
 

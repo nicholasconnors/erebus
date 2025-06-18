@@ -1,8 +1,10 @@
-from typing import Callable, List
-import numpy as np
 import json as json
-from uncertainties.core import Variable as UFloat
+from typing import Callable, List
+
+import numpy as np
 from uncertainties import ufloat
+from uncertainties.core import Variable as UFloat
+
 
 def gaussian_2D(xy, a : float, mu_x : float, mu_y : float, sigma : float, offset : float) -> list[float]:
     '''
@@ -70,10 +72,10 @@ def get_eclipse_duration(inc : float, a_rstar : float, rp_rstar : float, per : f
     Requires inclination in degrees
     '''
     b = a_rstar * np.cos(inc * np.pi / 180)
-    l = np.sqrt((1 + rp_rstar) ** 2 - b**2)
-    eclipse_phase_length = np.arcsin(l / a_rstar) / np.pi
-    l = eclipse_phase_length * per
-    return l
+    length = np.sqrt((1 + rp_rstar) ** 2 - b**2)
+    eclipse_phase_length = np.arcsin(length / a_rstar) / np.pi
+    length = eclipse_phase_length * per
+    return length
 
 def get_predicted_t_sec(planet, photometry_data) -> float:
     '''

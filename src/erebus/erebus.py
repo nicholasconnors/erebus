@@ -1,20 +1,22 @@
-import os
 import hashlib
-import numpy as np
-from erebus.utility.h5_serializable_file import H5Serializable
-from erebus.utility.run_cfg import ErebusRunConfig
-from erebus.utility import utils as utils
-from erebus.photometry_data import PhotometryData
-from erebus.wrapped_fits import WrappedFits
-from erebus.utility.planet import Planet
-import erebus.utility.fits_file_utils as f_util 
-from erebus.individual_fit import IndividualFit
-from erebus.joint_fit import JointFit
 import json
+import os
 from datetime import datetime
-from erebus.joint_fit_results import JointFitResults
-from erebus.individual_fit_results import IndividualFitResults
+
+import numpy as np
+
 import erebus.plotting as plotting
+import erebus.utility.fits_file_utils as f_util
+from erebus.individual_fit import IndividualFit
+from erebus.individual_fit_results import IndividualFitResults
+from erebus.joint_fit import JointFit
+from erebus.joint_fit_results import JointFitResults
+from erebus.photometry_data import PhotometryData
+from erebus.utility import utils as utils
+from erebus.utility.h5_serializable_file import H5Serializable
+from erebus.utility.planet import Planet
+from erebus.utility.run_cfg import ErebusRunConfig
+from erebus.wrapped_fits import WrappedFits
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -119,7 +121,7 @@ class Erebus(H5Serializable):
 
         if self.config.perform_joint_fit:
             self.joint_fit = JointFit(self.photometry, self.planet, self.config, force_clear_cache)
-            print(f"Joint fit " + ("already ran" if 'fp' in self.joint_fit.results else "wasn't run yet"))
+            print("Joint fit " + ("already ran" if 'fp' in self.joint_fit.results else "wasn't run yet"))
         
         self.save_to_path(self._cache_file)
     

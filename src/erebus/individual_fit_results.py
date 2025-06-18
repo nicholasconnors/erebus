@@ -1,5 +1,6 @@
-from erebus.utility.h5_serializable_file import H5Serializable
 from erebus.individual_fit import IndividualFit
+from erebus.utility.h5_serializable_file import H5Serializable
+
 
 class IndividualFitResults(H5Serializable):
     '''

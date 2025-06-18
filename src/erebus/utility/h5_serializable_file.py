@@ -1,17 +1,19 @@
-from typing import List
-import h5py
-import numpy as np
-import os
 import inspect
 import json
-from uncertainties.core import Variable as UFloat
-from uncertainties import ufloat
+import os
 import types
+from typing import List
+
+import h5py
+import numpy as np
 from pydantic import BaseModel
 from pydantic_core import from_json
-from erebus.utility.utils import _JSONDecoder
-from erebus.utility.utils import _JSONEncoder
+from uncertainties import ufloat
+from uncertainties.core import Variable as UFloat
+
 from erebus.utility.planet import Planet
+from erebus.utility.utils import _JSONDecoder, _JSONEncoder
+
 
 class H5Serializable:   
     '''
@@ -72,7 +74,7 @@ class H5Serializable:
         try:
             hf = h5py.File(file_path, 'w')
             # Filter out "private" attributes
-            names = [key for key in dir(self) if not key.startswith('_') and not key in self._exclude_keys()]
+            names = [key for key in dir(self) if not key.startswith('_') and key not in self._exclude_keys()]
             for name in names:
                 # Don't try to save functions
                 if isinstance(getattr(self.__class__, name, None), types.FunctionType):
@@ -100,7 +102,7 @@ class H5Serializable:
                         value = "PLANET" + json.dumps(value._yaml.model_dump(mode='json'), cls=_JSONEncoder)
                     elif not inspect.ismethod(value):
                         hf.attrs[name] = value
-                except Exception as e:
+                except Exception:
                     print(f"Couldn't save [{name}]")
                     raise
         except Exception as e:

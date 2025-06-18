@@ -1,0 +1,4 @@
+[flake8]
+select = F
+path = src
+ignore = F401

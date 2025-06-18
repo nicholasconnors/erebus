@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import gamma
 from uncertainties.core import Variable as UFloat
-from uncertainties import ufloat
+
 
 class Parameter:
     '''

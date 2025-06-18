@@ -1,17 +1,17 @@
-from erebus.utility.utils import bin_data
-from erebus.utility.utils import get_eclipse_duration
+
+import corner
 import matplotlib.colors as colors
-from scipy.ndimage.filters import uniform_filter1d
-from pathlib import Path
-from erebus.individual_fit import IndividualFit
-from erebus.joint_fit import JointFit
-from erebus.joint_fit_results import JointFitResults
-from erebus.individual_fit_results import IndividualFitResults
 import matplotlib.pyplot as plt
 import numpy as np
-import inspect
+from scipy.ndimage.filters import uniform_filter1d
+
+from erebus.individual_fit import IndividualFit
+from erebus.individual_fit_results import IndividualFitResults
+from erebus.joint_fit import JointFit
+from erebus.joint_fit_results import JointFitResults
 from erebus.mcmc_model import WrappedMCMC
-import corner
+from erebus.utility.utils import bin_data, get_eclipse_duration
+
 
 def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResults, save_to_directory : str = None, show : bool = False):
     '''

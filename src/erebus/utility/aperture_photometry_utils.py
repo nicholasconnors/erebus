@@ -1,9 +1,10 @@
 import numpy as np
+from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 from scipy.optimize import curve_fit
-from erebus.utility import utils
-from scipy.interpolate import LinearNDInterpolator
-from scipy.interpolate import NearestNDInterpolator
 from tqdm import tqdm
+
+from erebus.utility import utils
+
 
 def fit_star_position(frame, xy):
     '''
@@ -32,7 +33,7 @@ def clean_frames(raw_frames : np.ndarray, outlier_threshold : float) -> np.ndarr
     '''
     frames = np.zeros_like(raw_frames)
     
-    print(f"Rejecting NaNs and outliers")
+    print("Rejecting NaNs and outliers")
 
     # Evaluating per-pixel light curves
     bad_pixel_count = 0
@@ -73,7 +74,7 @@ def clean_frames(raw_frames : np.ndarray, outlier_threshold : float) -> np.ndarr
     for (x, y) in bad_pixels:
         bad_pixel_mask[x, y] = True
 
-    print(f"Interpolating bad pixels")
+    print("Interpolating bad pixels")
 
     for ind, frame in enumerate(tqdm(frames)):
         # Now interpolate bad pixels based on the surrounding pixels

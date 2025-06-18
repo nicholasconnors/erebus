@@ -1,10 +1,11 @@
-import os
 import hashlib
+import os
+
 import numpy as np
+
 import erebus.utility.aperture_photometry_utils as ap_utils
-from erebus.wrapped_fits import WrappedFits
 from erebus.utility.h5_serializable_file import H5Serializable
-from sklearn.decomposition import PCA as NormalPCA
+from erebus.wrapped_fits import WrappedFits
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
