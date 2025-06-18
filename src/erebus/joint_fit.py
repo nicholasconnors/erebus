@@ -120,13 +120,18 @@ class JointFit(H5Serializable):
         mcmc = WrappedMCMC()
         
         mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
-        # For the joint fit we fix the orbital parameters
+        
+        # For the joint fit we fix the orbital parameters except eccentricity
         mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar, True))
         mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar, True))
         mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, True))
         mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc, True))
-        mcmc.add_parameter("ecc", Parameter.prior_from_ufloat(planet.ecc, True))
-        mcmc.add_parameter("w", Parameter.prior_from_ufloat(planet.w, True))
+        
+        mcmc.add_parameter("ecc", Parameter.prior_from_ufloat(planet.ecc, positive_only=True))
+        if planet.w is None:
+            mcmc.add_parameter("w", Parameter.uniform_prior(180, 0, 360))
+        else:
+            mcmc.add_parameter("w", Parameter.prior_from_ufloat(planet.w))
         
         for visit_index in range(0, len(photometry_data_list)):
             if self.config.fit_fnpca:

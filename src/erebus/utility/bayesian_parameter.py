@@ -42,11 +42,13 @@ class Parameter:
         return f"{self.type} - Initial value: {self.value}"
     
     @classmethod
-    def prior_from_ufloat(cls, parameter : float | UFloat, force_fixed : bool = False):
+    def prior_from_ufloat(cls, parameter : float | UFloat, force_fixed : bool = False, positive_only : bool = False):
         if isinstance(parameter, float):
             return Parameter.fixed(parameter)
         elif force_fixed:
             return Parameter.fixed(parameter.nominal_value)
+        elif positive_only:
+            return Parameter.positive_gaussian_prior(parameter.nominal_value, parameter.std_dev)
         else:
             return Parameter.gaussian_prior(parameter.nominal_value, parameter.std_dev)
         
