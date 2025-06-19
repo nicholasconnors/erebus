@@ -9,3 +9,4 @@ planet_path: ../planets/lhs1140c.yaml
 aperture_radius: 5
 annulus_start: 12
 annulus_end: 20
+trim_integrations: [10, 10]

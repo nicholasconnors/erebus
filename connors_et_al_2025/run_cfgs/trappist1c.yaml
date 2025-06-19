@@ -11,3 +11,4 @@ annulus_start: 12
 annulus_end: 20
 trim_integrations: [10, 10]
 star_position: [693, 510]
+prevent_negative_eclipse_depth: True

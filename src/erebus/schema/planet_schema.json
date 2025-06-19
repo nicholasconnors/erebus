@@ -1,5 +1,5 @@
 {
-  "description": "Serialized YAML representation of a Planet for the Erebus pipeline.\n\nPlanet parameters with optional uncertainties are represented as lists of up to 3 floats\n1 float = no uncertainty, 2 floats = symmetric error, 3 floats = asymmetric error.\n\nAttributes:\n    name            Name of the planet\n    t0              Midpoint time of reference transit\n    t0_lookup_path  Optional replacement for t0, relative path to file with calculated TTVs (Two columns: t0, error)\n    a_rstar         Semi-major axis in units of stellar radii\n    p               Orbital period in days\n    rp_rstar        Radius of the exoplanet in units of stellar radii\n    inc             Inclination in degrees\n    ecc             Eccentricity\n    w               Argument of periastron in degrees   ",
+  "description": "Serialized YAML representation of a Planet for the Erebus pipeline.\n\nPlanet parameters with optional uncertainties are represented as lists of up to 3 floats\n1 float = no uncertainty, 2 floats = symmetric error, 3 floats = asymmetric error.\n\nAttributes:\n    name            Name of the planet\n    t0              Midpoint time of reference transit in BJD\n    t0_lookup_path  Optional replacement for t0, relative path to file with calculated TTVs (Two columns: t0, error)\n    a_rstar         Semi-major axis in units of stellar radii\n    p               Orbital period in days\n    rp_rstar        Radius of the exoplanet in units of stellar radii\n    inc             Inclination in degrees\n    ecc             Eccentricity\n    w               Argument of periastron in degrees   ",
   "properties": {
     "name": {
       "title": "Name",
@@ -19,6 +19,7 @@
           "type": "null"
         }
       ],
+      "default": null,
       "title": "T0"
     },
     "t0_lookup_path": {
@@ -30,6 +31,7 @@
           "type": "null"
         }
       ],
+      "default": null,
       "title": "T0 Lookup Path"
     },
     "a_rstar": {
@@ -74,17 +76,36 @@
     },
     "w": {
       "items": {
-        "type": "number"
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ]
       },
       "maxItems": 3,
       "title": "w",
       "type": "array"
+    },
+    "cache": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "include_in_schema": false,
+      "title": "Cache"
     }
   },
   "required": [
     "name",
-    "t0",
-    "t0_lookup_path",
     "a_rstar",
     "p",
     "rp_rstar",

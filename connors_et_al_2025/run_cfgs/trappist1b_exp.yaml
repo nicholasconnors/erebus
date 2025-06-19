@@ -2,9 +2,9 @@
 
 fit_exponential: true
 fit_linear: true
-perform_individual_fits: false
+perform_individual_fits: true
 perform_joint_fit: true
-calints_path: /home/nconnors/Research/TRAPPIST-1B
+calints_path: /home/nconnors/Research/TRAPPIST-1B_2
 planet_path: ../planets/trappist1b.yaml
 aperture_radius: 5
 annulus_start: 12
