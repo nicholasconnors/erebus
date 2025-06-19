@@ -122,7 +122,8 @@ class JointFit(H5Serializable):
                 
         mcmc = WrappedMCMC()
         
-        mcmc.add_parameter("fp", Parameter.uniform_prior(200e-6, -1500e-6, 1500e-6))
+        lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
+        mcmc.add_parameter("fp", Parameter.uniform_prior(400e-6, lower_limit, 2000e-6))
         
         # For the joint fit we fix the orbital parameters except eccentricity
         mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar, True))
