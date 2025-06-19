@@ -5,7 +5,7 @@ tags:
     - astronomy
     - exoplanets
 authors:
-    - name: Nicholas Connors
+    - name: Nicholas J. Connors
       orcid: 0000-0001-5848-6750
       affiliation: "1"
 affiliations:
