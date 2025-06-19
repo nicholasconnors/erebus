@@ -1,5 +1,8 @@
 # Changelog
 
-## 0.2.2
+## 0.7.0
 
-- Initial public release
+- Pre-processing of `calints` data for NaN and outlier rejection.
+- Light curve fitting using FN-PCA, exponential ramp, or custom systematic model
+- Fits for orbital parameters within provided errors. Support for `t0` predictions from lookup file.
+- Version used in Connors et al (in prep)
