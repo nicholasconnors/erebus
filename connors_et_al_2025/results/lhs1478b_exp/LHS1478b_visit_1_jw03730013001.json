@@ -1,0 +1,93 @@
+{
+    "fp": {
+        "__ufloat__": true,
+        "nominal_value": 0.0001661084220955788,
+        "std_dev": 6.98551378694639e-05
+    },
+    "t0": {
+        "__ufloat__": true,
+        "nominal_value": 58786.2542541881,
+        "std_dev": 0.0004187344129604753
+    },
+    "rp_rstar": {
+        "__ufloat__": true,
+        "nominal_value": 0.04620384475221344,
+        "std_dev": 0.001093167016313179
+    },
+    "a_rstar": {
+        "__ufloat__": true,
+        "nominal_value": 16.135203989706035,
+        "std_dev": 0.09322685668473696
+    },
+    "p": {
+        "__ufloat__": true,
+        "nominal_value": 1.9495377951338275,
+        "std_dev": 4.099706046978291e-06
+    },
+    "inc": {
+        "__ufloat__": true,
+        "nominal_value": 87.43702349179424,
+        "std_dev": 0.05186955060335663
+    },
+    "ecc": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "w": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc1": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc4": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc5": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "exp1": {
+        "__ufloat__": true,
+        "nominal_value": -0.00019493776263809903,
+        "std_dev": 0.001108433294389376
+    },
+    "exp2": {
+        "__ufloat__": true,
+        "nominal_value": -30.2572154104717,
+        "std_dev": 71.49465206831309
+    },
+    "a": {
+        "__ufloat__": true,
+        "nominal_value": -0.00674728478176115,
+        "std_dev": 0.0038455877107019323
+    },
+    "b": {
+        "__ufloat__": true,
+        "nominal_value": 0.00033691985652882907,
+        "std_dev": 0.0010171825156519204
+    },
+    "y_err": {
+        "__ufloat__": true,
+        "nominal_value": 0.000765515992256944,
+        "std_dev": 1.796873725604407e-05
+    },
+    "auto_corr": 1297.742022980804
+}
