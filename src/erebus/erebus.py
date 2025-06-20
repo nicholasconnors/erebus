@@ -150,7 +150,7 @@ class Erebus(H5Serializable):
         
         if self.config.perform_individual_fits:
             for fit in self.individual_fits:
-                has_run = 'fp' in fit.results
+                has_run = fit.has_converged()
                 if not has_run or force_clear_cache:
                     fit.run()
                 else:
@@ -168,7 +168,7 @@ class Erebus(H5Serializable):
                 utils.save_dict_to_json(dict, path + ".json")
 
         if self.config.perform_joint_fit:
-            has_run = 'fp' in self.joint_fit.results
+            has_run = self.joint_fit.has_converged()
             if not has_run or force_clear_cache:
                 self.joint_fit.run()
             else:

@@ -106,7 +106,7 @@ class WrappedMCMC:
         # Value should always be negative
         return lp + self.log_likelihood(theta, x, y)
 
-    def run(self, x, y, max_steps = 200000, walkers = 64, cache_file = None, force_clear_cache = False) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
+    def run(self, x, y, max_steps = 1000000, walkers = 64, cache_file = None, force_clear_cache = False) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
         '''
         Runs the MCMC, gets the results (with errors), ensemble sampler instance, autocorrelation time, and interation count
         '''   
