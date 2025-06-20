@@ -8,7 +8,7 @@ fit_linear: true
 perform_individual_fits: true
 perform_joint_fit: true
 planet_path: ../planets/trappist1c.yaml
-prevent_negative_eclipse_depth: true
+prevent_negative_eclipse_depth: false
 skip_emcee_backend_cache: false
 skip_visits: null
 star_position:
