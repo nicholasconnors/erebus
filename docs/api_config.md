@@ -20,3 +20,11 @@
         show_if_no_docstring: false
 
 ***
+
+> <p style="font-size: 24px;">Parameters</p>
+> ::: utility.bayesian_parameter.Parameter
+    options:
+        show_signature_annotations: false
+        show_root_heading: false
+        summary: true
+        show_if_no_docstring: false
