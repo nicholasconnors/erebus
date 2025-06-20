@@ -7,3 +7,5 @@ TRAPPIST-1b and c FN-PCA were made with 0.7.0 of the software (eccentricity supp
 TRAPPIST-1b and c exponential fts were made with 0.7.1 of the software (eccentricity convergence bug fixed which had affected these runs previously).
 
 For TRAPPIST-1c separate runs were done allowing or forbidding negative eclipse depths. This is due to the software sometimes mistaking the eclipse egress as a negative eclipse ingress allowed within the timing constraints on the eccentricity. 
+
+Chain plot pdf images aren't included because they are too large (png versions are still included).
