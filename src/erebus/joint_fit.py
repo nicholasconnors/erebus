@@ -134,8 +134,8 @@ class JointFit(H5Serializable):
         if planet.w is not None:
             ecosw = planet.ecc * umath.cos(planet.w * np.pi / 180)
             esinw = planet.ecc * umath.sin(planet.w * np.pi / 180)
-            mcmc.add_parameter("esinw", Parameter.prior_from_ufloat(esinw))
-            mcmc.add_parameter("ecosw", Parameter.prior_from_ufloat(ecosw))
+            mcmc.add_parameter("esinw", Parameter.prior_from_ufloat(esinw, force_fixed=config.fix_eclipse_timing))
+            mcmc.add_parameter("ecosw", Parameter.prior_from_ufloat(ecosw, force_fixed=config.fix_eclipse_timing))
         else:
             # Uniform for cos/sin omega from -1 to 1
             e = (planet.ecc.nominal_value + planet.ecc.std_dev)

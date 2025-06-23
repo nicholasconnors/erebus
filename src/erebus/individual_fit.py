@@ -70,10 +70,10 @@ class IndividualFit(H5Serializable):
         lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
         mcmc.add_parameter("fp", Parameter.uniform_prior(400e-6, lower_limit, 2000e-6))
              
-        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(t0, positive_only=True))
+        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(t0, positive_only=True, force_fixed=config.fix_eclipse_timing))
         mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar, positive_only=True))
         mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar, positive_only=True))
-        mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, positive_only=True))
+        mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, positive_only=True, force_fixed=config.fix_eclipse_timing))
         mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc, positive_only=True))
         
         # using ecosw and esinw as parameters instead of using e and w directly
@@ -81,8 +81,8 @@ class IndividualFit(H5Serializable):
         if planet.w is not None:
             ecosw = planet.ecc * umath.cos(planet.w * np.pi / 180)
             esinw = planet.ecc * umath.sin(planet.w * np.pi / 180)
-            mcmc.add_parameter("esinw", Parameter.prior_from_ufloat(esinw))
-            mcmc.add_parameter("ecosw", Parameter.prior_from_ufloat(ecosw))
+            mcmc.add_parameter("esinw", Parameter.prior_from_ufloat(esinw, force_fixed=config.fix_eclipse_timing))
+            mcmc.add_parameter("ecosw", Parameter.prior_from_ufloat(ecosw, force_fixed=config.fix_eclipse_timing))
         else:
             # Uniform for cos/sin omega from -1 to 1
             e = (planet.ecc.nominal_value + planet.ecc.std_dev)

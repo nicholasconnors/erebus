@@ -27,6 +27,7 @@ class ErebusRunConfig(BaseModel):
         star_position (list[int]): X and y pixel coordinates of the star. Optional (will search for the star or assume its centered).
         skip_emcee_backend_cache (bool): Optional bool to not save emcee backend. Speeds up run time but can lose progress during a run if stopped early.
         prevent_negative_eclipse_depth (bool): Optional bool to force eclipse depth to be positive.
+        fix_eclipse_timing (bool): Optional bool to force t0, period, ecosw to be fixed
     '''    
     fit_fnpca : Optional[bool] = False
     fit_exponential : Optional[bool] = False
@@ -44,6 +45,7 @@ class ErebusRunConfig(BaseModel):
     path : Optional[str] = Field(None, exclude=True)
     skip_emcee_backend_cache: Optional[bool] = False
     prevent_negative_eclipse_depth: Optional[bool] = False
+    fix_eclipse_timing: Optional[bool] = False
     
     _custom_systematic_model = None
     _custom_parameters : dict = None
