@@ -31,16 +31,14 @@ class IndividualFit(H5Serializable):
     
     def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None, index = None):
-        self.source_folder = photometry_data.source_folder
         self.visit_name = photometry_data.visit_name
-        source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
         self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
         self.planet_name = planet.name
         self.planet = planet
         self.order = 'X'
         self.photometry_data = photometry_data
 
-        self._cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{source_folder_hash}_{self.config_hash}_individual_fit.h5"
+        self._cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{self.config_hash}_individual_fit.h5"
         
         if override_cache_path is not None:
             self._cache_file = override_cache_path

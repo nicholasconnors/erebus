@@ -60,12 +60,10 @@ class JointFit(H5Serializable):
     
     def __init__(self, photometry_data_list : List[PhotometryData], planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None):
-        self.source_folder = photometry_data_list[0].source_folder
-        source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
         self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
         self.planet_name = planet.name
         
-        self._cache_file = f"{EREBUS_CACHE_DIR}/{source_folder_hash}_{self.config_hash}_joint_fit.h5"
+        self._cache_file = f"{EREBUS_CACHE_DIR}/{self.config_hash}_joint_fit.h5"
         
         self.results = {}
         

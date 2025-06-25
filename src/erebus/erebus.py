@@ -41,12 +41,12 @@ class Erebus(H5Serializable):
         
         if isinstance(run_cfg, str):
             run_cfg = ErebusRunConfig.load(run_cfg) 
-        
-        config_hash = hashlib.md5(json.dumps(run_cfg.model_dump()).encode()).hexdigest()   
-        self._cache_file = f"{EREBUS_CACHE_DIR}/{config_hash}_erebus.h5"
-    
+
         if override_cache_path is not None:
             self._cache_file = override_cache_path
+        else:
+            config_hash = hashlib.md5(json.dumps(run_cfg.model_dump()).encode()).hexdigest()   
+            self._cache_file = f"{EREBUS_CACHE_DIR}/{config_hash}_erebus.h5"
     
         self.config : ErebusRunConfig = run_cfg
         '''The configuration file used for this instance of the Erebus pipeline.'''
