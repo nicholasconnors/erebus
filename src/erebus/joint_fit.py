@@ -152,7 +152,7 @@ class JointFit(H5Serializable):
             
             if self.config.fit_exponential:
                 mcmc.add_parameter(f"exp1_{visit_index}", Parameter.uniform_prior(0.01, -0.1, 0.1))
-                mcmc.add_parameter(f"exp2_{visit_index}", Parameter.uniform_prior(-60.0, -200.0, -1.0))
+                mcmc.add_parameter(f"exp2_{visit_index}", Parameter.uniform_prior(-60.0, -600.0, -1.0))
             else:
                 mcmc.add_parameter(f"exp1_{visit_index}", Parameter.fixed(0))
                 mcmc.add_parameter(f"exp2_{visit_index}", Parameter.fixed(0))
@@ -162,11 +162,14 @@ class JointFit(H5Serializable):
             else:
                 mcmc.add_parameter(f"a_{visit_index}", Parameter.fixed(0))
                 
-            mcmc.add_parameter(f"b_{visit_index}", Parameter.uniform_prior(1e-6, -0.01, 0.01))
+            mcmc.add_parameter(f"b_{visit_index}", Parameter.uniform_prior(1e-6, -0.03, 0.03))
             
             if self.config._custom_parameters is not None:
                 for key in self.config._custom_parameters:
-                    mcmc.add_parameter(f"{key}_{visit_index}", copy.deepcopy(self.config._custom_parameters[key]))
+                    param = self.config._custom_parameters[key]
+                    if visit_index in self.config._custom_parameters_override:
+                        param = self.config._custom_parameters_override[visit_index][key]
+                    mcmc.add_parameter(f"{key}_{visit_index}", copy.deepcopy(param))
             
         mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))
         

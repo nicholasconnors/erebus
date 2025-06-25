@@ -49,6 +49,7 @@ class ErebusRunConfig(BaseModel):
     
     _custom_systematic_model = None
     _custom_parameters : dict = None
+    _custom_parameters_override : dict = {}
     
     def set_custom_systematic_model(self, model, params):
         '''
@@ -66,6 +67,14 @@ class ErebusRunConfig(BaseModel):
         self._custom_systematic_model = model
         self._custom_parameters = params
         print("Registered custom systematic model")
+        
+    def set_custom_systematic_model_prior_for_visit_index(self, index, params):
+        '''
+        Optionally override custom systematic model priors for specific visits
+        
+        Params are given as a dictionary of their names (matching the method signature) to a Parameter object.
+        '''
+        self._custom_parameters_override[index] = params
     
     def load(path : str):
         config = parse_yaml_file_as(ErebusRunConfig, path)

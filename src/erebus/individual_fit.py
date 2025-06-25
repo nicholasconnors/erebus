@@ -30,7 +30,7 @@ class IndividualFit(H5Serializable):
                 'photometry_data', '_force_clear_cache', 'predicted_t_sec']
     
     def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
-                 force_clear_cache : bool = False, override_cache_path : str = None):
+                 force_clear_cache : bool = False, override_cache_path : str = None, index = None):
         self.source_folder = photometry_data.source_folder
         self.visit_name = photometry_data.visit_name
         source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
@@ -98,7 +98,7 @@ class IndividualFit(H5Serializable):
         
         if self.config.fit_exponential:
             mcmc.add_parameter("exp1", Parameter.uniform_prior(0.01, -0.1, 0.1))
-            mcmc.add_parameter("exp2", Parameter.uniform_prior(-60.0, -200.0, -1.0))
+            mcmc.add_parameter("exp2", Parameter.uniform_prior(-60.0, -600.0, -1.0))
         else:
             mcmc.add_parameter("exp1", Parameter.fixed(0))
             mcmc.add_parameter("exp2", Parameter.fixed(0))
@@ -108,11 +108,14 @@ class IndividualFit(H5Serializable):
         else:
             mcmc.add_parameter("a", Parameter.fixed(0))
             
-        mcmc.add_parameter("b", Parameter.uniform_prior(1e-6, -0.01, 0.01))
+        mcmc.add_parameter("b", Parameter.uniform_prior(1e-6, -0.03, 0.03))
             
         if self.config._custom_parameters is not None:
             for key in self.config._custom_parameters:
-                mcmc.add_parameter(key, copy.deepcopy(self.config._custom_parameters[key]))
+                param = self.config._custom_parameters[key]
+                if index is not None and index in self.config._custom_parameters_override:
+                    param = self.config._custom_parameters_override[key]
+                mcmc.add_parameter(key, copy.deepcopy(param))
         # y_err always goes last
         mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))      
                   
