@@ -11,7 +11,7 @@ rm ./build/dist/*
 
 cd "build"
 
-echo "Installing depdencies"
+echo "Installing dependencies"
 pip install --upgrade pip
 pip install setuptools
 pip install -r ../requirements.txt
