@@ -8,6 +8,4 @@ TRAPPIST-1b and c exponential fts were made with 0.7.1 of the software (eccentri
 
 For TRAPPIST-1c separate runs were done allowing or forbidding negative eclipse depths. This is due to the software sometimes mistaking the eclipse egress as a negative eclipse ingress allowed within the timing constraints on the eccentricity. The forced positive eclipse depth was only used when the data was clearly inconsistent with a missed or 0 eclipse depth.
 
-For the TRAPPIST-1c exponential joint fit run the parameters did not all converge (the systematic model parameters did not). The eclipse depth value however did converge and is used in Table 2 of the paper.
-
 Chain plot pdf images aren't included because they are too large for GitHub
