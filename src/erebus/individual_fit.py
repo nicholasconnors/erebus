@@ -96,7 +96,7 @@ class IndividualFit(H5Serializable):
         
         if self.config.fit_exponential:
             mcmc.add_parameter("exp1", Parameter.uniform_prior(0.01, -0.1, 0.1))
-            mcmc.add_parameter("exp2", Parameter.uniform_prior(-60.0, -600.0, -1.0))
+            mcmc.add_parameter("exp2", Parameter.uniform_prior(-60.0, -200.0, -1.0))
         else:
             mcmc.add_parameter("exp1", Parameter.fixed(0))
             mcmc.add_parameter("exp2", Parameter.fixed(0))
@@ -106,7 +106,7 @@ class IndividualFit(H5Serializable):
         else:
             mcmc.add_parameter("a", Parameter.fixed(0))
             
-        mcmc.add_parameter("b", Parameter.uniform_prior(1e-6, -0.03, 0.03))
+        mcmc.add_parameter("b", Parameter.uniform_prior(1e-6, -0.01, 0.01))
             
         if self.config._custom_parameters is not None:
             for key in self.config._custom_parameters:
