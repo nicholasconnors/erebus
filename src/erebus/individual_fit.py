@@ -59,7 +59,7 @@ class IndividualFit(H5Serializable):
         
         self.eigenvalues, self.eigenvectors, self.pca_variance_ratios = perform_fn_pca_on_aperture(photometry_data.normalized_frames[self.start_trim:self.end_trim])
                 
-        mcmc = WrappedMCMC()
+        mcmc = WrappedMCMC(self._cache_file.replace(".h5", "_mcmc.h5"))
         
         start_time = np.min(photometry_data.time)
         t0 = planet.get_closest_t0(start_time)
@@ -204,8 +204,7 @@ class IndividualFit(H5Serializable):
         fit_method = create_method_signature(IndividualFit.__fit_method, args)
         self.mcmc.set_method(fit_method)
 
-        self.mcmc.run(self.time, self.raw_flux, 
-                      cache_file = None if self.config.skip_emcee_backend_cache else self._cache_file.replace(".h5", "_mcmc.h5"),
+        self.mcmc.run(self.time, self.raw_flux,
                       force_clear_cache=self._force_clear_cache)
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)

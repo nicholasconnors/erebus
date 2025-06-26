@@ -25,7 +25,6 @@ class ErebusRunConfig(BaseModel):
         skip_visits (list[int]): Optional list of indices to skip when doing individual fits. Index based on visit ID.
         trim_integrations (list[int]): Length-two list with the number of integrations to clip from the start and end. Optional.
         star_position (list[int]): X and y pixel coordinates of the star. Optional (will search for the star or assume its centered).
-        skip_emcee_backend_cache (bool): Optional bool to not save emcee backend. Speeds up run time but can lose progress during a run if stopped early.
         prevent_negative_eclipse_depth (bool): Optional bool to force eclipse depth to be positive.
         fix_eclipse_timing (bool): Optional bool to force t0, period, ecosw to be fixed
     '''    
@@ -43,7 +42,6 @@ class ErebusRunConfig(BaseModel):
     trim_integrations : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     star_position : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     path : Optional[str] = Field(None, exclude=True)
-    skip_emcee_backend_cache: Optional[bool] = False
     prevent_negative_eclipse_depth: Optional[bool] = False
     fix_eclipse_timing: Optional[bool] = False
     

@@ -118,7 +118,7 @@ class JointFit(H5Serializable):
         for n in range(0, len(photometry_data_list)):
             self.get_predicted_t_sec_of_visit(n)
                 
-        mcmc = WrappedMCMC()
+        mcmc = WrappedMCMC(self._cache_file.replace(".h5", "_mcmc.h5"))
         
         lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
         mcmc.add_parameter("fp", Parameter.uniform_prior(400e-6, lower_limit, 2000e-6))
@@ -293,7 +293,6 @@ class JointFit(H5Serializable):
         Performs the joint fit via MCMC. Caches the results to the disk.
         '''
         self.mcmc.run(self.time, self.raw_flux, walkers = 80, 
-                      cache_file = None if self.config.skip_emcee_backend_cache else self._cache_file.replace(".h5", "_mcmc.h5"),
                       force_clear_cache=self._force_clear_cache)
         
         self.results = self.mcmc.results

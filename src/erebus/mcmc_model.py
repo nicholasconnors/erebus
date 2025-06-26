@@ -13,34 +13,49 @@ import emcee
 import numpy as np
 from scipy.stats import norm
 from uncertainties import ufloat
+import os
 
+from erebus.utility.h5_serializable_file import H5Serializable
 from erebus.utility.bayesian_parameter import Parameter
 
 ForkingPickler.dumps = dill.dumps
 ForkingPickler.loads = dill.loads
 
-# TODO: Save/load using emcee.backends.HDFBackend + H5Serializable
-class WrappedMCMC:
+class WrappedMCMC(H5Serializable):
     '''
     Wrapper class for emcee
     User can define a method that is to be fit and parameters with Bayesian priors
     The model will always fit for a Gaussian noise parameter "y_err"
     '''
-    def __init__(self):
+    
+    def _exclude_keys(self):
+        '''
+        Excluded from serialization
+        '''
+        return ['sampler', 'params', 'model_function']
+    
+    
+    def __init__(self, cache_file):
         self.params : dict = {}
         '''Dictionary of parameters. Each is a bayesian_parameter instance.'''
         self.model_function : Callable[[Any], float] = None
         '''The function to be fit'''
         
         # Values set once it is done running
-        self.sampler : emcee.EnsembleSampler = None
-        '''The emcee EnsembleSampler which this class wrapped'''
+        self.sampler : emcee.EnsembleSampler | emcee.backends.HDFBackend = None
+        '''The emcee EnsembleSampler or HDFBackend which this class wrapped'''
         self.results : dict = {}
         '''Dictionary of results after fitting'''
         self.auto_correlation = 0
         '''The integrated autocorrelation time after the MCMC has finished running'''
         self.iterations = 0
         '''How many iterations this MCMC ran for before stopping.'''
+        
+        self._cache_file = cache_file
+        
+        if self._cache_file is not None and os.path.exists(self._cache_file):
+            self.load_from_path(self._cache_file)
+            self.sampler = emcee.backends.HDFBackend(self._cache_file.replace(".h5", "_chain0.h5"), read_only=True)
 
     def add_parameter(self, name : str, param : Parameter):
         '''
@@ -106,7 +121,7 @@ class WrappedMCMC:
         # Value should always be negative
         return lp + self.log_likelihood(theta, x, y)
 
-    def run(self, x, y, max_steps = 2000000, walkers = 64, cache_file = None, force_clear_cache = False) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
+    def run(self, x, y, max_steps = 2000000, walkers = 64, force_clear_cache = False) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
         '''
         Runs the MCMC, gets the results (with errors), ensemble sampler instance, autocorrelation time, and interation count
         '''   
@@ -121,13 +136,13 @@ class WrappedMCMC:
         backends = [None] * nchains        
         sampler = [None] * nchains
         for i in range(0, nchains):
-            if cache_file is not None:
-                # Must be separate files to prevent saving race conditions
-                backends[i] = emcee.backends.HDFBackend(cache_file.replace(".h5", "_chain%d.h5" % i))
-                if force_clear_cache:
-                    backends[i].reset(walkers, ndim)
+            # Must be separate files to prevent saving race conditions
+            backends[i] = emcee.backends.HDFBackend(self._cache_file.replace(".h5", "_chain%d.h5" % i))
+            if force_clear_cache:
+                backends[i].reset(walkers, ndim)
             sampler[i] = emcee.EnsembleSampler(walkers, ndim, self.__log_probability, 
-                                                args=(x, y), backend=backends[i])
+                                args=(x, y), backend=backends[i])
+
     
         # Let walkers get away from starting positions
         pos = [None] * nchains
@@ -144,13 +159,10 @@ class WrappedMCMC:
         
         # Unclear how to determine if backend has data except for checking for an exception
         has_backend = True
-        if cache_file is not None:
-            try:
-                backends[0].get_last_sample()
-            except:
-                print("No currently saved data")
-                has_backend = False
-        else:
+        try:
+            backends[0].get_last_sample()
+        except:
+            print("No currently saved data")
             has_backend = False
         
         if not has_backend:
@@ -272,4 +284,6 @@ class WrappedMCMC:
         self.sampler = sampler[0]
         self.auto_correlation = auto_correlation_time
         self.iterations = iteration_counter
+        
+        self.save_to_path(self._cache_file)
     
