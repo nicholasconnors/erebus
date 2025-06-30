@@ -2,16 +2,18 @@ annulus_end: 20
 annulus_start: 12
 aperture_radius: 5
 calints_path: /home/nconnors/Research/TRAPPIST-1C/JWST
-fit_exponential: true
-fit_fnpca: false
+fit_exponential: false
+fit_fnpca: true
 fit_linear: true
-fix_eclipse_timing: true
-perform_individual_fits: false
-perform_joint_fit: true
+fix_eclipse_timing: false
+perform_individual_fits: true
+perform_joint_fit: false
 planet_path: ../planets/trappist1c.yaml
 prevent_negative_eclipse_depth: false
-skip_emcee_backend_cache: false
-skip_visits: null
+skip_visits:
+- 0
+- 2
+- 3
 star_position:
 - 693
 - 510
