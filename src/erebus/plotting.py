@@ -28,10 +28,14 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     a = individual_fit.results['a_rstar'].nominal_value
     per = individual_fit.results['p'].nominal_value
     fp = individual_fit.results['fp'].nominal_value
-    ecc = individual_fit.results['ecc'].nominal_value
-    w = individual_fit.results['w'].nominal_value
+    ecosw = individual_fit.results["ecosw"].nominal_value if "ecosw" in individual_fit.results else 0
+    #esinw = individual_fit.results["esinw"].nominal_value if "esinw" in individual_fit.results else 0
+    
+    if "e" in individual_fit.results and "w" in individual_fit.results:
+        ecosw = individual_fit.results["e"].nominal_value * np.cos(individual_fit.results["w"].nominal_value * np.pi / 180)
+    
     fp_err = individual_fit.results['fp'].std_dev
-    t_sec_offset = 2 * per * ecc * np.cos(w * np.pi / 180) / np.pi
+    t_sec_offset = 2 * per * ecosw / np.pi
 
     flux_model = individual_fit.flux_model
     systematic_factor = individual_fit.systematic_factor
@@ -211,9 +215,13 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     a = joint_fit.results["a_rstar"].nominal_value
     rp = joint_fit.results["rp_rstar"].nominal_value
     per = joint_fit.results["p"].nominal_value
-    ecc = joint_fit.results["ecc"].nominal_value
-    w = joint_fit.results["w"].nominal_value
-    offset = (2 * per * ecc * np.cos(w * np.pi / 180) / np.pi) * 24
+    ecosw = joint_fit.results["ecosw"].nominal_value if "ecosw" in joint_fit.results else 0
+    #esinw = joint_fit.results["esinw"].nominal_value if "esinw" in joint_fit.results else 0
+    
+    if "e" in joint_fit.results and "w" in joint_fit.results:
+        ecosw = joint_fit.results["e"].nominal_value * np.cos(joint_fit.results["w"].nominal_value * np.pi / 180)
+    
+    offset = (2 * per * ecosw / np.pi) * 24
     duration = get_eclipse_duration(inc, a, rp, per) * 24
     print("Offset: ", offset, "hours")
     eclipse_start = offset - duration/2

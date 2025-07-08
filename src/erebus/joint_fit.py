@@ -60,12 +60,10 @@ class JointFit(H5Serializable):
     
     def __init__(self, photometry_data_list : List[PhotometryData], planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None):
-        self.source_folder = photometry_data_list[0].source_folder
-        source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
         self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
         self.planet_name = planet.name
         
-        self._cache_file = f"{EREBUS_CACHE_DIR}/{source_folder_hash}_{self.config_hash}_joint_fit.h5"
+        self._cache_file = f"{EREBUS_CACHE_DIR}/{self.config_hash}_joint_fit.h5"
         
         self.results = {}
         
@@ -120,7 +118,7 @@ class JointFit(H5Serializable):
         for n in range(0, len(photometry_data_list)):
             self.get_predicted_t_sec_of_visit(n)
                 
-        mcmc = WrappedMCMC()
+        mcmc = WrappedMCMC(self._cache_file.replace(".h5", "_mcmc.h5"))
         
         lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
         mcmc.add_parameter("fp", Parameter.uniform_prior(400e-6, lower_limit, 2000e-6))
@@ -131,11 +129,16 @@ class JointFit(H5Serializable):
         mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, True))
         mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc, True))
         
-        mcmc.add_parameter("ecc", Parameter.prior_from_ufloat(planet.ecc, positive_only=True))
-        if planet.w is None:
-            mcmc.add_parameter("w", Parameter.uniform_prior(180, 0, 360))
+        if planet.w is not None:
+            ecosw = planet.ecc * umath.cos(planet.w * np.pi / 180)
+            esinw = planet.ecc * umath.sin(planet.w * np.pi / 180)
+            mcmc.add_parameter("esinw", Parameter.prior_from_ufloat(esinw, force_fixed=config.fix_eclipse_timing))
+            mcmc.add_parameter("ecosw", Parameter.prior_from_ufloat(ecosw, force_fixed=config.fix_eclipse_timing))
         else:
-            mcmc.add_parameter("w", Parameter.prior_from_ufloat(planet.w))
+            # Uniform for cos/sin omega from -1 to 1
+            e = (planet.ecc.nominal_value + planet.ecc.std_dev)
+            mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -e, e))
+            mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -e, e))
         
         for visit_index in range(0, len(photometry_data_list)):
             if self.config.fit_fnpca:
@@ -161,7 +164,10 @@ class JointFit(H5Serializable):
             
             if self.config._custom_parameters is not None:
                 for key in self.config._custom_parameters:
-                    mcmc.add_parameter(f"{key}_{visit_index}", copy.deepcopy(self.config._custom_parameters[key]))
+                    param = self.config._custom_parameters[key]
+                    if visit_index in self.config._custom_parameters_override:
+                        param = self.config._custom_parameters_override[visit_index][key]
+                    mcmc.add_parameter(f"{key}_{visit_index}", copy.deepcopy(param))
             
         mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))
         
@@ -175,7 +181,7 @@ class JointFit(H5Serializable):
         self.save_to_path(self._cache_file)
     
     def physical_model(self, x : List[float], fp : float, rp_rstar : float,
-                       a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
+                       a_rstar : float, p : float, inc : float, esinw : float, ecosw : float) -> List[float]:
         '''
         Model for the lightcurve using batman
         fp is expected written in ppm
@@ -184,7 +190,7 @@ class JointFit(H5Serializable):
         visit_index = self.get_visit_index_from_time(x[0])
         # t_sec is relative to the start of the visit
         predicted_t_sec = self.get_predicted_t_sec_of_visit(visit_index).nominal_value
-        t_sec = predicted_t_sec + self.starting_times[visit_index] + 2 * p * ecc * umath.cos(w * np.pi / 180) / np.pi
+        t_sec = predicted_t_sec + self.starting_times[visit_index] + 2 * p * ecosw / np.pi
 
         if self.params is None:
             params = batman.TransitParams()
@@ -201,6 +207,10 @@ class JointFit(H5Serializable):
         params.inc = inc
         params.per = p
         params.a = a_rstar  
+        
+        ecc = umath.sqrt(ecosw ** 2 + esinw **2)
+        w = (umath.atan2(esinw, ecosw) % (2 * np.pi)) * 180 / np.pi
+        
         params.ecc = ecc
         params.w = w
                 
@@ -283,7 +293,6 @@ class JointFit(H5Serializable):
         Performs the joint fit via MCMC. Caches the results to the disk.
         '''
         self.mcmc.run(self.time, self.raw_flux, walkers = 80, 
-                      cache_file = None if self.config.skip_emcee_backend_cache else self._cache_file.replace(".h5", "_mcmc.h5"),
                       force_clear_cache=self._force_clear_cache)
         
         self.results = self.mcmc.results
@@ -294,3 +303,7 @@ class JointFit(H5Serializable):
         self.iterations = self.mcmc.iterations
         
         self.save_to_path(self._cache_file)
+    
+    def has_converged(self):
+        return hasattr(self, "auto_correlation") and self.auto_correlation is not None \
+            and np.isfinite(self.auto_correlation)

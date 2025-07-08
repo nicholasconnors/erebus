@@ -41,12 +41,12 @@ class Erebus(H5Serializable):
         
         if isinstance(run_cfg, str):
             run_cfg = ErebusRunConfig.load(run_cfg) 
-        
-        config_hash = hashlib.md5(json.dumps(run_cfg.model_dump()).encode()).hexdigest()   
-        self._cache_file = f"{EREBUS_CACHE_DIR}/{config_hash}_erebus.h5"
-    
+
         if override_cache_path is not None:
             self._cache_file = override_cache_path
+        else:
+            config_hash = hashlib.md5(json.dumps(run_cfg.model_dump()).encode()).hexdigest()   
+            self._cache_file = f"{EREBUS_CACHE_DIR}/{config_hash}_erebus.h5"
     
         self.config : ErebusRunConfig = run_cfg
         '''The configuration file used for this instance of the Erebus pipeline.'''
@@ -150,7 +150,7 @@ class Erebus(H5Serializable):
         
         if self.config.perform_individual_fits:
             for fit in self.individual_fits:
-                has_run = 'fp' in fit.results
+                has_run = fit.has_converged()
                 if not has_run or force_clear_cache:
                     fit.run()
                 else:
@@ -168,7 +168,7 @@ class Erebus(H5Serializable):
                 utils.save_dict_to_json(dict, path + ".json")
 
         if self.config.perform_joint_fit:
-            has_run = 'fp' in self.joint_fit.results
+            has_run = self.joint_fit.has_converged()
             if not has_run or force_clear_cache:
                 self.joint_fit.run()
             else:

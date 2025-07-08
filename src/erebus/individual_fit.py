@@ -30,17 +30,15 @@ class IndividualFit(H5Serializable):
                 'photometry_data', '_force_clear_cache', 'predicted_t_sec']
     
     def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
-                 force_clear_cache : bool = False, override_cache_path : str = None):
-        self.source_folder = photometry_data.source_folder
+                 force_clear_cache : bool = False, override_cache_path : str = None, index = None):
         self.visit_name = photometry_data.visit_name
-        source_folder_hash = hashlib.md5(self.source_folder.encode()).hexdigest()
         self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
         self.planet_name = planet.name
         self.planet = planet
         self.order = 'X'
         self.photometry_data = photometry_data
 
-        self._cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{source_folder_hash}_{self.config_hash}_individual_fit.h5"
+        self._cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{self.config_hash}_individual_fit.h5"
         
         if override_cache_path is not None:
             self._cache_file = override_cache_path
@@ -61,7 +59,7 @@ class IndividualFit(H5Serializable):
         
         self.eigenvalues, self.eigenvectors, self.pca_variance_ratios = perform_fn_pca_on_aperture(photometry_data.normalized_frames[self.start_trim:self.end_trim])
                 
-        mcmc = WrappedMCMC()
+        mcmc = WrappedMCMC(self._cache_file.replace(".h5", "_mcmc.h5"))
         
         start_time = np.min(photometry_data.time)
         t0 = planet.get_closest_t0(start_time)
@@ -70,16 +68,24 @@ class IndividualFit(H5Serializable):
         lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
         mcmc.add_parameter("fp", Parameter.uniform_prior(400e-6, lower_limit, 2000e-6))
              
-        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(t0, positive_only=True))
+        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(t0, positive_only=True, force_fixed=config.fix_eclipse_timing))
         mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar, positive_only=True))
         mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar, positive_only=True))
-        mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, positive_only=True))
+        mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, positive_only=True, force_fixed=config.fix_eclipse_timing))
         mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc, positive_only=True))
-        mcmc.add_parameter("ecc", Parameter.prior_from_ufloat(planet.ecc, positive_only=True))
-        if planet.w is None:
-            mcmc.add_parameter("w", Parameter.uniform_prior(180, 0, 360))
+        
+        # using ecosw and esinw as parameters instead of using e and w directly
+        # since w is circular it causes degeneracies (eg, 10 degrees and 370 degrees)
+        if planet.w is not None:
+            ecosw = planet.ecc * umath.cos(planet.w * np.pi / 180)
+            esinw = planet.ecc * umath.sin(planet.w * np.pi / 180)
+            mcmc.add_parameter("esinw", Parameter.prior_from_ufloat(esinw, force_fixed=config.fix_eclipse_timing))
+            mcmc.add_parameter("ecosw", Parameter.prior_from_ufloat(ecosw, force_fixed=config.fix_eclipse_timing))
         else:
-            mcmc.add_parameter("w", Parameter.prior_from_ufloat(planet.w))
+            # Uniform for cos/sin omega from -1 to 1
+            e = (planet.ecc.nominal_value + planet.ecc.std_dev)
+            mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -e, e))
+            mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -e, e))
         
         if self.config.fit_fnpca:
             for i in range(0, 5):
@@ -104,7 +110,10 @@ class IndividualFit(H5Serializable):
             
         if self.config._custom_parameters is not None:
             for key in self.config._custom_parameters:
-                mcmc.add_parameter(key, copy.deepcopy(self.config._custom_parameters[key]))
+                param = self.config._custom_parameters[key]
+                if index is not None and index in self.config._custom_parameters_override:
+                    param = self.config._custom_parameters_override[key]
+                mcmc.add_parameter(key, copy.deepcopy(param))
         # y_err always goes last
         mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))      
                   
@@ -118,7 +127,7 @@ class IndividualFit(H5Serializable):
         self._force_clear_cache = force_clear_cache
     
     def physical_model(self, x : List[float], fp : float, t0 : float, rp_rstar : float,
-                       a_rstar : float, p : float, inc : float, ecc : float, w : float) -> List[float]:
+                       a_rstar : float, p : float, inc : float, esinw : float, ecosw : float) -> List[float]:
         '''
         Model for the lightcurve using batman
         fp is expected written in ppm
@@ -129,12 +138,16 @@ class IndividualFit(H5Serializable):
             params.u = [0.3, 0.3]
             
         params.t0 = t0
-        params.t_secondary = self.predicted_t_sec.nominal_value + 2 * p * ecc * umath.cos(w * np.pi / 180) / np.pi
+        params.t_secondary = self.predicted_t_sec.nominal_value + 2 * p * ecosw / np.pi
         params.fp = fp
         params.rp = rp_rstar
         params.inc = inc
         params.per = p
         params.a = a_rstar  
+        
+        ecc = umath.sqrt(ecosw ** 2 + esinw **2)
+        w = (umath.atan2(esinw, ecosw) % (2 * np.pi)) * 180 / np.pi
+
         params.ecc = ecc
         params.w = w % 360
         
@@ -168,11 +181,11 @@ class IndividualFit(H5Serializable):
         
     @staticmethod
     def __fit_method(x : List[float], fp : float, t0 : float, rp_rstar : float,
-                       a_rstar : float, p : float, inc : float, ecc : float, w : float, 
+                       a_rstar : float, p : float, inc : float, esinw : float, ecosw : float, 
                        pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float,
                        exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
         systematic = IndividualFit.__instance.systematic_model(x, pc1, pc2, pc3, pc4, pc5, exp1, exp2, a, b, extra_params)
-        physical = IndividualFit.__instance.physical_model(x, fp, t0, rp_rstar, a_rstar, p, inc, ecc, w)
+        physical = IndividualFit.__instance.physical_model(x, fp, t0, rp_rstar, a_rstar, p, inc, esinw, ecosw)
         return physical * systematic 
     
     def fit_method(self, x : List[float], *args) -> List[float]:
@@ -191,8 +204,7 @@ class IndividualFit(H5Serializable):
         fit_method = create_method_signature(IndividualFit.__fit_method, args)
         self.mcmc.set_method(fit_method)
 
-        self.mcmc.run(self.time, self.raw_flux, 
-                      cache_file = None if self.config.skip_emcee_backend_cache else self._cache_file.replace(".h5", "_mcmc.h5"),
+        self.mcmc.run(self.time, self.raw_flux,
                       force_clear_cache=self._force_clear_cache)
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
@@ -202,3 +214,7 @@ class IndividualFit(H5Serializable):
         self.iterations = self.mcmc.iterations
         
         self.save_to_path(self._cache_file)
+        
+    def has_converged(self):
+        return hasattr(self, "auto_correlation") and self.auto_correlation is not None \
+            and np.isfinite(self.auto_correlation)
