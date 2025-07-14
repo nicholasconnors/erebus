@@ -25,24 +25,31 @@ class WrappedFits(H5Serializable):
         return WrappedFits(None, None, override_cache_path=path)
     
     def __init__(self, source_folder : str, visit_name : str, force_clear_cache : bool = False,
-                 override_cache_path : str = None, star_pixel_position : tuple[int, int] = None):      
+                 override_cache_path : str = None, star_pixel_position : tuple[int, int] = None,
+                 custom_timeseries_data : tuple[list[float], list[float]] = None):      
+        '''
+        custom_timeseries_data requires a 3d list of floats (time series image data) and a 1d list of time stamps
+        Must have the same length on the first axis
+        '''
         self.frames = []
         '''3D array respresenting time series images making up this observation.'''
         self.raw_frames = []
         '''3D array respresenting time series images making up this observation, before performing outlier and nan rejection.'''
         self.time : list[float] = []
-        '''The time values loaded from the corresponding fits files'''
+        '''The time values loaded from the corresponding fits files'''            
         
         if override_cache_path is not None:
             self._cache_file = override_cache_path 
-        else:
+        elif source_folder is not None:
             # Since extracting photometric data takes a long time, we cache it
             # The cache folder name is based on a hash of the source folder
             source_folder_hash = hashlib.md5(source_folder.encode()).hexdigest()
             
             self._cache_file = f"{EREBUS_CACHE_DIR}/{visit_name}_{source_folder_hash}_wrapped_fits.h5"
+        else:
+            self._cache_file = None
         
-        if not force_clear_cache and os.path.isfile(self._cache_file):
+        if not force_clear_cache and self._cache_file is not None and os.path.isfile(self._cache_file):
             self.load_from_path(self._cache_file)
         else:
             self.visit_name : str = visit_name
@@ -56,7 +63,12 @@ class WrappedFits(H5Serializable):
             self.frames = []
             self.raw_frames = []
             
-            self.__load_from_calints_file()
+            if custom_timeseries_data is not None:
+                self.raw_frames, self.time = custom_timeseries_data
+                self.frames = ap_utils.clean_frames(self.raw_frames, 5)
+            else:
+                self.__load_from_calints_file()
+            
             self.save_to_path(self._cache_file)
     
     def __load_from_calints_file(self):

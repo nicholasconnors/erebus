@@ -67,6 +67,9 @@ class H5Serializable:
         return self
     
     def save_to_path(self, file_path : str):
+        if file_path is None:
+            return
+        
         folder = os.path.dirname(os.path.abspath(file_path))
         if not os.path.isdir(folder):
             os.makedirs(folder)
