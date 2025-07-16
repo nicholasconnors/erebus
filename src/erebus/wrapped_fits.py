@@ -64,7 +64,9 @@ class WrappedFits(H5Serializable):
             self.raw_frames = []
             
             if custom_timeseries_data is not None:
-                self.raw_frames, self.time = custom_timeseries_data
+                raw_frames, time = custom_timeseries_data
+                self.raw_frames = np.array(raw_frames)
+                self.time = np.array(time)
                 self.frames = ap_utils.clean_frames(self.raw_frames, 5)
             else:
                 self.__load_from_calints_file()
