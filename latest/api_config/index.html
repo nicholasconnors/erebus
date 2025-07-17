@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
@@ -512,6 +512,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#utility.run_cfg.ErebusRunConfig.set_custom_systematic_model_prior_for_visit_index" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_custom_systematic_model_prior_for_visit_index
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#utility.bayesian_parameter.Parameter" class="md-nav__link">
     <span class="md-ellipsis">
       Parameter
@@ -787,6 +796,15 @@
   <a href="#utility.run_cfg.ErebusRunConfig.set_custom_systematic_model" class="md-nav__link">
     <span class="md-ellipsis">
       set_custom_systematic_model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility.run_cfg.ErebusRunConfig.set_custom_systematic_model_prior_for_visit_index" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_custom_systematic_model_prior_for_visit_index
     </span>
   </a>
   
@@ -1321,17 +1339,6 @@ be true else the run will not do anything.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="utility.run_cfg.ErebusRunConfig.skip_emcee_backend_cache">skip_emcee_backend_cache</span></code></td>
-            <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Optional bool to not save emcee backend. Speeds up run time but can lose progress during a run if stopped early.</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
             <td><code><span title="utility.run_cfg.ErebusRunConfig.prevent_negative_eclipse_depth">prevent_negative_eclipse_depth</span></code></td>
             <td>
                   <code><span title="bool">bool</span></code>
@@ -1339,6 +1346,17 @@ be true else the run will not do anything.</p>
             <td>
               <div class="doc-md-description">
                 <p>Optional bool to force eclipse depth to be positive.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="utility.run_cfg.ErebusRunConfig.fix_eclipse_timing">fix_eclipse_timing</span></code></td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional bool to force t0, period, ecosw to be fixed</p>
               </div>
             </td>
           </tr>
@@ -1368,6 +1386,14 @@ be true else the run will not do anything.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Optionally provide a callable function and dictionary of Parameter objects for bayesian priors.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="set_custom_systematic_model_prior_for_visit_index(index, params) (utility.run_cfg.ErebusRunConfig.set_custom_systematic_model_prior_for_visit_index)" href="#utility.run_cfg.ErebusRunConfig.set_custom_systematic_model_prior_for_visit_index">set_custom_systematic_model_prior_for_visit_index</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Optionally override custom systematic model priors for specific visits</p>
                 </div>
               </td>
             </tr>
@@ -1406,6 +1432,25 @@ be true else the run will not do anything.</p>
 <p>Model method signature must start with x.</p>
 <p>When used in conjunction with built-in fitting model provided by Erebus this model will be multiplied 
 by those fitting models and a best-fit y-offset applied.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="utility.run_cfg.ErebusRunConfig.set_custom_systematic_model_prior_for_visit_index" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_custom_systematic_model_prior_for_visit_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Optionally override custom systematic model priors for specific visits</p>
+<p>Params are given as a dictionary of their names (matching the method signature) to a Parameter object.</p>
 
 
     </div>
@@ -1756,7 +1801,7 @@ To be used with mcmc_model.py</p>
       <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
       
     
   </body>

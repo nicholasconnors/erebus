@@ -14,7 +14,7 @@
       
       
       <link rel="icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
@@ -593,9 +593,32 @@
 <p>Erebus is a rocky-exoplanet secondary eclipse aperture-photometry lightcurve fitting pipeline made for use with the Mid Infra-Red Instrument aboard the James Webb Space Telescope, starting with <code>calints.fits</code> files available on the <a href="https://mast.stsci.edu/portal/Mashup/Clients/Mast/Portal.html">Barbara A. Mikulski Archive for Space Telescopes</a>.</p>
 <p>For issue reporting or feedback suggestions click <a href="https://github.com/nicholasconnors/erebus/issues">here</a>.</p>
 <p>For the setup used when writing Connors et al. (in prep) click <a href="https://github.com/nicholasconnors/erebus/tree/main/connors_et_al_2025">here</a>.</p>
-<p>If you use Erebus in a scientific publication we will ask you cite our paper (information will be included here once it has been published).</p>
+<p>If you use Erebus in a scientific publication we will ask you cite our paper:</p>
+<pre><code>@ARTICLE{2025arXiv250702052C,
+       author = {{Connors}, Nicholas J. and {Monaghan}, Christopher and {Benneke}, Bj{\&quot;o}rn and {Dang}, Lisa},
+        title = &quot;{Uniform Reanalysis of JWST MIRI 15{\ensuremath{\mu}}m Exoplanet Eclipse Observations using Frame-Normalized Principal Component Analysis}&quot;,
+      journal = {arXiv e-prints},
+     keywords = {Earth and Planetary Astrophysics, Instrumentation and Methods for Astrophysics},
+         year = 2025,
+        month = jul,
+          eid = {arXiv:2507.02052},
+        pages = {arXiv:2507.02052},
+          doi = {10.48550/arXiv.2507.02052},
+archivePrefix = {arXiv},
+       eprint = {2507.02052},
+ primaryClass = {astro-ph.EP},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2025arXiv250702052C},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+</code></pre>
 <hr />
 <h1 id="changelog">Changelog</h1>
+<h2 id="071">0.7.1</h2>
+<ul>
+<li>Now uses ecosw and esinw instead of e and w</li>
+<li>Add optional setting to fix eclipse timing</li>
+<li>Improved convergence checking</li>
+</ul>
 <h2 id="070">0.7.0</h2>
 <ul>
 <li>Pre-processing of <code>calints</code> data for NaN and outlier rejection.</li>
@@ -658,7 +681,7 @@
       <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="assets/javascripts/bundle.56ea9cef.min.js"></script>
       
     
   </body>
