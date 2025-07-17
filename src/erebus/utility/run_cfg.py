@@ -17,7 +17,8 @@ class ErebusRunConfig(BaseModel):
         fit_linear (bool): Optional bool to use a linear slope in the systematic model.
         perform_joint_fit (bool): Optional bool to fit all visits together with a shared eclipse depth.
         perform_individual_fits (bool): Optional bool to fit each visit with their own eclipse depth.
-        calints_path (str): Relative path from the folder containing this file to where the .fits files are.
+        calints_path (str): Relative path from the folder containing this file to where the calints.fits files are.
+        uncal_path (str): Relative path from the folder containing this file to where the uncal.fits files are. One of uncal_path or calints_path must be set.
         planet_path (str): Relative path from the folder containing this file to where the planet config is.
         aperture_radius (int): Pixel radius for aperture photometry.
         annulus_start (int): Inner pixel radius of disk used for background subtraction.
@@ -33,7 +34,8 @@ class ErebusRunConfig(BaseModel):
     fit_linear : Optional[bool] = False
     perform_joint_fit : Optional[bool] = False
     perform_individual_fits : bool
-    calints_path : str = None
+    calints_path : Optional[str] = None
+    uncal_path : Optional[str] = None
     planet_path : str
     aperture_radius : int
     annulus_start : int

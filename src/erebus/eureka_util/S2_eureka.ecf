@@ -18,4 +18,4 @@ topdir                  {ROOT_FOLDER}
 
 # Directories relative to topdir
 inputdir                {INPUT_DIR}/Stage1
-outputdir               {OUTPUT_DIR}/JWST
+outputdir               {OUTPUT_DIR}

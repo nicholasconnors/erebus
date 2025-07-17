@@ -57,7 +57,7 @@ bg_x2               None    # Right edge of exclusion region for row-by-row BG s
 masktrace           True    # bg_y1 and bg_y2 will be ignored if masktrace=True since the trace will already be masked
 window_len          11
 expand_mask         8
-ignore_low          600
+ignore_low          None
 ignore_hi           None
 
 # Manual reference pixel correction for NIRSpec PRISM when not subtracting BG
@@ -76,4 +76,4 @@ topdir              {ROOT_FOLDER}
 
 # Directories relative to topdir
 inputdir            {INPUT_DIR}/JWST/**/
-outputdir           Stage1
+outputdir           {INPUT_DIR}/Stage1

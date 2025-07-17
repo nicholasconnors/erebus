@@ -17,6 +17,7 @@ from erebus.utility.h5_serializable_file import H5Serializable
 from erebus.utility.planet import Planet
 from erebus.utility.run_cfg import ErebusRunConfig
 from erebus.wrapped_fits import WrappedFits
+import erebus.eureka_util as eureka_util
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -59,6 +60,9 @@ class Erebus(H5Serializable):
         
         self.joint_fit : JointFit = None
         '''The joint fit instance.'''
+        
+        if run_cfg.uncal_path is not None:
+            run_cfg.calints_path = eureka_util.process_uncal(run_cfg.uncal_path)
         
         # Record absolute path so that a run file can be moved elsewhere and still work
         root_folder = os.path.dirname(os.path.abspath(run_cfg.path))
