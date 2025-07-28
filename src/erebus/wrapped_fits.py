@@ -7,6 +7,7 @@ import erebus.utility.aperture_photometry_utils as ap_utils
 import erebus.utility.fits_file_utils as f_utils
 import erebus.utility.utils as utils
 from erebus.utility.h5_serializable_file import H5Serializable
+import matplotlib.pyplot as plt
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -80,6 +81,18 @@ class WrappedFits(H5Serializable):
         frames, time = f_utils.load_all_calints_for_visit(self.source_folder, self.visit_name)
         
         self.time = time
+        
+        figures = "./debug_figures"
+        
+        if not os.path.isdir(figures):
+            os.makedirs(figures)
+        
+        # Debug: plot first frame
+        plt.imshow(frames[0])
+        plot_x = frames[0].shape[0]//2 if self._star_x is None else self._star_x
+        plot_y = frames[0].shape[1]//2 if self._star_y is None else self._star_y
+        plt.plot([plot_x], [plot_y], marker="x")
+        plt.savefig(figures + "/" + self.visit_name + "_first_frame.png")
 
         if self._star_x is None or self._star_y is None:
             x = range(0, frames[0].shape[0])
