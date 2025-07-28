@@ -53,14 +53,14 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     eclipse_end = t_sec_offset * 24 + duration / 2
     
     fig = plt.figure(figsize=(9, 5.5))
-    grid = fig.add_gridspec(4, 2)
+    grid = fig.add_gridspec(4, 5)
     
     ############################################################################## Layout
-    flux_subfigure = fig.add_subfigure(grid[0:3,0])
-    allan_deviation_subfigure = fig.add_subfigure(grid[3,0])
-    pca_subfig = fig.add_subfigure(grid[:,1:])
+    flux_subfigure = fig.add_subfigure(grid[0:3,0:2])
+    allan_deviation_subfigure = fig.add_subfigure(grid[3,0:2])
+    pca_subfig = fig.add_subfigure(grid[:,2:])
     
-    flux_gridspec = flux_subfigure.add_gridspec(3, 1, wspace=0, hspace=0.1)
+    flux_gridspec = flux_subfigure.add_gridspec(3, 1, wspace=0, hspace=0.0)
     flux_gridspec.update(top=1.0, right=0.85)
     flux_axs = flux_gridspec.subplots(sharex=True, sharey=True)
     flux_axs[0].set_title("Eclipse depth fitting")
@@ -69,14 +69,17 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     allan_gs = allan_deviation_subfigure.add_gridspec(1, 1)
     allan_gs.update(bottom=0.0, top=0.8, right=0.85)
     allan_ax = allan_gs.subplots()
-    
-    eigenvalue_gs = pca_subfig.add_gridspec(6,1, hspace=0.0, wspace=0.1)
-    eigenvalue_axs = eigenvalue_gs.subplots(sharex=True, sharey=False)
+
+    pca_grid = pca_subfig.add_gridspec(6, 6)
+    eigenvalue_subfigure = pca_subfig.add_subfigure(pca_grid[:,0:4])
+    eigenvalue_gs = eigenvalue_subfigure.add_gridspec(6,1, hspace=0.0, wspace=0.1)
     eigenvalue_gs.update(left=0.1, right=0.74, top=1.0, bottom=0)
-    eigenvalue_axs[0].set_title("FN-PCA decomposition of lightcurve")
+    eigenvalue_axs = eigenvalue_gs.subplots(sharex=True, sharey=False)
+    pca_subfig.suptitle("FN-PCA decomposition of lightcurve")
     eigenvalue_axs[-1].set_xlabel("Time from 0.5 phase (hours)")
     
-    eigenimage_gs = pca_subfig.add_gridspec(6,1, hspace=0.0, wspace=0)
+    eigenimage_subfigure = pca_subfig.add_subfigure(pca_grid[:,4])
+    eigenimage_gs = eigenimage_subfigure.add_gridspec(6,1, hspace=0.0, wspace=0)
     eigenimage_gs.update(left=0.74, right=0.96, top=1.0, bottom=0)
     eigenimage_axs = eigenimage_gs.subplots(sharex=True, sharey=False)
 
@@ -86,7 +89,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     flux_axs[0].errorbar(time, flux, yerr, linestyle='', marker='.', alpha = 0.2, color='gray')
     flux_axs[0].errorbar(bin_time, bin_flux, bin_yerr, linestyle='', marker='.', color='black', zorder=3)
     flux_axs[0].axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
-    flux_axs[0].plot(time, flux_model, color='red')
+    flux_axs[0].plot(time, flux_model, color='red', zorder=3)
     flux_axs[0].set_ylabel("Raw flux\n(ppm)")
 
     # Detrended flux
@@ -95,7 +98,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     flux_axs[1].errorbar(time, detrended_flux, yerr, linestyle='', marker='.', alpha = 0.2, color='gray')
     flux_axs[1].errorbar(bin_time, bin_detrended_flux, bin_yerr, linestyle='', marker='.', color='black', zorder=3)
     flux_axs[1].axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
-    flux_axs[1].plot(time, flux_model / systematic_factor, color='red')
+    flux_axs[1].plot(time, flux_model / systematic_factor, color='red', zorder=3)
     flux_axs[1].set_ylabel("Detrended flux\n(ppm)")
     flux_axs[1].text(0.5, 0.95, f"Eclipse depth: {fp*1e6:0.0f}+/-{fp_err*1e6:0.0f}ppm", horizontalalignment='center', verticalalignment='top', transform=flux_axs[1].transAxes)
 
@@ -166,13 +169,24 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     for ax in eigenimage_axs:
         ax.set_yticks([])
         ax.set_xticks([])
+    # Hack to get the alignment right
+    eigenimage_axs[-1].set_xticks([0])
+    eigenimage_axs[-1].set_xticklabels([" "])
+    eigenimage_axs[-1].set_xlabel(" ")
 
-    cbar_gs = pca_subfig.add_gridspec(1,1, hspace=0.0, wspace=0.1)
+    #gs.update just stopped working one day so now we have to do this mess, will need to improve later
+    cbar_subfigure = pca_subfig.add_subfigure(pca_grid[1:,5])
+    cbar_gs = cbar_subfigure.add_gridspec(1,1, hspace=0.5, wspace=0.5)
+    #cbar_gs.update(left=0.96, right=0.98, top=1, bottom=0)
     cbar_ax = cbar_gs.subplots(sharex=True, sharey=False)
-    cbar_gs.update(left=0.96, right=0.98, top=1.0-1*(1.0/(6)), bottom=0)
     fig.colorbar(im, cax=cbar_ax, ticks=[-1, 0, 1])
     cbar_ax.set_yticklabels([-1, 0, 1])
     cbar_ax.set_ylabel("Scale (symlog)")
+
+    # Adjust position of colour bar
+    pos = cbar_ax.get_position()
+    new_pos = [pos.x0, pos.y0, pos.width / 6, pos.height * 1.15]
+    cbar_ax.set_position(new_pos)
 
     if save_to_directory is not None:
         path = f"{save_to_directory}/{individual_fit.config.fit_fnpca}_{individual_fit.planet_name}_{individual_fit.visit_name}_{individual_fit.config_hash}"
