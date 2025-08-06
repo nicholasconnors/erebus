@@ -76,16 +76,20 @@ class IndividualFit(H5Serializable):
         
         # using ecosw and esinw as parameters instead of using e and w directly
         # since w is circular it causes degeneracies (eg, 10 degrees and 370 degrees)
-        if planet.w is not None:
+        if planet.w is not None and planet.ecc is not None:
             ecosw = planet.ecc * umath.cos(planet.w * np.pi / 180)
             esinw = planet.ecc * umath.sin(planet.w * np.pi / 180)
             mcmc.add_parameter("esinw", Parameter.prior_from_ufloat(esinw, force_fixed=config.fix_eclipse_timing))
             mcmc.add_parameter("ecosw", Parameter.prior_from_ufloat(ecosw, force_fixed=config.fix_eclipse_timing))
-        else:
+        elif planet.ecc is not None:
             # Uniform for cos/sin omega from -1 to 1
             e = (planet.ecc.nominal_value + planet.ecc.std_dev)
             mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -e, e))
             mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -e, e))
+        else:
+            # Uniform prior for esinw/ecosw from -1 to 1
+            mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -1, 1))
+            mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -1, 1))
         
         if self.config.fit_fnpca:
             for i in range(0, 5):
