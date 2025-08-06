@@ -113,6 +113,23 @@ class JointFit(H5Serializable):
             self.joint_eigenvalues.append(binned_eigenvalues)
             self.joint_eigenvectors.append(eigenvectors)
             self.pca_variance_ratios.append(variance_ratios)
+            print(np.array(binned_eigenvalues).shape)
+            
+        # If visits have different lengths (number of integrations) then these arrays can't be saved (inhomogenous)
+        # Pad with NaN in this case
+        n_visits = len(self.joint_eigenvalues)
+        n_eigenvalues = len(self.joint_eigenvalues[0])
+        max_length = max([len(eigenvalues[0]) for eigenvalues in self.joint_eigenvalues])
+        padded_joint_eigenvalues = np.full((n_visits, n_eigenvalues, max_length), np.nan)
+        for i in range(n_visits):
+            for j in range(n_eigenvalues):
+                v = self.joint_eigenvalues[i][j]
+                padded_joint_eigenvalues[i, j, :len(v)] = v
+        
+        self.joint_eigenvalues = np.array(padded_joint_eigenvalues)
+        self.joint_eigenvectors = np.array(self.joint_eigenvectors)
+        print(f"Eigenvalues shape: {self.joint_eigenvalues.shape}")
+        print(f"Eigenvectors shape: {self.joint_eigenvectors.shape}")
                 
         # Get the predicted eclipse times in advance
         for n in range(0, len(photometry_data_list)):
@@ -233,9 +250,12 @@ class JointFit(H5Serializable):
         systematic = np.ones_like(x)
         if self.config.fit_fnpca:
             coeffs = np.array([pc1, pc2, pc3, pc4, pc5])
-            pca = np.ones_like(self.joint_eigenvalues[visit_index][0])
+            # remove NaNs to account for jagged numpy array
+            eigenvalues = np.array([row[~np.isnan(row)] for row in self.joint_eigenvalues[visit_index]])
+
+            pca = np.ones_like(eigenvalues[0])
             for i in range(0, 5):
-                pca += coeffs[i] * self.joint_eigenvalues[visit_index][i]
+                pca += coeffs[i] * eigenvalues[i]
             systematic *= pca
         if self.config.fit_exponential:
             systematic *= (exp1 * np.exp(exp2 * time)) + 1

@@ -87,6 +87,8 @@ class Erebus(H5Serializable):
         
         else:
             self.load_from_path(self._cache_file)
+            if run_cfg is not None:
+                self.config = run_cfg
             
         for i in range(0, len(self.visit_names)):
             star_pos = None if run_cfg.star_position is None else (tuple)(run_cfg.star_position)
@@ -105,6 +107,7 @@ class Erebus(H5Serializable):
             planet_path = os.path.join(os.path.dirname(run_cfg.path), planet_path)
         self.planet = Planet(planet_path)
         '''The planet configuration file used for this instance of the pipeline'''
+        
         
         if self.config.perform_individual_fits:
             for i in range(0, len(self.visit_names)):

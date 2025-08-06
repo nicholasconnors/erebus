@@ -98,6 +98,8 @@ class _JSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, UFloat):
             return {'__ufloat__': True, 'nominal_value': obj.nominal_value, 'std_dev': obj.std_dev}
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
         return super().default(obj)
 
 class _JSONDecoder(json.JSONDecoder):

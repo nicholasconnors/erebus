@@ -246,7 +246,7 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     model_time_per_visit = joint_fit.model_time_per_visit
     model_flux_per_visit = joint_fit.model_flux_per_visit
     
-    for i in range(0, np.shape(relative_time_per_visit)[0]):
+    for i in range(0, len(relative_time_per_visit)):
         plt.plot(relative_time_per_visit[i], detrended_flux_per_visit[i], linestyle='', marker='.', color='grey', alpha=0.2)
     
     combined_times = np.concatenate(relative_time_per_visit)
@@ -262,7 +262,8 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     
     plt.errorbar(bin_time, bin_flux, yerr/np.sqrt(bin_size), color='black', linestyle='', marker='.')
     
-    plt.plot(model_time_per_visit[0], model_flux_per_visit[0], color='red')
+    for i in range(0, len(model_time_per_visit)):
+        plt.plot(model_time_per_visit[i], model_flux_per_visit[i], color='red')
     plt.axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
     plt.ylabel("Normalized flux")
     plt.xlabel("Time from 0.5 phase (hours)")
