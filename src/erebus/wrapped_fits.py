@@ -95,10 +95,7 @@ class WrappedFits(H5Serializable):
         plt.savefig(figures + "/" + self.visit_name + "_first_frame.png")
 
         if self._star_x is None or self._star_y is None:
-            x = range(0, frames[0].shape[0])
-            y = range(0, frames[0].shape[1])
-            x, y = np.meshgrid(x, y)
-            self._star_x, self._star_y = ap_utils.fit_star_position(frames[0], (x, y))
+            self._star_x, self._star_y = ap_utils.fit_star_position(frames[0])
                 
         # Get 127x127 frame
         self.raw_frames = np.array([utils.subarray_2D(frame, self._star_x, self._star_y, 127) for frame in frames])

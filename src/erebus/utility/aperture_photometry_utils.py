@@ -1,29 +1,21 @@
 import numpy as np
 from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
-from scipy.optimize import curve_fit
 from tqdm import tqdm
+from scipy.ndimage import gaussian_filter
 
-from erebus.utility import utils
 
-
-def fit_star_position(frame, xy):
+def fit_star_position(frame):
     '''
     Attempts to find a star within the image
     Expects frame as a 2d array and xy as a meshgrid of pixel positions
     '''
     
-    x, y = xy
-    max_y, max_x = np.unravel_index(np.nanargmax(frame), frame.shape)
-    initial_guess = [np.nanmax(frame), max_x, max_y, 10, np.median(frame)]
-    lower_bounds = [0, np.min(x), np.min(y), 3, 0]
-    upper_bounds = [np.inf, np.max(x), np.max(y), np.inf, np.inf]
-    params, _ = curve_fit(utils.gaussian_2D, xy, frame.ravel(), p0=initial_guess, bounds=(lower_bounds, upper_bounds))
-
-    # Return just the mean x and y
-    star_x = int(round(params[1]))
-    star_y = int(round(params[2]))
-    print(f"Found star at: {star_x}, {star_y}")
-    return star_x, star_y
+    frame[np.isnan(frame)] = 0
+    frame[np.abs(frame - np.median(frame)) > 10 * np.std(frame)] = 0
+    frame = gaussian_filter(frame, 10)
+    y, x = np.unravel_index(frame.argmax(), frame.shape)
+    print(f"Found star at: {x}, {y}")
+    return x, y
 
 def clean_frames(raw_frames : np.ndarray, outlier_threshold : float) -> np.ndarray:
     '''
