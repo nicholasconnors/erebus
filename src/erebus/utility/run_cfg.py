@@ -13,6 +13,7 @@ class ErebusRunConfig(BaseModel):
     
     Attributes:
         fit_fnpca (bool): Optional bool to use FN-PCA in the systematic model.
+        fit_autoencoder (bool): Optional bool to use autoencoder latent space vectors in the systematic model.
         fit_exponential (bool): Optional bool to use an exponential curve in the systematic model.
         fit_linear (bool): Optional bool to use a linear slope in the systematic model.
         perform_joint_fit (bool): Optional bool to fit all visits together with a shared eclipse depth.
@@ -28,8 +29,10 @@ class ErebusRunConfig(BaseModel):
         star_position (list[int]): X and y pixel coordinates of the star. Optional (will search for the star or assume its centered).
         prevent_negative_eclipse_depth (bool): Optional bool to force eclipse depth to be positive.
         fix_eclipse_timing (bool): Optional bool to force t0, period, ecosw to be fixed
+        fit_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a uniform prior with twice this width centered on 0.5 phase
     '''    
     fit_fnpca : Optional[bool] = False
+    fit_autoencoder : Optional[bool] = False
     fit_exponential : Optional[bool] = False
     fit_linear : Optional[bool] = False
     perform_joint_fit : Optional[bool] = False
@@ -46,6 +49,7 @@ class ErebusRunConfig(BaseModel):
     path : Optional[str] = Field(None, exclude=True)
     prevent_negative_eclipse_depth: Optional[bool] = False
     fix_eclipse_timing: Optional[bool] = False
+    fit_eclipse_timing_offset : Optional[float] = None
     
     _custom_systematic_model = None
     _custom_parameters : dict = None
@@ -76,15 +80,26 @@ class ErebusRunConfig(BaseModel):
         '''
         self._custom_parameters_override[index] = params
     
+    @staticmethod
     def load(path : str):
+        '''
+        Loads EreusRunConfig from a yaml file
+        '''
         config = parse_yaml_file_as(ErebusRunConfig, path)
         config.path = path
         return config
     
     def save(self, path : str):
+        '''
+        Saves this ErebusRunConfig instance to the path as a yaml file
+        '''
         to_yaml_file(path, self)
     
+    @staticmethod
     def _save_schema(path : str):
+        '''
+        Saves the json schema for validating ErebusRunConfig instances
+        '''
         run_schema = ErebusRunConfig.model_json_schema()
         run_schema_json = json.dumps(run_schema, indent=2)
         with open(path, "w") as f:

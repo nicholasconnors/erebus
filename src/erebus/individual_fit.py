@@ -16,6 +16,7 @@ from erebus.utility.h5_serializable_file import H5Serializable
 from erebus.utility.planet import Planet
 from erebus.utility.run_cfg import ErebusRunConfig
 from erebus.utility.utils import create_method_signature
+import inspect
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -37,6 +38,9 @@ class IndividualFit(H5Serializable):
         self.planet = planet
         self.order = 'X'
         self.photometry_data = photometry_data
+        
+        self.latent_space_vectors = None
+        '''Latent space vectors from autoencoder systematic model if relevant'''
 
         self._cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{self.config_hash}_individual_fit.h5"
         
@@ -90,6 +94,11 @@ class IndividualFit(H5Serializable):
             # Uniform prior for esinw/ecosw from -1 to 1
             mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -1, 1))
             mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -1, 1))
+        if self.config.fit_eclipse_timing_offset is not None:
+            offset = self.config.fit_eclipse_timing_offset
+            mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(0, -offset, offset))
+        else:
+            mcmc.add_parameter("t_sec_offset", Parameter.fixed(0))
         
         if self.config.fit_fnpca:
             for i in range(0, 5):
@@ -97,6 +106,13 @@ class IndividualFit(H5Serializable):
         else:
             for i in range(0, 5):
                 mcmc.add_parameter(f"pc{(i+1)}", Parameter.fixed(0))
+        
+        if self.config.fit_autoencoder:
+            for i in range(0, 5):
+                mcmc.add_parameter(f"ae{(i+1)}", Parameter.uniform_prior(0.1, -10, 10))
+        else:
+            for i in range(0, 5):
+                mcmc.add_parameter(f"ae{(i+1)}", Parameter.fixed(0))
         
         if self.config.fit_exponential:
             mcmc.add_parameter("exp1", Parameter.uniform_prior(0.01, -0.1, 0.1))
@@ -131,7 +147,7 @@ class IndividualFit(H5Serializable):
         self._force_clear_cache = force_clear_cache
     
     def physical_model(self, x : List[float], fp : float, t0 : float, rp_rstar : float,
-                       a_rstar : float, p : float, inc : float, esinw : float, ecosw : float) -> List[float]:
+                       a_rstar : float, p : float, inc : float, esinw : float, ecosw : float, t_sec_offset : float) -> List[float]:
         '''
         Model for the lightcurve using batman
         fp is expected written in ppm
@@ -142,7 +158,7 @@ class IndividualFit(H5Serializable):
             params.u = [0.3, 0.3]
             
         params.t0 = t0
-        params.t_secondary = self.predicted_t_sec.nominal_value + 2 * p * ecosw / np.pi
+        params.t_secondary = self.predicted_t_sec.nominal_value + (2 * p * ecosw / np.pi) + t_sec_offset
         params.fp = fp
         params.rp = rp_rstar
         params.inc = inc
@@ -163,6 +179,7 @@ class IndividualFit(H5Serializable):
         return flux_model
     
     def systematic_model(self, x : List[float], pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float, 
+                         ae1 : float, ae2 : float, ae3 : float, ae4 : float, ae5 : float,
                          exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
         systematic = np.ones_like(x)
         if self.config.fit_fnpca:
@@ -171,13 +188,27 @@ class IndividualFit(H5Serializable):
             for i in range(0, 5):
                 pca += coeffs[i] * self.eigenvalues[i]
             systematic *= pca
+        if self.config.fit_autoencoder:
+            coeffs = np.array([ae1, ae2, ae3, ae4, ae5])
+            lsv = np.ones_like(x)
+            for i in range(0, 5):
+                # normalize
+                vector = self.latent_space_vectors[i][self.start_trim:self.end_trim]
+                vector -= np.median(vector)
+                vector /= np.std(vector)
+                lsv += coeffs[i] * vector
+            systematic *= lsv
         if self.config.fit_exponential:
             systematic *= (exp1 * np.exp(exp2 * x)) + 1
         if self.config.fit_linear:
             systematic *= (a * x) + 1
         if self.config._custom_systematic_model is not None:
             flat_args = np.array(extra_params).flatten()
-            systematic *= self.config._custom_systematic_model(x, *flat_args)
+            arg_names = list(inspect.signature(self.config._custom_systematic_model).parameters.keys())
+            if arg_names[1] == "visit_index":
+                systematic *= self.config._custom_systematic_model(x, self.order, *flat_args)
+            else:
+                systematic *= self.config._custom_systematic_model(x, *flat_args)
         
         systematic += b
         
@@ -185,11 +216,12 @@ class IndividualFit(H5Serializable):
         
     @staticmethod
     def __fit_method(x : List[float], fp : float, t0 : float, rp_rstar : float,
-                       a_rstar : float, p : float, inc : float, esinw : float, ecosw : float, 
+                       a_rstar : float, p : float, inc : float, esinw : float, ecosw : float, t_sec_offset : float,
                        pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float,
+                       ae1 : float, ae2 : float, ae3 : float, ae4 : float, ae5 : float,
                        exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
-        systematic = IndividualFit.__instance.systematic_model(x, pc1, pc2, pc3, pc4, pc5, exp1, exp2, a, b, extra_params)
-        physical = IndividualFit.__instance.physical_model(x, fp, t0, rp_rstar, a_rstar, p, inc, esinw, ecosw)
+        systematic = IndividualFit.__instance.systematic_model(x, pc1, pc2, pc3, pc4, pc5, ae1, ae2, ae3, ae4, ae5, exp1, exp2, a, b, extra_params)
+        physical = IndividualFit.__instance.physical_model(x, fp, t0, rp_rstar, a_rstar, p, inc, esinw, ecosw, t_sec_offset)
         return physical * systematic 
     
     def fit_method(self, x : List[float], *args) -> List[float]:
@@ -198,6 +230,17 @@ class IndividualFit(H5Serializable):
         '''
         IndividualFit.__instance = self
         return IndividualFit.__fit_method(x, *args)
+    
+    def get_number_of_systematic_args(self):
+        number_of_systematic_args = len(inspect.getfullargspec(self.systematic_model).args) - 2
+        if self.config._custom_parameters is not None:
+            number_of_systematic_args += len(self.config._custom_parameters)
+        return number_of_systematic_args
+        
+    def get_number_of_physical_args(self):
+        # Excluding self and x
+        number_of_physical_args = len(inspect.getfullargspec(self.physical_model).args) - 2
+        return number_of_physical_args
 
     def run(self):
         # Since the MCMC runs off a static method set the static instance to this object first

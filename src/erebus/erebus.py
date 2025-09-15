@@ -18,6 +18,7 @@ from erebus.utility.planet import Planet
 from erebus.utility.run_cfg import ErebusRunConfig
 from erebus.wrapped_fits import WrappedFits
 import erebus.eureka_util as eureka_util
+from erebus.systematics.autoencoder import get_latent_space
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -60,6 +61,9 @@ class Erebus(H5Serializable):
         
         self.joint_fit : JointFit = None
         '''The joint fit instance.'''
+        
+        self.latent_space_vectors = None
+        ''' Autoencoder latent space vectors used as systematic model (if fit_autoencoder is set to true) '''
         
         if run_cfg.uncal_path is not None:
             run_cfg.calints_path = eureka_util.process_uncal(run_cfg.uncal_path)
@@ -108,6 +112,23 @@ class Erebus(H5Serializable):
         self.planet = Planet(planet_path)
         '''The planet configuration file used for this instance of the pipeline'''
         
+        # Do these once and then give them to the individual an joint fits because they differ each time (non-deterministic)
+        # If this was loaded from a file keep those vectors instead
+        if self.config.fit_autoencoder:
+            self.latent_space_vectors = [get_latent_space(photometry.normalized_frames, 5) for photometry in self.photometry]
+            
+            # If visits have different lengths (number of integrations) then these arrays can't be saved (inhomogenous)
+            # Pad with NaN in this case
+            n_visits = len(self.latent_space_vectors)
+            n_latent_space_vectors = len(self.latent_space_vectors[0])
+            max_length = max([len(vectors[0]) for vectors in self.latent_space_vectors])
+            padded_joint_latent_space_vectors = np.full((n_visits, n_latent_space_vectors, max_length), np.nan)
+            for i in range(n_visits):
+                for j in range(n_latent_space_vectors):
+                    v = self.latent_space_vectors[i][j]
+                    padded_joint_latent_space_vectors[i, j, :len(v)] = v
+            self.latent_space_vectors = np.array(padded_joint_latent_space_vectors)
+            print("Latent space vectors shape:", self.latent_space_vectors.shape, "Visits:", n_visits, "Max visit length (integrations): ", max_length)
         
         if self.config.perform_individual_fits:
             for i in range(0, len(self.visit_names)):
@@ -116,6 +137,12 @@ class Erebus(H5Serializable):
                                                          force_clear_cache)
                 self.individual_fits.append(individual_fit)
                 print(f"Visit {self.visit_names[i]} " + ("already ran" if 'fp' in individual_fit.results else "wasn't run yet"))
+                
+                if self.config.fit_autoencoder:
+                    # Filter out nan from jagged np array padding
+                    lsv = np.array(self.latent_space_vectors[i])
+                    lsv = np.array([row[~np.isnan(row)] for row in lsv])
+                    individual_fit.latent_space_vectors = lsv
             
             # Label the visits by the order they were observed
             individual_fit_order = np.argsort([fit.start_time for fit in self.individual_fits]) + 1           
@@ -128,17 +155,20 @@ class Erebus(H5Serializable):
 
         if self.config.perform_joint_fit:
             self.joint_fit = JointFit(self.photometry, self.planet, self.config, force_clear_cache)
+            if self.config.fit_autoencoder:
+                self.joint_fit.latent_space_vectors = self.latent_space_vectors
             print("Joint fit " + ("already ran" if 'fp' in self.joint_fit.results else "wasn't run yet"))
         
         self.save_to_path(self._cache_file)
     
-    def run(self, force_clear_cache : bool = False, output_folder="./output_{DATE}/"):
+    def run(self, force_clear_cache : bool = False, output_folder="./output_{DATE}_{NAME}/"):
         '''
         Performs all individual and joint fits. Results and plots are saved to the given folder.
-        Output folder can optionally include the current time by writing {DATE}
+        Output folder can optionally include the current time by writing {DATE}, or the planet name by including {NAME}
         '''
         time = datetime.now().strftime("%d_%m_%y_%H_%M_%S")
         output_folder = output_folder.replace("{DATE}", time)
+        output_folder = output_folder.replace("{NAME}", self.planet.name)
         
         if not os.path.isdir(output_folder):
             os.makedirs(output_folder)
@@ -162,10 +192,14 @@ class Erebus(H5Serializable):
                     fit.run()
                 else:
                     print("Skipping " + fit.visit_name + ": already ran")
-                plotting.plot_fnpca_individual_fit(fit, figure_folder)
-                plotting.plot_eigenvectors(fit, eigenvec_folder)        
-                plotting.corner_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_corner.pdf")
-                plotting.chain_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_chain.pdf")
+                
+                try:
+                    plotting.plot_fnpca_individual_fit(fit, figure_folder)
+                    plotting.plot_eigenvectors(fit, eigenvec_folder)        
+                    plotting.corner_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_corner.pdf")
+                    plotting.chain_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_chain.pdf")
+                except Exception as e:
+                    print(f"Plotting routine failed: {e}")
     
                 path = output_folder + self.planet.name + "_visit_" + str(fit.order) + "_" + fit.visit_name
                 IndividualFitResults(fit).save_to_path(path + ".h5")
@@ -180,9 +214,13 @@ class Erebus(H5Serializable):
                 self.joint_fit.run()
             else:
                 print("Skipping joint fit: already ran")
-            plotting.plot_joint_fit(self.joint_fit, figure_folder)
-            plotting.corner_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_corner.pdf")
-            plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.pdf")
+            
+            try:
+                plotting.plot_joint_fit(self.joint_fit, figure_folder)
+                plotting.corner_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_corner.pdf")
+                plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.pdf")
+            except Exception as e:
+                print(f"Plotting routine failed: {e}")
     
             path = output_folder + self.planet.name + "_joint_fit"
             JointFitResults(self.joint_fit).save_to_path(path + ".h5")

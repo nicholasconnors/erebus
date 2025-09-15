@@ -34,6 +34,8 @@ class JointFitResults(H5Serializable):
             '''The unique hash of the config file. Used for naming cache files.'''
             self.predicted_t_secs = fit.predicted_t_secs
             '''Predicted 0.5 eclipse time for each visit'''
+            self.joint_latent_space_vectors = fit.latent_space_vectors
+            '''Latent space vectors for autoencoder systematic model if relevant'''
 
             # Time given relative to the predicted t_sec for that visit
             self.detrended_flux_per_visit = []
@@ -71,7 +73,23 @@ class JointFitResults(H5Serializable):
                 self.relative_time_per_visit.append((time - time_offset) * 24)
                 self.model_time_per_visit.append((physical_time - time_offset) * 24)
                 self.model_flux_per_visit.append(physical)
+            
+            # To be serialized 2D arrays cannot be jagged
+            self.detrended_flux_per_visit = JointFitResults.__pad_2d_array(self.detrended_flux_per_visit)
+            self.relative_time_per_visit = JointFitResults.__pad_2d_array(self.relative_time_per_visit)
+            self.model_time_per_visit = JointFitResults.__pad_2d_array(self.model_time_per_visit)
+            self.model_flux_per_visit = JointFitResults.__pad_2d_array(self.model_flux_per_visit)
     
+    @staticmethod
+    def __pad_2d_array(array_2d):
+        max_length = max([len(array) for array in array_2d])
+        n_arrays = len(array_2d)
+        padded_array_2d = np.full((n_arrays, max_length), np.nan)
+        for i in range(n_arrays):
+            array = array_2d[i]
+            padded_array_2d[i, :len(array)] = array
+        return np.array(padded_array_2d)
+
     @staticmethod
     def load(path : str):
         '''After running an Erebus instance, the results file can be loaded later using this method.'''

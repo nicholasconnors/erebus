@@ -317,7 +317,7 @@ def chain_plot(mcmc : WrappedMCMC, save_to_path : str = None, show : bool = Fals
     fig, axes = plt.subplots(ndim, figsize=(10, 7), sharex = True)
     if ndim == 1:
         axes = [axes]
-    for i in range(ndim):
+    for i in range(samples.shape[2]):
         ax = axes[i]
         ax.plot(samples[:, :, i], "k", alpha=0.3)
         ax.set_xlim(0, len(samples))

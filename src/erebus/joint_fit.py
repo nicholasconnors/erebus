@@ -71,6 +71,8 @@ class JointFit(H5Serializable):
         '''Memoize predicted t_sec to save time'''
         self.__closest_t0 = {}
         '''Memoize t0 for each visit index to save time'''
+        self.latent_space_vectors = None
+        '''Latent space vectors from autoencoder systematic model if relevant'''
         
         if override_cache_path is not None:
             self._cache_file = override_cache_path
@@ -146,16 +148,24 @@ class JointFit(H5Serializable):
         mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, True))
         mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc, True))
         
-        if planet.w is not None:
+        if planet.w is not None and planet.ecc is not None:
             ecosw = planet.ecc * umath.cos(planet.w * np.pi / 180)
             esinw = planet.ecc * umath.sin(planet.w * np.pi / 180)
             mcmc.add_parameter("esinw", Parameter.prior_from_ufloat(esinw, force_fixed=config.fix_eclipse_timing))
             mcmc.add_parameter("ecosw", Parameter.prior_from_ufloat(ecosw, force_fixed=config.fix_eclipse_timing))
-        else:
+        elif planet.ecc is not None:
             # Uniform for cos/sin omega from -1 to 1
             e = (planet.ecc.nominal_value + planet.ecc.std_dev)
             mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -e, e))
             mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -e, e))
+        else:
+            mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -1, 1))
+            mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -1, 1))
+        if self.config.fit_eclipse_timing_offset is not None:
+            offset = self.config.fit_eclipse_timing_offset
+            mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(0, -offset, offset))
+        else:
+            mcmc.add_parameter("t_sec_offset", Parameter.fixed(0))
         
         for visit_index in range(0, len(photometry_data_list)):
             if self.config.fit_fnpca:
@@ -164,6 +174,13 @@ class JointFit(H5Serializable):
             else:
                 for i in range(0, 5):
                     mcmc.add_parameter(f"pc{(i+1)}_{visit_index}", Parameter.fixed(0))
+                    
+            if self.config.fit_autoencoder:
+                for i in range(0, 5):
+                    mcmc.add_parameter(f"ae{(i+1)}_{visit_index}", Parameter.uniform_prior(0.1, -10, 10))
+            else:
+                for i in range(0, 5):
+                    mcmc.add_parameter(f"ae{(i+1)}_{visit_index}", Parameter.fixed(0))
             
             if self.config.fit_exponential:
                 mcmc.add_parameter(f"exp1_{visit_index}", Parameter.uniform_prior(0.01, -0.1, 0.1))
@@ -198,7 +215,7 @@ class JointFit(H5Serializable):
         self.save_to_path(self._cache_file)
     
     def physical_model(self, x : List[float], fp : float, rp_rstar : float,
-                       a_rstar : float, p : float, inc : float, esinw : float, ecosw : float) -> List[float]:
+                       a_rstar : float, p : float, inc : float, esinw : float, ecosw : float, t_sec_offset : float) -> List[float]:
         '''
         Model for the lightcurve using batman
         fp is expected written in ppm
@@ -207,7 +224,7 @@ class JointFit(H5Serializable):
         visit_index = self.get_visit_index_from_time(x[0])
         # t_sec is relative to the start of the visit
         predicted_t_sec = self.get_predicted_t_sec_of_visit(visit_index).nominal_value
-        t_sec = predicted_t_sec + self.starting_times[visit_index] + 2 * p * ecosw / np.pi
+        t_sec = predicted_t_sec + self.starting_times[visit_index] + (2 * p * ecosw / np.pi) + t_sec_offset
 
         if self.params is None:
             params = batman.TransitParams()
@@ -239,6 +256,7 @@ class JointFit(H5Serializable):
         return flux_model
     
     def systematic_model(self, x : List[float], pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float, 
+                         ae1 : float, ae2 : float, ae3 : float, ae4 : float, ae5 : float,
                          exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
         '''
         Assumes all x are from the same visit
@@ -257,13 +275,30 @@ class JointFit(H5Serializable):
             for i in range(0, 5):
                 pca += coeffs[i] * eigenvalues[i]
             systematic *= pca
+        if self.config.fit_autoencoder:
+            coeffs = np.array([ae1, ae2, ae3, ae4, ae5])
+            # remove NaNs to account for jagged numpy array
+            vectors = np.array([row[~np.isnan(row)][self.start_trim:self.end_trim] for row in self.latent_space_vectors[visit_index]])
+            print("Vector shape", vectors.shape)
+            lsv = np.ones_like(vectors[0])
+            for i in range(0, 5):
+                vector = vectors[i]
+                vector -= np.median(vector)
+                vector /= np.std(vector)
+                lsv += coeffs[i] * vector
+            systematic *= lsv
+            
         if self.config.fit_exponential:
             systematic *= (exp1 * np.exp(exp2 * time)) + 1
         if self.config.fit_linear:
             systematic *= (a * time) + 1
         if self.config._custom_systematic_model is not None:
             flat_args = np.array(extra_params).flatten()
-            systematic *= self.config._custom_systematic_model(x, *flat_args)
+            arg_names = list(inspect.signature(self.config._custom_systematic_model).parameters.keys())
+            if arg_names[1] == "visit_index":
+                systematic *= self.config._custom_systematic_model(x, visit_index, *flat_args)
+            else:
+                systematic *= self.config._custom_systematic_model(x, *flat_args)
         
         systematic += b
         
