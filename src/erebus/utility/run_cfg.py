@@ -13,7 +13,7 @@ class ErebusRunConfig(BaseModel):
     
     Attributes:
         fit_fnpca (bool): Optional bool to use FN-PCA in the systematic model.
-        fit_autoencoder (bool): Optional bool to use autoencoder latent space vectors in the systematic model.
+        fit_autoencoder (bool): Optional bool to use autoencoder latent space vectors in the systematic model. NOTE: Not well tested, may not work
         fit_exponential (bool): Optional bool to use an exponential curve in the systematic model.
         fit_linear (bool): Optional bool to use a linear slope in the systematic model.
         perform_joint_fit (bool): Optional bool to fit all visits together with a shared eclipse depth.
