@@ -9,7 +9,7 @@ import batman
 import numpy as np
 import uncertainties.umath as umath
 
-from erebus.frame_normalized_pca import perform_fn_pca_on_aperture
+from erebus.systematics.frame_normalized_pca import perform_fn_pca_on_aperture
 from erebus.mcmc_model import WrappedMCMC
 from erebus.photometry_data import PhotometryData
 from erebus.utility.bayesian_parameter import Parameter
