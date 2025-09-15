@@ -79,6 +79,9 @@ class JointFitResults(H5Serializable):
             self.relative_time_per_visit = JointFitResults.__pad_2d_array(self.relative_time_per_visit)
             self.model_time_per_visit = JointFitResults.__pad_2d_array(self.model_time_per_visit)
             self.model_flux_per_visit = JointFitResults.__pad_2d_array(self.model_flux_per_visit)
+            
+            self.final_log_likelihood = fit.final_log_likelihood
+            self.BIC = fit.BIC
     
     @staticmethod
     def __pad_2d_array(array_2d):

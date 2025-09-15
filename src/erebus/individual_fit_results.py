@@ -49,6 +49,9 @@ class IndividualFitResults(H5Serializable):
             '''The best fit detrended lightcurve.'''
             self.systematic_factor = fit.systematic_model(fit.time, *systematic_params)
             '''The systematic factor which was divided out of the raw lightcurve to get the detrended one.'''
+            
+            self.final_log_likelihood = fit.final_log_likelihood
+            self.BIC = fit.BIC
     
     @staticmethod
     def load(path : str):

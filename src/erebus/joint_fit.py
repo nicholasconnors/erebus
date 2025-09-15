@@ -356,6 +356,8 @@ class JointFit(H5Serializable):
         
         self.auto_correlation = self.mcmc.auto_correlation
         self.iterations = self.mcmc.iterations
+        self.final_log_likelihood = self.mcmc.final_log_likelihood
+        self.BIC = self.mcmc.BIC
         
         self.save_to_path(self._cache_file)
     

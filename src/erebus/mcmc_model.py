@@ -284,6 +284,8 @@ class WrappedMCMC(H5Serializable):
         self.sampler = sampler[0]
         self.auto_correlation = auto_correlation_time
         self.iterations = iteration_counter
+        self.final_log_likelihood = self.log_likelihood([r[0] for r in res], x, y)
+        self.BIC = len(self.get_free_params()) * np.log(len(x)) - 2 * self.final_log_likelihood
         
         self.save_to_path(self._cache_file)
     
