@@ -50,8 +50,8 @@ class IndividualFitResults(H5Serializable):
             self.systematic_factor = fit.systematic_model(fit.time, *systematic_params)
             '''The systematic factor which was divided out of the raw lightcurve to get the detrended one.'''
             
-            self.final_log_likelihood = fit.final_log_likelihood
-            self.BIC = fit.BIC
+            self.final_log_likelihood = fit.final_log_likelihood if hasattr(fit, "final_log_likelihood") else 0
+            self.BIC = fit.BIC if hasattr(fit, "BIC") else 0
     
     @staticmethod
     def load(path : str):
