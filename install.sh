@@ -3,7 +3,7 @@
 echo "Building and installing Erebus locally"
 
 if [ ! -d "build" ]; then
-    mkdir "build"
+    mkdir "build/dist"
 fi
 
 // Remove any existing builds
@@ -21,4 +21,4 @@ python -m build --outdir ./dist ../
 
 echo "Done"
 
-pip install dist/*.tar.gz
+python -m pip install dist/*.tar.gz

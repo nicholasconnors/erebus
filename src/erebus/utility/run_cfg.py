@@ -1,9 +1,8 @@
 import json
-from typing import Annotated, List, Optional
+from typing import Annotated, List, Optional, Union
 
 from pydantic import BaseModel, Field
 from pydantic_yaml import parse_yaml_file_as, to_yaml_file
-
 
 class ErebusRunConfig(BaseModel):
     '''
@@ -44,16 +43,32 @@ class ErebusRunConfig(BaseModel):
     annulus_start : int
     annulus_end : int
     skip_visits : Optional[List[int]] = None
-    trim_integrations : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
+    trim_integrations : Optional[Union[List[int], List[List[int]]]] = None
     star_position : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     path : Optional[str] = Field(None, exclude=True)
     prevent_negative_eclipse_depth: Optional[bool] = False
     fix_eclipse_timing: Optional[bool] = False
     fit_eclipse_timing_offset : Optional[float] = None
+    max_steps : Optional[int] = None
     
     _custom_systematic_model = None
     _custom_parameters : dict = None
     _custom_parameters_override : dict = {}
+    
+    def get_trim_integrations(self, visit_index):
+        # Assumes that trim_integrations is properly formatted as either None, [start, end], [[visit 1 start, end], [visit 2 start, end], [etc]]
+        result = [0, None]
+        if self.trim_integrations is not None:
+            if isinstance(self.trim_integrations[0], int):
+                result = self.trim_integrations
+            else:
+                result = self.trim_integrations[visit_index]
+        if result[1] is not None:
+            if result[1] <= 0:
+                result[1] = None
+            else:
+                result[1] = -abs(result[1])
+        return result
     
     def set_custom_systematic_model(self, model, params):
         '''

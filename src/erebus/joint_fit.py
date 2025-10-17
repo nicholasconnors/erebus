@@ -31,7 +31,8 @@ class JointFit(H5Serializable):
         '''
         return ['config', 'photometry_data_list', 'time', 'raw_flux', 'params',
                 'transit_models', 'mcmc', "starting_times", "_force_clear_cache",
-                'predicted_t_secs']
+                'predicted_t_secs', 'time_per_visit', 'all_eigenvalues', 'start_trim',
+                'end_trim']
     
     def get_predicted_t_sec_of_visit(self, index : int):
         '''
@@ -85,19 +86,11 @@ class JointFit(H5Serializable):
         self.planet = planet
         self.photometry_data_list = photometry_data_list
         
-        self.start_trim = 0 if config.trim_integrations is None else config.trim_integrations[0]
-        self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
+        self.start_trim = [config.get_trim_integrations(i)[0] for i in range(0, len(photometry_data_list))]
+        self.end_trim = [config.get_trim_integrations(i)[1] for i in range(0, len(photometry_data_list))]
         
         # For the joint fit we bin the data to speed up convergence
         self.bin_size = 4
-        self.time = np.concatenate([bin_data(data.time[self.start_trim:self.end_trim], self.bin_size)[0] for data in photometry_data_list])
-        self.starting_times = np.sort(np.array([np.min(data.time) for data in photometry_data_list]))
-        self.raw_flux = np.concatenate([bin_data(data.raw_flux[self.start_trim:self.end_trim], self.bin_size)[0] for data in photometry_data_list])
-        
-        # Orders might be wrong, assumes each visit was in order
-        sort = np.argsort(self.time)
-        self.time = self.time[sort]
-        self.raw_flux = self.raw_flux[sort]
         
         self.config = config
         
@@ -109,13 +102,30 @@ class JointFit(H5Serializable):
         self.joint_eigenvalues = []
         self.joint_eigenvectors = [] 
         self.pca_variance_ratios = []
+        self.time = []
         for i, data in enumerate(photometry_data_list):
-            eigenvalues, eigenvectors, variance_ratios = perform_fn_pca_on_aperture(data.normalized_frames[self.start_trim:self.end_trim])
+            eigenvalues, eigenvectors, variance_ratios = perform_fn_pca_on_aperture(data.normalized_frames[self.start_trim[i]:self.end_trim[i]])
             binned_eigenvalues = np.array([bin_data(ev, self.bin_size)[0] for ev in eigenvalues])
             self.joint_eigenvalues.append(binned_eigenvalues)
             self.joint_eigenvectors.append(eigenvectors)
             self.pca_variance_ratios.append(variance_ratios)
+            binned_time = bin_data(data.time[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0]
+            self.time.append(binned_time)
             print(np.array(binned_eigenvalues).shape)
+            
+        # time per visit used to interpolate FNPCA systematic
+        self.time = np.concatenate(self.time)
+        self.all_eigenvalues = np.concatenate(self.joint_eigenvalues, axis=1)
+        self.starting_times = np.sort(np.array([np.min(data.time) for data in photometry_data_list]))
+        self.raw_flux = np.concatenate([bin_data(data.raw_flux[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0] for i, data in enumerate(photometry_data_list)])
+        
+        # Orders might be wrong, assumes each visit was in order
+        sort = np.argsort(self.time)
+        self.time = self.time[sort]
+        self.all_eigenvalues = self.all_eigenvalues[:,sort]
+        self.raw_flux = self.raw_flux[sort]
+        
+        self.eigenvalue_lookup = dict(zip(self.time, self.all_eigenvalues.T))
             
         # If visits have different lengths (number of integrations) then these arrays can't be saved (inhomogenous)
         # Pad with NaN in this case
@@ -261,20 +271,29 @@ class JointFit(H5Serializable):
         '''
         Assumes all x are from the same visit
         '''
-        visit_index = self.get_visit_index_from_time(x[0])
-        starting_time = self.starting_times[visit_index]
-        time = x - starting_time
+        time = np.array([xi - self.starting_times[self.get_visit_index_from_time(xi)] for xi in x])
 
         systematic = np.ones_like(x)
         if self.config.fit_fnpca:
             coeffs = np.array([pc1, pc2, pc3, pc4, pc5])
+            
+            # x might not fully match eigenvalues so interp
+            # print(f"Shapes of stuff {x.shape} {self.time.shape} {self.all_eigenvalues.shape}")
+            if np.min(x) < np.min(self.time) or np.max(x) > np.max(self.time):
+                raise Exception(f"Bad, out of bounds! {np.min(x)} < {np.min(self.time)} or {np.max(x)} > {np.max(self.time)}")
+            #eigenvalues = np.array([np.interp(x, self.time, row) for row in self.all_eigenvalues.T])
+            eigenvalues = np.array([self.eigenvalue_lookup[xi] for xi in x]).T
+            #raise Exception(f"{eigenvalues.shape} {systematic.shape} {self.joint_eigenvalues.shape} {self.time.shape} {self.all_eigenvalues.shape}")
+            
             # remove NaNs to account for jagged numpy array
-            eigenvalues = np.array([row[~np.isnan(row)] for row in self.joint_eigenvalues[visit_index]])
+            eigenvalues = np.array([row[~np.isnan(row)] for row in eigenvalues])
 
             pca = np.ones_like(eigenvalues[0])
             for i in range(0, 5):
                 pca += coeffs[i] * eigenvalues[i]
+
             systematic *= pca
+        '''
         if self.config.fit_autoencoder:
             coeffs = np.array([ae1, ae2, ae3, ae4, ae5])
             # remove NaNs to account for jagged numpy array
@@ -287,6 +306,7 @@ class JointFit(H5Serializable):
                 vector /= np.std(vector)
                 lsv += coeffs[i] * vector
             systematic *= lsv
+        '''
             
         if self.config.fit_exponential:
             systematic *= (exp1 * np.exp(exp2 * time)) + 1
@@ -296,7 +316,7 @@ class JointFit(H5Serializable):
             flat_args = np.array(extra_params).flatten()
             arg_names = list(inspect.signature(self.config._custom_systematic_model).parameters.keys())
             if arg_names[1] == "visit_index":
-                systematic *= self.config._custom_systematic_model(x, visit_index, *flat_args)
+                systematic *= np.array([self.config._custom_systematic_model(xi, self.get_visit_index_from_time(xi), *flat_args) for xi in x])
             else:
                 systematic *= self.config._custom_systematic_model(x, *flat_args)
         
@@ -348,7 +368,8 @@ class JointFit(H5Serializable):
         Performs the joint fit via MCMC. Caches the results to the disk.
         '''
         self.mcmc.run(self.time, self.raw_flux, walkers = 80, 
-                      force_clear_cache=self._force_clear_cache)
+                      force_clear_cache=self._force_clear_cache,
+                      max_steps = self.config.max_steps if self.config.max_steps is not None else 2000000)
         
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)

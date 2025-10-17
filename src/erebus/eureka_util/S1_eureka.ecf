@@ -15,6 +15,7 @@ skip_dark_current   False
 skip_jump           False
 skip_ramp_fitting   False
 skip_gain_scale     False
+skip_bg             False
 
 #Pipeline stages parameters
 jump_rejection_threshold  4.0 #float, default is 4.0, CR sigma rejection threshold. Usually recommend a larger value for TSO data.

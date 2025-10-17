@@ -130,11 +130,13 @@ class Erebus(H5Serializable):
             self.latent_space_vectors = np.array(padded_joint_latent_space_vectors)
             print("Latent space vectors shape:", self.latent_space_vectors.shape, "Visits:", n_visits, "Max visit length (integrations): ", max_length)
         
+        indices = np.argsort([np.min(photo.time) for photo in self.photometry])
+        
         if self.config.perform_individual_fits:
             for i in range(0, len(self.visit_names)):
                 individual_fit = IndividualFit(self.photometry[i], 
                                                          self.planet, self.config,
-                                                         force_clear_cache)
+                                                         force_clear_cache, index = indices[i])
                 self.individual_fits.append(individual_fit)
                 print(f"Visit {self.visit_names[i]} " + ("already ran" if 'fp' in individual_fit.results else "wasn't run yet"))
                 
@@ -149,9 +151,9 @@ class Erebus(H5Serializable):
             for i, fit in enumerate(self.individual_fits):
                 # If you are skipping visits this won't be done since it will be inaccurate
                 if self.config.skip_visits is None:
-                    fit.order = individual_fit_order[i]
+                    fit.order_label = individual_fit_order[i]
                 else:
-                    fit.order = "X"
+                    fit.order_label = "X"
 
         if self.config.perform_joint_fit:
             self.joint_fit = JointFit(self.photometry, self.planet, self.config, force_clear_cache)
@@ -201,11 +203,13 @@ class Erebus(H5Serializable):
                 except Exception as e:
                     print(f"Plotting routine failed: {e}")
     
-                path = output_folder + self.planet.name + "_visit_" + str(fit.order) + "_" + fit.visit_name
+                path = output_folder + self.planet.name + "_visit_" + str(fit.order_label) + "_" + fit.visit_name
                 IndividualFitResults(fit).save_to_path(path + ".h5")
                 
+                # Human readable results for easy checking
                 dict = fit.results.copy()
                 dict['auto_corr'] = fit.auto_correlation
+                dict['BIC'] = fit.BIC
                 utils.save_dict_to_json(dict, path + ".json")
 
         if self.config.perform_joint_fit:
@@ -225,8 +229,10 @@ class Erebus(H5Serializable):
             path = output_folder + self.planet.name + "_joint_fit"
             JointFitResults(self.joint_fit).save_to_path(path + ".h5")
             
+            # Human readable results for easy checking
             dict = self.joint_fit.results.copy()
             dict['auto_corr'] = self.joint_fit.auto_correlation
+            dict['BIC'] = self.joint_fit.BIC
             utils.save_dict_to_json(dict, path + ".json")
         
         

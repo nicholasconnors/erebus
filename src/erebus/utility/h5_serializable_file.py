@@ -45,9 +45,8 @@ class H5Serializable:
                         value = ufloat(float(nominal_value), float(std_dev))
                     elif value.startswith("PYDANTIC"):
                         value = from_json(value[len("PYDANTIC"):])
-                    elif isinstance(value, Planet):
+                    elif value.startswith("PLANET"):
                         value = from_json(value[len("PLANET"):])    
-                        value = Planet.__load_from_yaml(value)      
                     elif value.startswith("JAGGED_LIST"):
                         value = json.loads(value[len("JAGGED_LIST"):], cls=_JSONDecoder)
                     

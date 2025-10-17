@@ -28,7 +28,7 @@ class IndividualFit(H5Serializable):
         Excluded from serialization
         '''
         return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', '__instance', 
-                'photometry_data', '_force_clear_cache', 'predicted_t_sec']
+                'photometry_data', '_force_clear_cache', 'predicted_t_sec', 'start_trim', 'end_trim']
     
     def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None, index = None):
@@ -36,7 +36,8 @@ class IndividualFit(H5Serializable):
         self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
         self.planet_name = planet.name
         self.planet = planet
-        self.order = 'X'
+        self.order_label = 'X'
+        self.index = index
         self.photometry_data = photometry_data
         
         self.latent_space_vectors = None
@@ -47,8 +48,9 @@ class IndividualFit(H5Serializable):
         if override_cache_path is not None:
             self._cache_file = override_cache_path
         
-        self.start_trim = 0 if config.trim_integrations is None else config.trim_integrations[0]
-        self.end_trim = None if config.trim_integrations is None else -np.abs(config.trim_integrations[1])
+        trim = config.get_trim_integrations(index)
+        self.start_trim = trim[0]
+        self.end_trim = trim[1]
         
         self.start_time = np.min(photometry_data.time)
         self.time = photometry_data.time[self.start_trim:self.end_trim] - np.min(photometry_data.time)
@@ -206,7 +208,7 @@ class IndividualFit(H5Serializable):
             flat_args = np.array(extra_params).flatten()
             arg_names = list(inspect.signature(self.config._custom_systematic_model).parameters.keys())
             if arg_names[1] == "visit_index":
-                systematic *= self.config._custom_systematic_model(x, self.order, *flat_args)
+                systematic *= self.config._custom_systematic_model(x, self.index, *flat_args)
             else:
                 systematic *= self.config._custom_systematic_model(x, *flat_args)
         
@@ -252,7 +254,8 @@ class IndividualFit(H5Serializable):
         self.mcmc.set_method(fit_method)
 
         self.mcmc.run(self.time, self.raw_flux,
-                      force_clear_cache=self._force_clear_cache)
+                      force_clear_cache=self._force_clear_cache,
+                      max_steps = self.config.max_steps if self.config.max_steps is not None else 2000000)
         self.results = self.mcmc.results
         self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
         print(self.mcmc.results)

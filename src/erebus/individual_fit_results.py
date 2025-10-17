@@ -21,7 +21,7 @@ class IndividualFitResults(H5Serializable):
             '''For each principal component, this is its eigenimage.'''
             self.pca_variance_ratios = fit.pca_variance_ratios
             '''For each principal component, how much of the variance does it explain.'''
-            self.order = fit.order
+            self.order = fit.order_label
             '''If there were other visits observed, this is the numerical ordering they occuring in.'''
             self.results = fit.results
             '''A dictionary of results for the fit parameters (e.g., eclipse depth)'''
