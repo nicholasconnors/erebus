@@ -39,7 +39,7 @@ class Erebus(H5Serializable):
         return Erebus(None, override_cache_path=path)
     
     def __init__(self, run_cfg : ErebusRunConfig | str, force_clear_cache : bool = False,
-                 override_cache_path : str = None):    
+                 override_cache_path : str = None, override_wrapped_fits : list[WrappedFits] = None):    
         
         if isinstance(run_cfg, str):
             run_cfg = ErebusRunConfig.load(run_cfg) 
@@ -79,31 +79,40 @@ class Erebus(H5Serializable):
         '''The unique names of each visit.'''
         
         # Load from file if needed
-        if force_clear_cache or not os.path.isfile(self._cache_file):
-            self.visit_names = f_util.get_fits_files_visits_in_folder(self._calints_abs_path)
-            if self.visit_names is None or len(self.visit_names) == 0:
-                print("No visits found, aborting")
-                return
-        
-            if run_cfg.skip_visits is not None:
-                filt = np.array([i not in run_cfg.skip_visits for i in range(0, len(self.visit_names))])
-                self.visit_names = self.visit_names[filt]
-        
-        else:
-            self.load_from_path(self._cache_file)
-            if run_cfg is not None:
-                self.config = run_cfg
+        if override_wrapped_fits is None:
+            if force_clear_cache or not os.path.isfile(self._cache_file):
+                self.visit_names = f_util.get_fits_files_visits_in_folder(self._calints_abs_path)
+                if self.visit_names is None or len(self.visit_names) == 0:
+                    print("No visits found, aborting")
+                    return
             
-        for i in range(0, len(self.visit_names)):
+                if run_cfg.skip_visits is not None:
+                    filt = np.array([i not in run_cfg.skip_visits for i in range(0, len(self.visit_names))])
+                    self.visit_names = self.visit_names[filt]
+            
+            else:
+                self.load_from_path(self._cache_file)
+                if run_cfg is not None:
+                    self.config = run_cfg
+                
+        if override_wrapped_fits is not None:
+            self.visit_names = [fits.visit_name for fits in override_wrapped_fits]
             star_pos = None if run_cfg.star_position is None else (tuple)(run_cfg.star_position)
-            fit = WrappedFits(self._calints_abs_path, self.visit_names[i], 
-                              force_clear_cache=force_clear_cache,
-                              star_pixel_position=star_pos)
-            self.photometry.append(PhotometryData(fit, run_cfg.aperture_radius,
-                                                  (run_cfg.annulus_start, run_cfg.annulus_end),
-                                                  force_clear_cache))
-            # Improve memory usage
-            del fit
+            for fits in override_wrapped_fits:
+                self.photometry.append(PhotometryData(fits, run_cfg.aperture_radius,
+                                        (run_cfg.annulus_start, run_cfg.annulus_end),
+                                        force_clear_cache))
+        else:
+            for i in range(0, len(self.visit_names)):
+                star_pos = None if run_cfg.star_position is None else (tuple)(run_cfg.star_position)
+                fit = WrappedFits(self._calints_abs_path, self.visit_names[i], 
+                                force_clear_cache=force_clear_cache,
+                                star_pixel_position=star_pos)
+                self.photometry.append(PhotometryData(fit, run_cfg.aperture_radius,
+                                                    (run_cfg.annulus_start, run_cfg.annulus_end),
+                                                    force_clear_cache))
+                # Improve memory usage
+                del fit
             
         # Planet path is relative to the config file
         planet_path = run_cfg.planet_path

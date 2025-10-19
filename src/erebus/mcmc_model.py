@@ -131,6 +131,9 @@ class WrappedMCMC(H5Serializable):
         
         initial_guess_var = [self.params[p].initial_guess_variation for p in self.get_free_params()]
         ndim = len(initial_guess_var)
+        if walkers < ndim * 2:
+            print(f"Number of walkers ({walkers}) must be greater than ndim ({ndim}) * 2")
+            walkers = ndim*  2
         nchains = 2
         
         backends = [None] * nchains        
@@ -207,7 +210,7 @@ class WrappedMCMC(H5Serializable):
         withinchainvar = np.zeros((nchains, ndim), dtype=np.float64)
         meanchain = np.zeros((nchains, ndim), dtype=np.float64)
 
-        minlength = 10000
+        minlength = np.min([10000, max_steps])
         ichaincheck = 10000
         chainstep = minlength
         iteration_counter = burn_in if backends[0] is None else np.min([backends[0].iteration, backends[1].iteration])
@@ -245,15 +248,16 @@ class WrappedMCMC(H5Serializable):
                 auto_correlation_time = np.inf
             all_within_epsilon = all(np.abs(1 - R) < epsilon)
             all_converged = np.isfinite(auto_correlation_time)
+            
+            chainstep = ichaincheck
+            iteration_counter += chainstep
+            
             loopcriteria = (not all_within_epsilon or not all_converged) and iteration_counter < max_steps
             
             print("Rubin gelman convergence:", R, "converged?", all_within_epsilon)
             print("Autocorr time:", auto_correlation_time, "converged?", all_converged)
             print("Iterations:", iteration_counter, "Max steps:", max_steps)
             print("Continue looping?", loopcriteria)
-            
-            chainstep = ichaincheck
-            iteration_counter += chainstep
         
         try:
             auto_correlation_time = np.mean(sampler[0].get_autocorr_time())

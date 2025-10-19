@@ -50,6 +50,7 @@ class ErebusRunConfig(BaseModel):
     fix_eclipse_timing: Optional[bool] = False
     fit_eclipse_timing_offset : Optional[float] = None
     max_steps : Optional[int] = None
+    fit_lightcurve_phase : Optional[bool] = False
     
     _custom_systematic_model = None
     _custom_parameters : dict = None
@@ -59,6 +60,7 @@ class ErebusRunConfig(BaseModel):
         # Assumes that trim_integrations is properly formatted as either None, [start, end], [[visit 1 start, end], [visit 2 start, end], [etc]]
         result = [0, None]
         if self.trim_integrations is not None:
+            # List of two
             if isinstance(self.trim_integrations[0], int):
                 result = self.trim_integrations
             else:

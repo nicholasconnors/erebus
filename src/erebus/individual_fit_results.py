@@ -35,7 +35,8 @@ class IndividualFitResults(H5Serializable):
             '''The planet config file used to create this run'''
             self.config_hash = fit.config_hash
             '''The unique hash of the config file. Used for naming cache files.'''
-            self.frames = fit.photometry_data.normalized_frames
+            trim = fit.config.get_trim_integrations(fit.index)
+            self.frames = fit.photometry_data.normalized_frames[trim[0]:trim[1]]
             '''The frames which aperture photometry was performed on for the fit.'''
             self.predicted_t_sec = fit.predicted_t_sec
             '''The predicted 0.5 phase eclipse time'''

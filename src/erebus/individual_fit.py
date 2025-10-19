@@ -178,6 +178,10 @@ class IndividualFit(H5Serializable):
             transit_model = batman.TransitModel(params, x, transittype="secondary")
 
         flux_model = transit_model.light_curve(params)
+        
+        if self.config.fit_lightcurve_phase:
+            flux_model = ((flux_model - 1) * ((1 / 2.0) * np.cos(2 * np.pi * x / params.per + np.pi) + (1/2.0))) + 1
+        
         return flux_model
     
     def systematic_model(self, x : List[float], pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float, 
