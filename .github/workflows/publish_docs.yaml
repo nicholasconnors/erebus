@@ -56,7 +56,9 @@ jobs:
           python-version: 3.12
       - name: Install Dependencies
         run: |
+          pip install mkdocs
           pip install mkdocs-material
+          pip install mkdocstrings
           pip install pillow cairosvg mike
           pip install mkdocstrings-python
           pip install markdown-include
