@@ -4,10 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from erebus.utility.utils import get_eclipse_duration
 from uncertainties import ufloat
-from erebus.wrapped_fits import WrappedFits
 from photutils.aperture import CircularAperture, CircularAnnulus, aperture_photometry
-import numpy as np
-from uncertainties import ufloat
 from astropy import units as units
 
 def get_stellar_flux_calibration_F1500W(visit : IndividualFitResults, fits : WrappedFits, plot_dir : str = None):
