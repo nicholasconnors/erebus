@@ -72,8 +72,6 @@ class JointFit(H5Serializable):
         '''Memoize predicted t_sec to save time'''
         self.__closest_t0 = {}
         '''Memoize t0 for each visit index to save time'''
-        self.latent_space_vectors = None
-        '''Latent space vectors from autoencoder systematic model if relevant'''
         
         if override_cache_path is not None:
             self._cache_file = override_cache_path
@@ -184,13 +182,6 @@ class JointFit(H5Serializable):
             else:
                 for i in range(0, 5):
                     mcmc.add_parameter(f"pc{(i+1)}_{visit_index}", Parameter.fixed(0))
-                    
-            if self.config.fit_autoencoder:
-                for i in range(0, 5):
-                    mcmc.add_parameter(f"ae{(i+1)}_{visit_index}", Parameter.uniform_prior(0.1, -10, 10))
-            else:
-                for i in range(0, 5):
-                    mcmc.add_parameter(f"ae{(i+1)}_{visit_index}", Parameter.fixed(0))
             
             if self.config.fit_exponential:
                 mcmc.add_parameter(f"exp1_{visit_index}", Parameter.uniform_prior(0.01, -0.1, 0.1))
@@ -270,7 +261,6 @@ class JointFit(H5Serializable):
         return flux_model
     
     def systematic_model(self, x : List[float], pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float, 
-                         ae1 : float, ae2 : float, ae3 : float, ae4 : float, ae5 : float,
                          exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
         '''
         Assumes all x are from the same visit
@@ -297,20 +287,6 @@ class JointFit(H5Serializable):
                 pca += coeffs[i] * eigenvalues[i]
 
             systematic *= pca
-        '''
-        if self.config.fit_autoencoder:
-            coeffs = np.array([ae1, ae2, ae3, ae4, ae5])
-            # remove NaNs to account for jagged numpy array
-            vectors = np.array([row[~np.isnan(row)][self.start_trim:self.end_trim] for row in self.latent_space_vectors[visit_index]])
-            print("Vector shape", vectors.shape)
-            lsv = np.ones_like(vectors[0])
-            for i in range(0, 5):
-                vector = vectors[i]
-                vector -= np.median(vector)
-                vector /= np.std(vector)
-                lsv += coeffs[i] * vector
-            systematic *= lsv
-        '''
             
         if self.config.fit_exponential:
             systematic *= (exp1 * np.exp(exp2 * time)) + 1

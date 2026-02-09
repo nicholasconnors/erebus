@@ -39,9 +39,6 @@ class IndividualFit(H5Serializable):
         self.order_label = 'X'
         self.index = index
         self.photometry_data = photometry_data
-        
-        self.latent_space_vectors = None
-        '''Latent space vectors from autoencoder systematic model if relevant'''
 
         self._cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{self.config_hash}_individual_fit.h5"
         
@@ -108,13 +105,6 @@ class IndividualFit(H5Serializable):
         else:
             for i in range(0, 5):
                 mcmc.add_parameter(f"pc{(i+1)}", Parameter.fixed(0))
-        
-        if self.config.fit_autoencoder:
-            for i in range(0, 5):
-                mcmc.add_parameter(f"ae{(i+1)}", Parameter.uniform_prior(0.1, -10, 10))
-        else:
-            for i in range(0, 5):
-                mcmc.add_parameter(f"ae{(i+1)}", Parameter.fixed(0))
         
         if self.config.fit_exponential:
             mcmc.add_parameter("exp1", Parameter.uniform_prior(0.01, -0.1, 0.1))
@@ -184,8 +174,7 @@ class IndividualFit(H5Serializable):
         
         return flux_model
     
-    def systematic_model(self, x : List[float], pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float, 
-                         ae1 : float, ae2 : float, ae3 : float, ae4 : float, ae5 : float,
+    def systematic_model(self, x : List[float], pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float,
                          exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
         systematic = np.ones_like(x)
         if self.config.fit_fnpca:
@@ -194,16 +183,6 @@ class IndividualFit(H5Serializable):
             for i in range(0, 5):
                 pca += coeffs[i] * self.eigenvalues[i]
             systematic *= pca
-        if self.config.fit_autoencoder:
-            coeffs = np.array([ae1, ae2, ae3, ae4, ae5])
-            lsv = np.ones_like(x)
-            for i in range(0, 5):
-                # normalize
-                vector = self.latent_space_vectors[i][self.start_trim:self.end_trim]
-                vector -= np.median(vector)
-                vector /= np.std(vector)
-                lsv += coeffs[i] * vector
-            systematic *= lsv
         if self.config.fit_exponential:
             systematic *= (exp1 * np.exp(exp2 * x)) + 1
         if self.config.fit_linear:
@@ -224,9 +203,8 @@ class IndividualFit(H5Serializable):
     def __fit_method(x : List[float], fp : float, t0 : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, esinw : float, ecosw : float, t_sec_offset : float,
                        pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float,
-                       ae1 : float, ae2 : float, ae3 : float, ae4 : float, ae5 : float,
                        exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
-        systematic = IndividualFit.__instance.systematic_model(x, pc1, pc2, pc3, pc4, pc5, ae1, ae2, ae3, ae4, ae5, exp1, exp2, a, b, extra_params)
+        systematic = IndividualFit.__instance.systematic_model(x, pc1, pc2, pc3, pc4, pc5, exp1, exp2, a, b, extra_params)
         physical = IndividualFit.__instance.physical_model(x, fp, t0, rp_rstar, a_rstar, p, inc, esinw, ecosw, t_sec_offset)
         return physical * systematic 
     

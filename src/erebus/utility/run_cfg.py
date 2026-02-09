@@ -12,7 +12,6 @@ class ErebusRunConfig(BaseModel):
     
     Attributes:
         fit_fnpca (bool): Optional bool to use FN-PCA in the systematic model.
-        fit_autoencoder (bool): Optional bool to use autoencoder latent space vectors in the systematic model. NOTE: Not well tested, may not work
         fit_exponential (bool): Optional bool to use an exponential curve in the systematic model.
         fit_linear (bool): Optional bool to use a linear slope in the systematic model.
         perform_joint_fit (bool): Optional bool to fit all visits together with a shared eclipse depth.
@@ -31,7 +30,6 @@ class ErebusRunConfig(BaseModel):
         fit_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a uniform prior with twice this width centered on 0.5 phase
     '''    
     fit_fnpca : Optional[bool] = False
-    fit_autoencoder : Optional[bool] = False
     fit_exponential : Optional[bool] = False
     fit_linear : Optional[bool] = False
     perform_joint_fit : Optional[bool] = False

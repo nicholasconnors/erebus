@@ -34,8 +34,6 @@ class JointFitResults(H5Serializable):
             '''The unique hash of the config file. Used for naming cache files.'''
             self.predicted_t_secs = fit.predicted_t_secs
             '''Predicted 0.5 eclipse time for each visit'''
-            self.joint_latent_space_vectors = fit.latent_space_vectors
-            '''Latent space vectors for autoencoder systematic model if relevant'''
 
             # Time given relative to the predicted t_sec for that visit
             self.detrended_flux_per_visit = []
