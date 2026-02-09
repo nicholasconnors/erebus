@@ -177,8 +177,8 @@ class Erebus(H5Serializable):
                 try:
                     plotting.plot_fnpca_individual_fit(fit, figure_folder)
                     plotting.plot_eigenvectors(fit, eigenvec_folder)        
-                    plotting.corner_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_corner.pdf")
-                    plotting.chain_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_chain.pdf")
+                    plotting.corner_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_corner.png")
+                    plotting.chain_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_chain.png")
                 except Exception as e:
                     print(f"Plotting routine failed: {e}")
     
@@ -200,8 +200,8 @@ class Erebus(H5Serializable):
             
             try:
                 plotting.plot_joint_fit(self.joint_fit, figure_folder)
-                plotting.corner_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_corner.pdf")
-                plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.pdf")
+                plotting.corner_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_corner.png")
+                plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.png")
             except Exception as e:
                 print(f"Plotting routine failed: {e}")
     
