@@ -28,6 +28,7 @@ class ErebusRunConfig(BaseModel):
         prevent_negative_eclipse_depth (bool): Optional bool to force eclipse depth to be positive.
         fix_eclipse_timing (bool): Optional bool to force t0, period, ecosw to be fixed
         fit_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a uniform prior with twice this width centered on 0.5 phase
+        joint_fit_bin_size (int): Optional bin size for joint fit, if performed. Defaults to 4.
     '''    
     fit_fnpca : Optional[bool] = False
     fit_exponential : Optional[bool] = False
@@ -49,6 +50,7 @@ class ErebusRunConfig(BaseModel):
     fit_eclipse_timing_offset : Optional[float] = None
     max_steps : Optional[int] = None
     fit_lightcurve_phase : Optional[bool] = False
+    joint_fit_bin_size : Optional[int] = 4
     
     _custom_systematic_model = None
     _custom_parameters : dict = None

@@ -88,7 +88,7 @@ class JointFit(H5Serializable):
         self.end_trim = [config.get_trim_integrations(i)[1] for i in range(0, len(photometry_data_list))]
         
         # For the joint fit we bin the data to speed up convergence
-        self.bin_size = 4
+        self.bin_size = config.joint_fit_bin_size
         
         self.config = config
         
