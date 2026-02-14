@@ -93,9 +93,14 @@ class IndividualFit(H5Serializable):
             # Uniform prior for esinw/ecosw from -1 to 1
             mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -1, 1))
             mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -1, 1))
-        if self.config.fit_eclipse_timing_offset is not None:
-            offset = self.config.fit_eclipse_timing_offset
-            mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(0, -offset, offset))
+        if self.config.fit_uniform_eclipse_timing_offset is not None:
+            center = self.config.fit_uniform_eclipse_timing_offset[0]
+            half_width = self.config.fit_uniform_eclipse_timing_offset[1]
+            mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(center, -half_width, half_width))
+        elif self.config.fit_gaussian_eclipse_timing_offset is not None:
+            center = self.config.fit_gaussian_eclipse_timing_offset[0]
+            std_dev = self.config.fit_gaussian_eclipse_timing_offset[1]
+            mcmc.add_parameter("t_sec_offset", Parameter.gaussian_prior(center, std_dev))
         else:
             mcmc.add_parameter("t_sec_offset", Parameter.fixed(0))
         

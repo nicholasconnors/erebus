@@ -30,7 +30,7 @@ class Erebus(H5Serializable):
         '''
         Excluded from serialization
         '''
-        return ['individual_fits', 'joint_fit', 'photometry', 'planet']
+        return ['individual_fits', 'joint_fit', 'photometry', 'planet', 'force_clear_cache']
     
     @staticmethod
     def load(path : str):
@@ -39,6 +39,8 @@ class Erebus(H5Serializable):
     
     def __init__(self, run_cfg : ErebusRunConfig | str, force_clear_cache : bool = False,
                  override_cache_path : str = None, override_wrapped_fits : list[WrappedFits] = None):    
+                
+        self.force_clear_cache = force_clear_cache        
         
         if isinstance(run_cfg, str):
             run_cfg = ErebusRunConfig.load(run_cfg) 
@@ -117,13 +119,19 @@ class Erebus(H5Serializable):
         self.planet = Planet(planet_path)
         '''The planet configuration file used for this instance of the pipeline'''
         
-        indices = np.argsort([np.min(photo.time) for photo in self.photometry])
+        self.__setup_fits()
         
+        self.save_to_path(self._cache_file)
+        
+    def __setup_fits(self):
+        print("Setting up fit objects")
+        indices = np.argsort([np.min(photo.time) for photo in self.photometry])
+
         if self.config.perform_individual_fits:
             for i in range(0, len(self.visit_names)):
                 individual_fit = IndividualFit(self.photometry[i], 
                                                          self.planet, self.config,
-                                                         force_clear_cache, index = indices[i])
+                                                         self.force_clear_cache, index = indices[i])
                 self.individual_fits.append(individual_fit)
                 print(f"Visit {self.visit_names[i]} " + ("already ran" if 'fp' in individual_fit.results else "wasn't run yet"))
             
@@ -137,10 +145,8 @@ class Erebus(H5Serializable):
                     fit.order_label = "X"
 
         if self.config.perform_joint_fit:
-            self.joint_fit = JointFit(self.photometry, self.planet, self.config, force_clear_cache)
+            self.joint_fit = JointFit(self.photometry, self.planet, self.config, self.force_clear_cache)
             print("Joint fit " + ("already ran" if 'fp' in self.joint_fit.results else "wasn't run yet"))
-        
-        self.save_to_path(self._cache_file)
     
     def run(self, force_clear_cache : bool = False, output_folder="./output_{DATE}_{NAME}/"):
         '''
@@ -150,6 +156,11 @@ class Erebus(H5Serializable):
         time = datetime.now().strftime("%d_%m_%y_%H_%M_%S")
         output_folder = output_folder.replace("{DATE}", time)
         output_folder = output_folder.replace("{NAME}", self.planet.name)
+        
+        # Clearing the cache here should reset fits but not photometry data
+        if force_clear_cache:
+            self.force_clear_cache = True
+            self.__setup_fits()
         
         if not os.path.isdir(output_folder):
             os.makedirs(output_folder)
@@ -167,7 +178,7 @@ class Erebus(H5Serializable):
         self.planet.save(output_folder + self.planet.name + "_planet_config.yaml")
         
         if self.config.perform_individual_fits:
-            for fit in self.individual_fits:
+            for fit in self.individual_fits:                
                 has_run = fit.has_converged()
                 if not has_run or force_clear_cache:
                     fit.run()
@@ -191,7 +202,7 @@ class Erebus(H5Serializable):
                 dict['BIC'] = fit.BIC
                 utils.save_dict_to_json(dict, path + ".json")
 
-        if self.config.perform_joint_fit:
+        if self.config.perform_joint_fit:           
             has_run = self.joint_fit.has_converged()
             if not has_run or force_clear_cache:
                 self.joint_fit.run()

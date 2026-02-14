@@ -27,7 +27,8 @@ class ErebusRunConfig(BaseModel):
         star_position (list[int]): X and y pixel coordinates of the star. Optional (will search for the star or assume its centered).
         prevent_negative_eclipse_depth (bool): Optional bool to force eclipse depth to be positive.
         fix_eclipse_timing (bool): Optional bool to force t0, period, ecosw to be fixed
-        fit_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a uniform prior with twice this width centered on 0.5 phase
+        fit_uniform_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a uniform prior. First value is time from 0.5 phase, second value is half width
+        fit_gaussian_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a gaussian prior. First value is time from 0.5 phase, second value is std dev
         joint_fit_bin_size (int): Optional bin size for joint fit, if performed. Defaults to 4.
     '''    
     fit_fnpca : Optional[bool] = False
@@ -47,7 +48,8 @@ class ErebusRunConfig(BaseModel):
     path : Optional[str] = Field(None, exclude=True)
     prevent_negative_eclipse_depth: Optional[bool] = False
     fix_eclipse_timing: Optional[bool] = False
-    fit_eclipse_timing_offset : Optional[float] = None
+    fit_uniform_eclipse_timing_offset : Annotated[Optional[List[float]], Field(max_length=2, min_length=2)] = None
+    fit_gaussian_eclipse_timing_offset : Annotated[Optional[List[float]], Field(max_length=2, min_length=2)] = None
     max_steps : Optional[int] = None
     fit_lightcurve_phase : Optional[bool] = False
     joint_fit_bin_size : Optional[int] = 4
