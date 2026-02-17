@@ -69,39 +69,55 @@ class IndividualFit(H5Serializable):
         self.predicted_t_sec = planet.get_predicted_tsec(start_time)
         
         lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
-        mcmc.add_parameter("fp", Parameter.uniform_prior(400e-6, lower_limit, 2000e-6))
+        
+        if config.fit_no_eclipse:
+            mcmc.add_parameter("fp", Parameter.fixed(0))
+        else:
+            mcmc.add_parameter("fp", Parameter.uniform_prior(400e-6, lower_limit, 2000e-6))
              
-        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(t0, positive_only=True, force_fixed=config.fix_eclipse_timing))
-        mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar, positive_only=True))
-        mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar, positive_only=True))
-        mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, positive_only=True, force_fixed=config.fix_eclipse_timing))
-        mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc, positive_only=True))
+        fixed_timing_params = config.fix_eclipse_timing or config.fit_no_eclipse
+        fixed_planet_params = config.fit_no_eclipse
+        mcmc.add_parameter("t0", Parameter.prior_from_ufloat(t0, positive_only=True, force_fixed=fixed_timing_params))
+        mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar, positive_only=True, force_fixed=fixed_planet_params))
+        mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar, positive_only=True, force_fixed=fixed_planet_params))
+        mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, positive_only=True, force_fixed=fixed_timing_params))
+        mcmc.add_parameter("inc", Parameter.prior_from_ufloat(planet.inc, positive_only=True, force_fixed=fixed_planet_params))
         
         # using ecosw and esinw as parameters instead of using e and w directly
         # since w is circular it causes degeneracies (eg, 10 degrees and 370 degrees)
         if planet.w is not None and planet.ecc is not None:
             ecosw = planet.ecc * umath.cos(planet.w * np.pi / 180)
             esinw = planet.ecc * umath.sin(planet.w * np.pi / 180)
-            mcmc.add_parameter("esinw", Parameter.prior_from_ufloat(esinw, force_fixed=config.fix_eclipse_timing))
-            mcmc.add_parameter("ecosw", Parameter.prior_from_ufloat(ecosw, force_fixed=config.fix_eclipse_timing))
-        elif planet.ecc is not None:
-            # Uniform for cos/sin omega from -1 to 1
-            e = (planet.ecc.nominal_value + planet.ecc.std_dev)
-            mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -e, e))
-            mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -e, e))
+            mcmc.add_parameter("esinw", Parameter.prior_from_ufloat(esinw, force_fixed=fixed_timing_params))
+            mcmc.add_parameter("ecosw", Parameter.prior_from_ufloat(ecosw, force_fixed=fixed_timing_params))
         else:
-            # Uniform prior for esinw/ecosw from -1 to 1
-            mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -1, 1))
-            mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -1, 1))
-        if self.config.fit_uniform_eclipse_timing_offset is not None:
-            center = self.config.fit_uniform_eclipse_timing_offset[0]
-            half_width = self.config.fit_uniform_eclipse_timing_offset[1]
-            mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(center, -half_width, half_width))
-        elif self.config.fit_gaussian_eclipse_timing_offset is not None:
-            center = self.config.fit_gaussian_eclipse_timing_offset[0]
-            std_dev = self.config.fit_gaussian_eclipse_timing_offset[1]
-            mcmc.add_parameter("t_sec_offset", Parameter.gaussian_prior(center, std_dev))
-        else:
+            if fixed_timing_params:
+                mcmc.add_parameter("esinw", Parameter.fixed(0))
+                mcmc.add_parameter("ecosw", Parameter.fixed(0))
+            else:
+                if planet.ecc is not None:
+                    # Uniform for cos/sin omega from -1 to 1
+                    e = (planet.ecc.nominal_value + planet.ecc.std_dev)
+                    mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -e, e))
+                    mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -e, e))
+                else:
+                    # Uniform prior for esinw/ecosw from -1 to 1
+                    mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -1, 1))
+                    mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -1, 1))
+        
+        flag_t_sec_set = False
+        if not config.fit_no_eclipse:
+            if self.config.fit_uniform_eclipse_timing_offset is not None:
+                center = self.config.fit_uniform_eclipse_timing_offset[0]
+                half_width = self.config.fit_uniform_eclipse_timing_offset[1]
+                mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(center, -half_width, half_width))
+                flag_t_sec_set = True
+            elif self.config.fit_gaussian_eclipse_timing_offset is not None:
+                center = self.config.fit_gaussian_eclipse_timing_offset[0]
+                std_dev = self.config.fit_gaussian_eclipse_timing_offset[1]
+                mcmc.add_parameter("t_sec_offset", Parameter.gaussian_prior(center, std_dev))
+                flag_t_sec_set = True
+        if not flag_t_sec_set:
             mcmc.add_parameter("t_sec_offset", Parameter.fixed(0))
         
         if self.config.fit_fnpca:
