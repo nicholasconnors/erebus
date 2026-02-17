@@ -125,6 +125,9 @@ class Erebus(H5Serializable):
         
     def __setup_fits(self):
         print("Setting up fit objects")
+        
+        self.individual_fits : list[IndividualFit] = []        
+        
         indices = np.argsort([np.min(photo.time) for photo in self.photometry])
 
         if self.config.perform_individual_fits:
