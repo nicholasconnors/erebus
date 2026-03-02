@@ -1,6 +1,4 @@
 import copy
-import hashlib
-import json
 import os
 from typing import List
 
@@ -33,7 +31,7 @@ class IndividualFit(H5Serializable):
     def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None, index = None):
         self.visit_name = photometry_data.visit_name
-        self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
+        self.config_hash = config.get_hash()
         self.planet_name = planet.name
         self.planet = planet
         self.order_label = 'X'
@@ -145,7 +143,7 @@ class IndividualFit(H5Serializable):
             for key in self.config._custom_parameters:
                 param = self.config._custom_parameters[key]
                 if index is not None and index in self.config._custom_parameters_override:
-                    param = self.config._custom_parameters_override[key]
+                    param = self.config._custom_parameters_override[index][key]
                 mcmc.add_parameter(key, copy.deepcopy(param))
         # y_err always goes last
         mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))      
@@ -210,11 +208,9 @@ class IndividualFit(H5Serializable):
             systematic *= (a * x) + 1
         if self.config._custom_systematic_model is not None:
             flat_args = np.array(extra_params).flatten()
-            arg_names = list(inspect.signature(self.config._custom_systematic_model).parameters.keys())
-            if arg_names[1] == "visit_index":
-                systematic *= self.config._custom_systematic_model(x, self.index, *flat_args)
-            else:
-                systematic *= self.config._custom_systematic_model(x, *flat_args)
+
+            # Custom systematic must always have x, visit_index, and joint_fit bool
+            systematic *= self.config._custom_systematic_model(x, self.index, False, *flat_args)
         
         systematic += b
         

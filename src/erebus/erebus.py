@@ -1,5 +1,3 @@
-import hashlib
-import json
 import os
 from datetime import datetime
 
@@ -48,7 +46,7 @@ class Erebus(H5Serializable):
         if override_cache_path is not None:
             self._cache_file = override_cache_path
         else:
-            config_hash = hashlib.md5(json.dumps(run_cfg.model_dump()).encode()).hexdigest()   
+            config_hash = run_cfg.get_hash() 
             self._cache_file = f"{EREBUS_CACHE_DIR}/{config_hash}_erebus.h5"
     
         self.config : ErebusRunConfig = run_cfg
@@ -83,11 +81,6 @@ class Erebus(H5Serializable):
                 if self.visit_names is None or len(self.visit_names) == 0:
                     print("No visits found, aborting")
                     return
-            
-                if run_cfg.skip_visits is not None:
-                    filt = np.array([i not in run_cfg.skip_visits for i in range(0, len(self.visit_names))])
-                    self.visit_names = self.visit_names[filt]
-            
             else:
                 self.load_from_path(self._cache_file)
                 if run_cfg is not None:
@@ -141,11 +134,7 @@ class Erebus(H5Serializable):
             # Label the visits by the order they were observed
             individual_fit_order = np.argsort([fit.start_time for fit in self.individual_fits]) + 1           
             for i, fit in enumerate(self.individual_fits):
-                # If you are skipping visits this won't be done since it will be inaccurate
-                if self.config.skip_visits is None:
-                    fit.order_label = individual_fit_order[i]
-                else:
-                    fit.order_label = "X"
+                fit.order_label = individual_fit_order[i]
 
         if self.config.perform_joint_fit:
             self.joint_fit = JointFit(self.photometry, self.planet, self.config, self.force_clear_cache)
@@ -181,7 +170,11 @@ class Erebus(H5Serializable):
         self.planet.save(output_folder + self.planet.name + "_planet_config.yaml")
         
         if self.config.perform_individual_fits:
-            for fit in self.individual_fits:                
+            for i, fit in enumerate(self.individual_fits):
+                if i in self.config.skip_visits:
+                    print(f"Skipping visit index {i} - {fit.visit_name}")
+                    continue
+                   
                 has_run = fit.has_converged()
                 if not has_run or force_clear_cache:
                     fit.run()

@@ -1,4 +1,5 @@
 import json
+import hashlib
 from typing import Annotated, List, Optional, Union
 
 from pydantic import BaseModel, Field
@@ -100,6 +101,12 @@ class ErebusRunConfig(BaseModel):
         Params are given as a dictionary of their names (matching the method signature) to a Parameter object.
         '''
         self._custom_parameters_override[index] = params
+        
+    def get_hash(self):
+        '''
+        Returns a unique hash representing this run config
+        '''
+        return hashlib.md5((json.dumps(self.model_dump()) + json.dumps(list(self._custom_parameters.keys()))).encode()).hexdigest()
     
     @staticmethod
     def load(path : str):

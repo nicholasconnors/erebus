@@ -1,7 +1,5 @@
 import copy
-import hashlib
 import inspect
-import json
 import os
 from typing import List
 
@@ -61,7 +59,7 @@ class JointFit(H5Serializable):
     
     def __init__(self, photometry_data_list : List[PhotometryData], planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None):
-        self.config_hash = hashlib.md5(json.dumps(config.model_dump()).encode()).hexdigest()
+        self.config_hash = config.get_hash()
         self.planet_name = planet.name
         
         self._cache_file = f"{EREBUS_CACHE_DIR}/{self.config_hash}_joint_fit.h5"
@@ -82,16 +80,24 @@ class JointFit(H5Serializable):
         self._force_clear_cache = force_clear_cache
         
         self.planet = planet
+        
+        # Maps the saved photometry data index to the visit index
+        self.visit_indices = np.arange(0, len(photometry_data_list))
         self.photometry_data_list = photometry_data_list
-        
-        self.start_trim = [config.get_trim_integrations(i)[0] for i in range(0, len(photometry_data_list))]
-        self.end_trim = [config.get_trim_integrations(i)[1] for i in range(0, len(photometry_data_list))]
-        
-        # For the joint fit we bin the data to speed up convergence
-        self.bin_size = config.joint_fit_bin_size
         
         self.config = config
         
+        # Remove visits we're skipping
+        if self.config.skip_visits is not None and len(self.config.skip_visits) > 0:
+            self.visit_indices = np.delete(self.visit_indices, self.config.skip_visits)
+            self.photometry_data_list = np.delete(self.photometry_data_list, self.config.skip_visits)
+        
+        self.start_trim = [config.get_trim_integrations(i)[0] for i in np.arange(len(photometry_data_list))]
+        self.end_trim = [config.get_trim_integrations(i)[1] for i in np.arange(len(photometry_data_list))]
+        
+        # For the joint fit we bin the data to speed up convergence
+        self.bin_size = config.joint_fit_bin_size
+                
         self.chain = None
         
         self.params = None
@@ -107,6 +113,8 @@ class JointFit(H5Serializable):
             self.joint_eigenvalues.append(binned_eigenvalues)
             self.joint_eigenvectors.append(eigenvectors)
             self.pca_variance_ratios.append(variance_ratios)
+            if i in config.skip_visits:
+                continue
             binned_time = bin_data(data.time[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0]
             self.time.append(binned_time)
             print(np.array(binned_eigenvalues).shape)
@@ -198,7 +206,7 @@ class JointFit(H5Serializable):
         if not flag_t_sec_set:
             mcmc.add_parameter("t_sec_offset", Parameter.fixed(0))
         
-        for visit_index in range(0, len(photometry_data_list)):
+        for visit_index in self.visit_indices:
             if self.config.fit_fnpca:
                 for i in range(0, 5):
                     mcmc.add_parameter(f"pc{(i+1)}_{visit_index}", Parameter.uniform_prior(0.1, -10, 10))
@@ -288,19 +296,13 @@ class JointFit(H5Serializable):
         '''
         Assumes all x are from the same visit
         '''
-        time = np.array([xi - self.starting_times[self.get_visit_index_from_time(xi)] for xi in x])
-
+        visit_index = self.get_visit_index_from_time(x[0])
+        time = np.array(x) -np.array([xi - self.starting_times[visit_index] for xi in x])
+        
         systematic = np.ones_like(x)
         if self.config.fit_fnpca:
             coeffs = np.array([pc1, pc2, pc3, pc4, pc5])
-            
-            # x might not fully match eigenvalues so interp
-            # print(f"Shapes of stuff {x.shape} {self.time.shape} {self.all_eigenvalues.shape}")
-            if np.min(x) < np.min(self.time) or np.max(x) > np.max(self.time):
-                raise Exception(f"Bad, out of bounds! {np.min(x)} < {np.min(self.time)} or {np.max(x)} > {np.max(self.time)}")
-            #eigenvalues = np.array([np.interp(x, self.time, row) for row in self.all_eigenvalues.T])
             eigenvalues = np.array([self.eigenvalue_lookup[xi] for xi in x]).T
-            #raise Exception(f"{eigenvalues.shape} {systematic.shape} {self.joint_eigenvalues.shape} {self.time.shape} {self.all_eigenvalues.shape}")
             
             # remove NaNs to account for jagged numpy array
             eigenvalues = np.array([row[~np.isnan(row)] for row in eigenvalues])
@@ -317,11 +319,7 @@ class JointFit(H5Serializable):
             systematic *= (a * time) + 1
         if self.config._custom_systematic_model is not None:
             flat_args = np.array(extra_params).flatten()
-            arg_names = list(inspect.signature(self.config._custom_systematic_model).parameters.keys())
-            if arg_names[1] == "visit_index":
-                systematic *= np.array([self.config._custom_systematic_model(xi, self.get_visit_index_from_time(xi), *flat_args) for xi in x])
-            else:
-                systematic *= self.config._custom_systematic_model(x, *flat_args)
+            systematic *= self.config._custom_systematic_model(x, visit_index, True, *flat_args)
         
         systematic += b
         
@@ -353,11 +351,11 @@ class JointFit(H5Serializable):
         # x is a list of times
         visit_indices = np.array([self.get_visit_index_from_time(xi) for xi in x])
         results = np.zeros_like(x)
-        for visit_index in range(0, len(self.photometry_data_list)):
+        for i, visit_index in enumerate(self.visit_indices):
             filt = visit_indices == visit_index
             time = x[filt]
                         
-            systematic_index_start = (number_of_physical_args + 1) + (visit_index * number_of_systematic_args)
+            systematic_index_start = (number_of_physical_args + 1) + (i * number_of_systematic_args)
             systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
         
             systematic = self.systematic_model(time, *systematic_args)
@@ -370,7 +368,7 @@ class JointFit(H5Serializable):
         '''
         Performs the joint fit via MCMC. Caches the results to the disk.
         '''
-        self.mcmc.run(self.time, self.raw_flux, walkers = 80, 
+        self.mcmc.run(self.time, self.raw_flux, walkers = 80,
                       force_clear_cache=self._force_clear_cache,
                       max_steps = self.config.max_steps if self.config.max_steps is not None else 2000000)
         
