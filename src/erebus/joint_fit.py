@@ -104,26 +104,29 @@ class JointFit(H5Serializable):
         self.transit_models = {}
         
         self.joint_eigenvalues = []
-        self.joint_eigenvectors = [] 
+        self.joint_eigenvectors = []
         self.pca_variance_ratios = []
         self.time = []
+        self.raw_flux = []
         for i, data in enumerate(photometry_data_list):
             eigenvalues, eigenvectors, variance_ratios = perform_fn_pca_on_aperture(data.normalized_frames[self.start_trim[i]:self.end_trim[i]])
             binned_eigenvalues = np.array([bin_data(ev, self.bin_size)[0] for ev in eigenvalues])
             self.joint_eigenvalues.append(binned_eigenvalues)
             self.joint_eigenvectors.append(eigenvectors)
             self.pca_variance_ratios.append(variance_ratios)
-            if i in config.skip_visits:
+            if config.skip_visits is not None and i in config.skip_visits:
                 continue
             binned_time = bin_data(data.time[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0]
             self.time.append(binned_time)
+            binned_flux = bin_data(data.raw_flux[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0]
+            self.raw_flux.append(binned_flux)
             print(np.array(binned_eigenvalues).shape)
             
         # time per visit used to interpolate FNPCA systematic
         self.time = np.concatenate(self.time)
         self.all_eigenvalues = np.concatenate(self.joint_eigenvalues, axis=1)
         self.starting_times = np.sort(np.array([np.min(data.time) for data in photometry_data_list]))
-        self.raw_flux = np.concatenate([bin_data(data.raw_flux[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0] for i, data in enumerate(photometry_data_list)])
+        self.raw_flux = np.concatenate(self.raw_flux)
         
         # Orders might be wrong, assumes each visit was in order
         sort = np.argsort(self.time)

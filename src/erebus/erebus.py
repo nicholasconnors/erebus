@@ -171,7 +171,7 @@ class Erebus(H5Serializable):
         
         if self.config.perform_individual_fits:
             for i, fit in enumerate(self.individual_fits):
-                if i in self.config.skip_visits:
+                if self.config.skip_visits is not None and i in self.config.skip_visits:
                     print(f"Skipping visit index {i} - {fit.visit_name}")
                     continue
                    
