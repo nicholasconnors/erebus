@@ -56,12 +56,13 @@ class JointFitResults(H5Serializable):
 
             physical_args = args[0:number_of_physical_args]
             visit_indices = np.array([fit.get_visit_index_from_time(xi) for xi in fit.time])
-            for visit_index in range(0, len(fit.photometry_data_list)):
+            for i, visit_index in enumerate(fit.visit_indices):
                 filt = visit_indices == visit_index
                 time = fit.time[filt]
                 flux = fit.raw_flux[filt]
-                            
-                systematic_index_start = (number_of_physical_args) + (visit_index * number_of_systematic_args)
+                
+                # Only add visits that were included
+                systematic_index_start = (number_of_physical_args) + (i * number_of_systematic_args)
                 systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
             
                 systematic = fit.systematic_model(time, *systematic_args)
@@ -73,7 +74,7 @@ class JointFitResults(H5Serializable):
                 self.relative_time_per_visit.append((time - time_offset) * 24)
                 self.model_time_per_visit.append((physical_time - time_offset) * 24)
                 self.model_flux_per_visit.append(physical)
-            
+                        
             # To be serialized 2D arrays cannot be jagged
             self.detrended_flux_per_visit = JointFitResults.__pad_2d_array(self.detrended_flux_per_visit)
             self.relative_time_per_visit = JointFitResults.__pad_2d_array(self.relative_time_per_visit)
