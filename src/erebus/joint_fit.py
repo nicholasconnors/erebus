@@ -300,7 +300,7 @@ class JointFit(H5Serializable):
         Assumes all x are from the same visit
         '''
         visit_index = self.get_visit_index_from_time(x[0])
-        time = np.array(x) -np.array([xi - self.starting_times[visit_index] for xi in x])
+        time = np.array(x) - self.starting_times[visit_index]
         
         systematic = np.ones_like(x)
         if self.config.fit_fnpca:
