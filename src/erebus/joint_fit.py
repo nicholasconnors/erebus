@@ -197,9 +197,10 @@ class JointFit(H5Serializable):
         
         def try_add_eclipse_timing_parameter(name):
             if self.config.fit_uniform_eclipse_timing_offset is not None:
-                center = self.config.fit_uniform_eclipse_timing_offset[0]
-                half_width = self.config.fit_uniform_eclipse_timing_offset[1]
-                mcmc.add_parameter(name, Parameter.uniform_prior(center, -half_width, half_width))
+                start = self.config.fit_uniform_eclipse_timing_offset[0]
+                end = self.config.fit_uniform_eclipse_timing_offset[1]
+                center = (start + end)/2
+                mcmc.add_parameter(name, Parameter.uniform_prior(center, start, end))
                 return True
             if self.config.fit_gaussian_eclipse_timing_offset is not None:
                 center = self.config.fit_gaussian_eclipse_timing_offset[0]
@@ -384,8 +385,8 @@ class JointFit(H5Serializable):
             filt = visit_indices == visit_index
             time = x[filt]
                         
-            # + 2 for the number of individual eclipse t_sec offsets and depths
-            systematic_index_start = (number_of_physical_args + 2 + i) + (i * number_of_systematic_args)
+            # Physical args, then 2 * num_visits for individual t_sec and fp, then skip systematic args for other visits
+            systematic_index_start = (number_of_physical_args + 1) + (2 * num_visits) + (i * number_of_systematic_args)
             systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
         
             systematic = self.systematic_model(time, *systematic_args)
@@ -399,7 +400,7 @@ class JointFit(H5Serializable):
             if self.config.fit_eclipse_depth_per_visit:
                 visit_specific_fp = args[number_of_physical_args + 1 + i + num_visits]
                 physical_args = list(physical_args)
-                physical_args[1] = visit_specific_fp
+                physical_args[0] = visit_specific_fp
                 physical_args = tuple(physical_args)
             
             physical = self.physical_model(time, *physical_args)

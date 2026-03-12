@@ -106,9 +106,10 @@ class IndividualFit(H5Serializable):
         flag_t_sec_set = False
         if not config.fit_no_eclipse:
             if self.config.fit_uniform_eclipse_timing_offset is not None:
-                center = self.config.fit_uniform_eclipse_timing_offset[0]
-                half_width = self.config.fit_uniform_eclipse_timing_offset[1]
-                mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(center, -half_width, half_width))
+                start = self.config.fit_uniform_eclipse_timing_offset[0]
+                end = self.config.fit_uniform_eclipse_timing_offset[1]
+                center = (start + end)/2.0
+                mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(center, start, end))
                 flag_t_sec_set = True
             elif self.config.fit_gaussian_eclipse_timing_offset is not None:
                 center = self.config.fit_gaussian_eclipse_timing_offset[0]

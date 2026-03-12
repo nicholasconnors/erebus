@@ -28,7 +28,7 @@ class ErebusRunConfig(BaseModel):
         star_position (list[int]): X and y pixel coordinates of the star. Optional (will search for the star or assume its centered).
         prevent_negative_eclipse_depth (bool): Optional bool to force eclipse depth to be positive.
         fix_eclipse_timing (bool): Optional bool to force t0, period, ecosw to be fixed
-        fit_uniform_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a uniform prior. First value is time from 0.5 phase, second value is half width
+        fit_uniform_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a uniform prior. First value is start, second value is end, relative to 0.5 phase
         fit_gaussian_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a gaussian prior. First value is time from 0.5 phase, second value is std dev
         fit_eclipse_timing_offset_per_visit (bool): Optional bool to use a different eclipse timing offset for each visit during a joint fit.
         fit_eclipse_depth_per_visit (bool): Optional bool to use a different eclipse depth for each visit during a joint fit.
