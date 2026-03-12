@@ -30,6 +30,7 @@ class ErebusRunConfig(BaseModel):
         fix_eclipse_timing (bool): Optional bool to force t0, period, ecosw to be fixed
         fit_uniform_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a uniform prior. First value is time from 0.5 phase, second value is half width
         fit_gaussian_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a gaussian prior. First value is time from 0.5 phase, second value is std dev
+        fit_eclipse_timing_offset_per_visit (bool): Optional bool to use a different eclipse timing offset for each visit during a joint fit.
         joint_fit_bin_size (int): Optional bin size for joint fit, if performed. Defaults to 4.
         fit_no_eclipse (bool): Optionally fit only systematic (as in, eclipse depth is 0).
     '''    
@@ -52,6 +53,7 @@ class ErebusRunConfig(BaseModel):
     fix_eclipse_timing: Optional[bool] = False
     fit_uniform_eclipse_timing_offset : Annotated[Optional[List[float]], Field(max_length=2, min_length=2)] = None
     fit_gaussian_eclipse_timing_offset : Annotated[Optional[List[float]], Field(max_length=2, min_length=2)] = None
+    fit_eclipse_timing_offset_per_visit : Optional[bool] = False
     max_steps : Optional[int] = None
     fit_lightcurve_phase : Optional[bool] = False
     joint_fit_bin_size : Optional[int] = 4

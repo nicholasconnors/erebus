@@ -194,20 +194,34 @@ class JointFit(H5Serializable):
                     mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -1, 1))
                     mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -1, 1))
         
-        flag_t_sec_set = False
-        if not config.fit_no_eclipse:
+        def add_eclipse_timing_parameter(name):
             if self.config.fit_uniform_eclipse_timing_offset is not None:
                 center = self.config.fit_uniform_eclipse_timing_offset[0]
                 half_width = self.config.fit_uniform_eclipse_timing_offset[1]
-                mcmc.add_parameter("t_sec_offset", Parameter.uniform_prior(center, -half_width, half_width))
-                flag_t_sec_set = True
-            elif self.config.fit_gaussian_eclipse_timing_offset is not None:
+                mcmc.add_parameter(name, Parameter.uniform_prior(center, -half_width, half_width))
+                return True
+            if self.config.fit_gaussian_eclipse_timing_offset is not None:
                 center = self.config.fit_gaussian_eclipse_timing_offset[0]
                 std_dev = self.config.fit_gaussian_eclipse_timing_offset[1]
-                mcmc.add_parameter("t_sec_offset", Parameter.gaussian_prior(center, std_dev))
-                flag_t_sec_set = True
+                mcmc.add_parameter(name, Parameter.gaussian_prior(center, std_dev))
+                return True
+            return False
+        
+        # If not fitting eclipse, don't fit timing
+        # If fitting a separate timing per eclipse, don't set those global offset
+        flag_t_sec_set = False
+        if not config.fit_no_eclipse and not config.fit_eclipse_timing_offset_per_visit:
+            flag_t_sec_set = add_eclipse_timing_parameter("t_sec_offset")
         if not flag_t_sec_set:
             mcmc.add_parameter("t_sec_offset", Parameter.fixed(0))
+            
+        for visit_index in self.visit_indices:
+            flag_visit_t_sec_set = False
+            name = f"t_sec_offset_{(visit_index)}"
+            if not config.fit_no_eclipse and config.fit_eclipse_timing_offset_per_visit:
+                flag_visit_t_sec_set = add_eclipse_timing_parameter(name)
+            if not flag_visit_t_sec_set:
+                mcmc.add_parameter(name, Parameter.fixed(0))
         
         for visit_index in self.visit_indices:
             if self.config.fit_fnpca:
@@ -358,10 +372,19 @@ class JointFit(H5Serializable):
             filt = visit_indices == visit_index
             time = x[filt]
                         
-            systematic_index_start = (number_of_physical_args + 1) + (i * number_of_systematic_args)
+            # + i for the number of individual eclipse offsets
+            systematic_index_start = (number_of_physical_args + 1 + i) + (i * number_of_systematic_args)
             systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
         
             systematic = self.systematic_model(time, *systematic_args)
+            
+            # Relies on last argument being t_sec_offset, not ideal
+            if self.config.fit_eclipse_timing_offset_per_visit:
+                visit_specific_t_sec_offset = args[number_of_physical_args + 1 + i]
+                physical_args = list(physical_args)
+                physical_args[-1] = visit_specific_t_sec_offset
+                physical_args = tuple(physical_args)
+            
             physical = self.physical_model(time, *physical_args)
             results[filt] = systematic * physical
             
