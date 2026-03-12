@@ -158,12 +158,13 @@ class JointFit(H5Serializable):
                 
         mcmc = WrappedMCMC(self._cache_file.replace(".h5", "_mcmc.h5"))
         
-        lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
+        fp_lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
+        fp_upper_limit = 2000e-6
         
-        if config.fit_no_eclipse:
+        if config.fit_no_eclipse or config.fit_eclipse_depth_per_visit:
             mcmc.add_parameter("fp", Parameter.fixed(0))
         else:
-            mcmc.add_parameter("fp", Parameter.uniform_prior(400e-6, lower_limit, 2000e-6))
+            mcmc.add_parameter("fp", Parameter.uniform_prior(400e-6, fp_lower_limit, fp_upper_limit))
              
         fixed_timing_params = config.fix_eclipse_timing or config.fit_no_eclipse
         fixed_planet_params = config.fit_no_eclipse
@@ -194,7 +195,7 @@ class JointFit(H5Serializable):
                     mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -1, 1))
                     mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -1, 1))
         
-        def add_eclipse_timing_parameter(name):
+        def try_add_eclipse_timing_parameter(name):
             if self.config.fit_uniform_eclipse_timing_offset is not None:
                 center = self.config.fit_uniform_eclipse_timing_offset[0]
                 half_width = self.config.fit_uniform_eclipse_timing_offset[1]
@@ -209,20 +210,30 @@ class JointFit(H5Serializable):
         
         # If not fitting eclipse, don't fit timing
         # If fitting a separate timing per eclipse, don't set those global offset
-        flag_t_sec_set = False
-        if not config.fit_no_eclipse and not config.fit_eclipse_timing_offset_per_visit:
-            flag_t_sec_set = add_eclipse_timing_parameter("t_sec_offset")
-        if not flag_t_sec_set:
+        should_fit_individual_t_sec_offset = not config.fit_no_eclipse and config.fit_eclipse_depth_per_visit
+        should_fit_global_t_sec_offset = not config.fit_no_eclipse and not config.fit_eclipse_depth_per_visit
+        should_fit_individual_eclipse_depths = not config.fit_no_eclipse and config.fit_eclipse_depth_per_visit
+        
+        flag_global_t_sec_set = False
+        if should_fit_global_t_sec_offset:
+            flag_t_sec_set = try_add_eclipse_timing_parameter("t_sec_offset")
+        if not flag_global_t_sec_set:
             mcmc.add_parameter("t_sec_offset", Parameter.fixed(0))
-            
+        
         for visit_index in self.visit_indices:
             flag_visit_t_sec_set = False
             name = f"t_sec_offset_{(visit_index)}"
-            if not config.fit_no_eclipse and config.fit_eclipse_timing_offset_per_visit:
-                flag_visit_t_sec_set = add_eclipse_timing_parameter(name)
+            if should_fit_individual_t_sec_offset:
+                flag_visit_t_sec_set = try_add_eclipse_timing_parameter(name)
             if not flag_visit_t_sec_set:
                 mcmc.add_parameter(name, Parameter.fixed(0))
-        
+            
+            name = f"fp_{(visit_index)}"
+            if should_fit_individual_eclipse_depths:
+                mcmc.add_parameter(name, Parameter.uniform_prior(400e-6, fp_lower_limit, fp_upper_limit))
+            else:
+                mcmc.add_parameter(name, Parameter.fixed(0))
+
         for visit_index in self.visit_indices:
             if self.config.fit_fnpca:
                 for i in range(0, 5):
@@ -363,6 +374,7 @@ class JointFit(H5Serializable):
         number_of_systematic_args = self.get_number_of_systematic_args()
         
         physical_args = args[1:number_of_physical_args + 1]
+        num_visits = len(self.visit_indices)
                 
         # Systematic arguments we're actually using will depend on the x value
         # x is a list of times
@@ -372,17 +384,22 @@ class JointFit(H5Serializable):
             filt = visit_indices == visit_index
             time = x[filt]
                         
-            # + i for the number of individual eclipse offsets
-            systematic_index_start = (number_of_physical_args + 1 + i) + (i * number_of_systematic_args)
+            # + 2 for the number of individual eclipse t_sec offsets and depths
+            systematic_index_start = (number_of_physical_args + 2 + i) + (i * number_of_systematic_args)
             systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
         
             systematic = self.systematic_model(time, *systematic_args)
             
-            # Relies on last argument being t_sec_offset, not ideal
+            # Relies on argument positions of t_sec_offset and depth, not ideal
             if self.config.fit_eclipse_timing_offset_per_visit:
                 visit_specific_t_sec_offset = args[number_of_physical_args + 1 + i]
                 physical_args = list(physical_args)
                 physical_args[-1] = visit_specific_t_sec_offset
+                physical_args = tuple(physical_args)
+            if self.config.fit_eclipse_depth_per_visit:
+                visit_specific_fp = args[number_of_physical_args + 1 + i + num_visits]
+                physical_args = list(physical_args)
+                physical_args[1] = visit_specific_fp
                 physical_args = tuple(physical_args)
             
             physical = self.physical_model(time, *physical_args)
