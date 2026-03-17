@@ -217,7 +217,7 @@ class JointFit(H5Serializable):
         
         flag_global_t_sec_set = False
         if should_fit_global_t_sec_offset:
-            flag_t_sec_set = try_add_eclipse_timing_parameter("t_sec_offset")
+            flag_global_t_sec_set = try_add_eclipse_timing_parameter("t_sec_offset")
         if not flag_global_t_sec_set:
             mcmc.add_parameter("t_sec_offset", Parameter.fixed(0))
         
@@ -348,7 +348,7 @@ class JointFit(H5Serializable):
             systematic += (a * time)
         if self.config._custom_systematic_model is not None:
             flat_args = np.array(extra_params).flatten()
-            systematic += self.config._custom_systematic_model(x, visit_index, True, *flat_args)
+            systematic += self.config._custom_systematic_model(time, visit_index, True, *flat_args)
         
         systematic += b
         
