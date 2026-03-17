@@ -131,7 +131,7 @@ class Planet:
         with open(path, "w") as f:
             f.write(planet_schema_json)
             
-    def get_closest_t0(self, obs_start):
+    def get_closest_t0(self, obs_start : float):
         '''
         Given a start time in BJD-2,400,000.5, use the lookup file to get
         the closest t0

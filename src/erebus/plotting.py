@@ -234,37 +234,30 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     
     if "e" in joint_fit.results and "w" in joint_fit.results:
         ecosw = joint_fit.results["e"].nominal_value * np.cos(joint_fit.results["w"].nominal_value * np.pi / 180)
-    
-    offset = (2 * per * ecosw / np.pi) * 24
-    duration = get_eclipse_duration(inc, a, rp, per) * 24
-    print("Offset: ", offset, "hours")
-    eclipse_start = offset - duration/2
-    eclipse_end = offset + duration/2
-    
-    detrended_flux_per_visit = joint_fit.detrended_flux_per_visit
-    time_per_visit = joint_fit.time_per_visit
-    model_time_per_visit = joint_fit.model_time_per_visit
-    model_flux_per_visit = joint_fit.model_flux_per_visit
-    
-    for i in range(0, len(time_per_visit)):
-        plt.plot(time_per_visit[i], detrended_flux_per_visit[i], linestyle='', marker='.', color='grey', alpha=0.2)
-    
-    combined_times = np.concatenate(time_per_visit)
-    combined_flux = np.concatenate(detrended_flux_per_visit)
-    sort = np.argsort(combined_times)
-    combined_times = combined_times[sort]
-    combined_flux = combined_flux[sort]
-    
-    bin_size = len(combined_times) // 30
-    bin_time, _ = bin_data(combined_times, bin_size)
-    bin_flux, _ = bin_data(combined_flux, bin_size)
-    yerr = joint_fit.results['y_err'].nominal_value
-    
-    plt.errorbar(bin_time, bin_flux, yerr/np.sqrt(bin_size), color='black', linestyle='', marker='.')
-    
-    for i in range(0, len(model_time_per_visit)):
-        plt.plot(model_time_per_visit[i], model_flux_per_visit[i], color='red')
-    plt.axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
+
+    def phase_fold_light_curve(time, flux):
+        all_time = np.concatenate(time)
+        all_time = all_time[np.where(np.isfinite(all_time))]
+
+        all_flux = np.concatenate(flux)
+        all_flux = all_flux[np.where(np.isfinite(all_flux))]
+        
+        s = np.argsort(all_time)
+        all_time = all_time[s]
+        all_flux = all_flux[s]
+
+        return all_time, all_flux
+
+    all_time, all_flux = phase_fold_light_curve(joint_fit.time_per_visit, joint_fit.detrended_flux_per_visit)
+    bin_size = len(all_time) // 20
+    bin_time, _ = bin_data(all_time, bin_size)
+    bin_flux, _ = bin_data(all_flux, bin_size)
+    model_time, model_flux = phase_fold_light_curve(joint_fit.time_per_visit, joint_fit.model_flux_per_visit)
+
+    plt.plot(all_time, all_flux, color='grey', alpha=0.5)
+    plt.plot(model_time, model_flux, color='red')
+    plt.errorbar(bin_time, bin_flux, yerr=joint_fit.results['y_err'].nominal_value, color='black', linestyle='', marker='o')
+
     plt.ylabel("Normalized flux")
     plt.xlabel("Time from 0.5 phase (hours)")
     plt.title("Phase folded light curve")

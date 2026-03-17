@@ -44,6 +44,8 @@ class JointFitResults(H5Serializable):
             '''A list containing the time values corresponding to detrended_flux_per_visit'''
             self.systematic_per_visit = []
             '''A list containing the systematic model corresponding to detrended_flux_per_visit'''
+            self.raw_flux_per_visit = []
+            '''A list containing the raw flux of each visit'''
             
             # Time relative to predicted t_sec and used to run the physical model
             self.model_flux_per_visit = []
@@ -68,21 +70,20 @@ class JointFitResults(H5Serializable):
                 systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
             
                 systematic = fit.systematic_model(time, *systematic_args)
-                physical_time = np.linspace(np.min(time), np.max(time), 1000)
-                physical = fit.physical_model(physical_time, *physical_args)
+                physical = fit.physical_model(time, *physical_args)
                 
                 self.detrended_flux_per_visit.append(flux / systematic)
                 self.systematic_per_visit.append(systematic)
+                self.raw_flux_per_visit.append(flux)
                 time_offset = fit.get_predicted_t_sec_of_visit(visit_index).nominal_value + fit.starting_times[visit_index]
                 self.time_per_visit.append((time - time_offset) * 24)
-                self.model_time_per_visit.append((physical_time - time_offset) * 24)
                 self.model_flux_per_visit.append(physical)
                         
             # To be serialized 2D arrays cannot be jagged
             self.detrended_flux_per_visit = JointFitResults.__pad_2d_array(self.detrended_flux_per_visit)
             self.systematic_per_visit = JointFitResults.__pad_2d_array(self.systematic_per_visit)
+            self.raw_flux_per_visit = JointFitResults.__pad_2d_array(self.systematic_per_visit)
             self.time_per_visit = JointFitResults.__pad_2d_array(self.time_per_visit)
-            self.model_time_per_visit = JointFitResults.__pad_2d_array(self.model_time_per_visit)
             self.model_flux_per_visit = JointFitResults.__pad_2d_array(self.model_flux_per_visit)
             
             self.final_log_likelihood = fit.final_log_likelihood
