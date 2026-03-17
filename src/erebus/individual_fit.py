@@ -199,19 +199,19 @@ class IndividualFit(H5Serializable):
         systematic = np.ones_like(x)
         if self.config.fit_fnpca:
             coeffs = np.array([pc1, pc2, pc3, pc4, pc5])
-            pca = np.ones_like(self.eigenvalues[0])
+            pca = np.zeros_like(self.eigenvalues[0])
             for i in range(0, 5):
                 pca += coeffs[i] * self.eigenvalues[i]
-            systematic *= pca
+            systematic += pca
         if self.config.fit_exponential:
-            systematic *= (exp1 * np.exp(exp2 * x)) + 1
+            systematic += (exp1 * np.exp(exp2 * x))
         if self.config.fit_linear:
-            systematic *= (a * x) + 1
+            systematic += (a * x)
         if self.config._custom_systematic_model is not None:
             flat_args = np.array(extra_params).flatten()
 
             # Custom systematic must always have x, visit_index, and joint_fit bool
-            systematic *= self.config._custom_systematic_model(x, self.index, False, *flat_args)
+            systematic += self.config._custom_systematic_model(x, self.index, False, *flat_args)
         
         systematic += b
         

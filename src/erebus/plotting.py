@@ -242,14 +242,14 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     eclipse_end = offset + duration/2
     
     detrended_flux_per_visit = joint_fit.detrended_flux_per_visit
-    relative_time_per_visit = joint_fit.relative_time_per_visit
+    time_per_visit = joint_fit.time_per_visit
     model_time_per_visit = joint_fit.model_time_per_visit
     model_flux_per_visit = joint_fit.model_flux_per_visit
     
-    for i in range(0, len(relative_time_per_visit)):
-        plt.plot(relative_time_per_visit[i], detrended_flux_per_visit[i], linestyle='', marker='.', color='grey', alpha=0.2)
+    for i in range(0, len(time_per_visit)):
+        plt.plot(time_per_visit[i], detrended_flux_per_visit[i], linestyle='', marker='.', color='grey', alpha=0.2)
     
-    combined_times = np.concatenate(relative_time_per_visit)
+    combined_times = np.concatenate(time_per_visit)
     combined_flux = np.concatenate(detrended_flux_per_visit)
     sort = np.argsort(combined_times)
     combined_times = combined_times[sort]

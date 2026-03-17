@@ -228,7 +228,7 @@ class JointFit(H5Serializable):
                 flag_visit_t_sec_set = try_add_eclipse_timing_parameter(name)
             if not flag_visit_t_sec_set:
                 mcmc.add_parameter(name, Parameter.fixed(0))
-            
+        for visit_index in self.visit_indices:
             name = f"fp_{(visit_index)}"
             if should_fit_individual_eclipse_depths:
                 mcmc.add_parameter(name, Parameter.uniform_prior(400e-6, fp_lower_limit, fp_upper_limit))
@@ -336,19 +336,19 @@ class JointFit(H5Serializable):
             # remove NaNs to account for jagged numpy array
             eigenvalues = np.array([row[~np.isnan(row)] for row in eigenvalues])
 
-            pca = np.ones_like(eigenvalues[0])
+            pca = np.zeros_like(eigenvalues[0])
             for i in range(0, 5):
                 pca += coeffs[i] * eigenvalues[i]
 
-            systematic *= pca
+            systematic += pca
             
         if self.config.fit_exponential:
-            systematic *= (exp1 * np.exp(exp2 * time)) + 1
+            systematic += (exp1 * np.exp(exp2 * time))
         if self.config.fit_linear:
-            systematic *= (a * time) + 1
+            systematic += (a * time)
         if self.config._custom_systematic_model is not None:
             flat_args = np.array(extra_params).flatten()
-            systematic *= self.config._custom_systematic_model(x, visit_index, True, *flat_args)
+            systematic += self.config._custom_systematic_model(x, visit_index, True, *flat_args)
         
         systematic += b
         

@@ -41,7 +41,7 @@ def bin_data(array: np.ndarray, bin_size : int):
     '''
     Returns the means and standard error of each bin
     '''
-    if len(array) < bin_size:
+    if len(array) < bin_size or bin_size == 1:
         return array, np.zeros_like(array)
     
     # Get length which is divisible by bin_size
