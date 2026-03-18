@@ -225,15 +225,15 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     
     fp = joint_fit.results['fp'].nominal_value
     fp_err = joint_fit.results['fp'].std_dev
-    inc = joint_fit.results["inc"].nominal_value
-    a = joint_fit.results["a_rstar"].nominal_value
-    rp = joint_fit.results["rp_rstar"].nominal_value
-    per = joint_fit.results["p"].nominal_value
-    ecosw = joint_fit.results["ecosw"].nominal_value if "ecosw" in joint_fit.results else 0
+    #inc = joint_fit.results["inc"].nominal_value
+    #a = joint_fit.results["a_rstar"].nominal_value
+    #rp = joint_fit.results["rp_rstar"].nominal_value
+    #per = joint_fit.results["p"].nominal_value
+    #ecosw = joint_fit.results["ecosw"].nominal_value if "ecosw" in joint_fit.results else 0
     #esinw = joint_fit.results["esinw"].nominal_value if "esinw" in joint_fit.results else 0
     
-    if "e" in joint_fit.results and "w" in joint_fit.results:
-        ecosw = joint_fit.results["e"].nominal_value * np.cos(joint_fit.results["w"].nominal_value * np.pi / 180)
+    #if "e" in joint_fit.results and "w" in joint_fit.results:
+    #    ecosw = joint_fit.results["e"].nominal_value * np.cos(joint_fit.results["w"].nominal_value * np.pi / 180)
 
     def phase_fold_light_curve(time, flux):
         all_time = np.concatenate(time)
