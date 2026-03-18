@@ -249,7 +249,9 @@ class WrappedMCMC(H5Serializable):
             
             R = gelman_rubin_convergence(withinchainvar, meanchain, chain_length, nchains)
             try:
-                auto_correlation_time = np.mean(sampler[0].get_autocorr_time())
+                #auto_correlation_time = np.mean(sampler[0].get_autocorr_time())
+                auto_correlation_time = np.mean(emcee.autocorr.integrated_time(full_chains[0]))
+
             except Exception as e:
                 print(e)
                 auto_correlation_time = np.inf
@@ -268,7 +270,7 @@ class WrappedMCMC(H5Serializable):
         
         try:
             #auto_correlation_time = np.mean(sampler[0].get_autocorr_time())
-            emcee.autocorr.integrated_time(full_chains[0])
+            auto_correlation_time = np.mean(emcee.autocorr.integrated_time(full_chains[0]))
             print("Autocorr time:", auto_correlation_time)
             discard = int(auto_correlation_time) * 3 if np.isfinite(auto_correlation_time) else 0
         except:
