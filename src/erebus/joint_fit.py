@@ -33,15 +33,16 @@ class JointFit(BaseFit):
                 'predicted_t_secs', 'time_per_visit', 'all_eigenvalues', 'start_trim',
                 'end_trim', 'eigenvalue_map', 'visit_index_filter', 'planet']
     
-    def get_predicted_t_sec_of_visit(self, index : int):
+    def get_predicted_t_sec_of_visit(self, index : int) -> float:
         '''
         Predicted t_sec given a perfectly circular orbit, for a given visit
+        In BJD
         '''
         if index in self.predicted_t_secs:
             return self.predicted_t_secs[index]
         
         start_time = self.starting_times[index]
-        predicted_t_sec = self.planet.get_predicted_tsec(start_time)
+        predicted_t_sec = self.planet.get_predicted_tsec(start_time).nominal_value + start_time
 
         self.predicted_t_secs[index] = predicted_t_sec
         return predicted_t_sec
@@ -239,7 +240,7 @@ class JointFit(BaseFit):
     #override
     def _get_predicted_t_sec_from_x(self, x : List[float]):
         visit_index = self.get_visit_index_from_time(x[0])
-        return self.get_predicted_t_sec_of_visit(visit_index).nominal_value
+        return self.get_predicted_t_sec_of_visit(visit_index)
     
     #override
     def _get_transit_model_from_x(self, x : List[float], params : batman.TransitParams):
@@ -270,6 +271,15 @@ class JointFit(BaseFit):
         visit_index = self.get_visit_index_from_time(x[0])
         return self.eigenvalue_map[visit_index]
         
+    def get_systematic_index_start(self, i):
+        num_visits = len(self.visit_indices)
+        number_of_physical_args = self.get_number_of_physical_args()
+        number_of_systematic_args = self.get_number_of_systematic_args()
+
+        # Skip physical args, then 2 * num_visits for individual t_sec and fp, then skip systematic args for other visits
+        # Does not skip x
+        return (number_of_physical_args) + (2 * num_visits) + (i * number_of_systematic_args)
+    
     #override
     def fit_method(self, *args) -> List[float]:
         '''
@@ -282,6 +292,11 @@ class JointFit(BaseFit):
         
         physical_args = args[1:number_of_physical_args + 1]
         num_visits = len(self.visit_indices)
+        
+        #for i, (name, val) in enumerate(zip(self.mcmc.params.keys(), args[1:])):
+        #    print(f"{i}, {name}, {val}")
+        
+        #print(list(self.mcmc.params.keys())[1:number_of_physical_args + 1])
                 
         # Systematic arguments we're actually using will depend on the x value
         # x is a list of times
@@ -290,10 +305,11 @@ class JointFit(BaseFit):
             filt = self.visit_index_filter[visit_index]
             time = x[filt]
                         
-            # Skip x and physical args, then 2 * num_visits for individual t_sec and fp, then skip systematic args for other visits
-            systematic_index_start = (number_of_physical_args + 1) + (2 * num_visits) + (i * number_of_systematic_args)
+            # +1 to skip x
+            systematic_index_start = self.get_systematic_index_start(i) + 1
             systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
-        
+            #print(list(self.mcmc.params.keys())[systematic_index_start:systematic_index_start + number_of_systematic_args])
+
             systematic = self.systematic_model(time, *systematic_args)
             
             # Relies on argument positions of t_sec_offset and depth, not ideal
@@ -310,6 +326,8 @@ class JointFit(BaseFit):
                 physical_args = tuple(physical_args)
             
             physical = self.physical_model(time, *physical_args)
+            #print(physical_args)
+            #print(systematic_args)
             results[filt] = systematic * physical
                         
         return results

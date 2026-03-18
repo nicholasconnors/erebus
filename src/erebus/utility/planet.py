@@ -168,7 +168,7 @@ class Planet:
     def get_predicted_tsec(self, obs_start):
         '''
         Given a start time in BJD-2,400,000.5, use the lookup file or t0
-        and P to get the next eclipse time
+        and P to get the next eclipse time relative to obs_start
         '''
         t0 = self.get_closest_t0(obs_start)
         table_prediction = ((t0 + self.get_next_t0(obs_start)) / 2.0) \

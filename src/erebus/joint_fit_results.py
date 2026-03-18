@@ -66,7 +66,7 @@ class JointFitResults(H5Serializable):
                 flux = fit.raw_flux[filt]
                 
                 # Only add visits that were included
-                systematic_index_start = (number_of_physical_args) + (i * number_of_systematic_args)
+                systematic_index_start = fit.get_systematic_index_start(i)
                 systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
             
                 systematic = fit.systematic_model(time, *systematic_args)
@@ -75,7 +75,7 @@ class JointFitResults(H5Serializable):
                 self.detrended_flux_per_visit.append(flux / systematic)
                 self.systematic_per_visit.append(systematic)
                 self.raw_flux_per_visit.append(flux)
-                time_offset = fit.get_predicted_t_sec_of_visit(visit_index).nominal_value + fit.starting_times[visit_index]
+                time_offset = fit.get_predicted_t_sec_of_visit(visit_index)
                 self.time_per_visit.append((time - time_offset) * 24)
                 self.model_flux_per_visit.append(physical)
                         
