@@ -105,7 +105,7 @@ class IndividualFit(BaseFit):
     
     #override
     def _get_predicted_t_sec_from_x(self, x : List[float]):
-        return self.predicted_t_sec.nominal_value
+        return self.predicted_t_sec
     
     #override
     def _get_transit_model_from_x(self, x : List[float], params : batman.TransitParams):
