@@ -22,7 +22,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
         individual_fit = IndividualFitResults(individual_fit)
     
     yerr = individual_fit.results['y_err'].nominal_value
-    t_sec = individual_fit.predicted_t_sec.nominal_value
+    t_sec = individual_fit.predicted_t_sec
     rp = individual_fit.results['rp_rstar'].nominal_value
     inc = individual_fit.results['inc'].nominal_value
     a = individual_fit.results['a_rstar'].nominal_value
@@ -104,8 +104,8 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
 
     # Systematic factor
     linear_component = individual_fit.results['a'].nominal_value * raw_time + individual_fit.results['b'].nominal_value + 1
-    flux_axs[2].plot(time, systematic_factor, color='red')
-    flux_axs[2].plot(time, linear_component, color='black', linestyle='--', label='Linear component')
+    flux_axs[2].plot(time, systematic_factor / np.median(systematic_factor), color='red')
+    flux_axs[2].plot(time, linear_component / np.median(linear_component), color='black', linestyle='--', label='Linear component')
     flux_axs[2].axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
     flux_axs[2].legend()
     flux_axs[2].set_ylabel("Systematc factor\n(ppm)")
@@ -279,13 +279,13 @@ def corner_plot(mcmc : WrappedMCMC, save_to_path : str = None, show : bool = Fal
     Call this on an MCMC model after it has run in order to show and optionally save a corner plot.
     '''
     
-    if mcmc.sampler is None:
+    if mcmc.flat_chain is None:
         print("Cannot make corner plot: MCMC run data isn't cached yet")
         return
     
     labels = mcmc.get_free_params()
     corner.corner(
-        mcmc.flat_samples, labels=labels
+        mcmc.flat_chain, labels=labels
     )
     
     if save_to_path is not None:
@@ -301,7 +301,7 @@ def chain_plot(mcmc : WrappedMCMC, save_to_path : str = None, show : bool = Fals
     Call this on an MCMC model after it has run in order to show and optionally save a chain plot.
 
     '''
-    if mcmc.sampler is None:
+    if mcmc.full_chain is None:
         print("Cannot make chain plot: MCMC run data isn't cached yet")
         return
     samples = mcmc.full_chain

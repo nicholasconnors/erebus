@@ -44,6 +44,8 @@ class WrappedMCMC(H5Serializable):
         self.__free_params = None
         
         # Values set once it is done running
+        self.full_chain = None
+        self.flat_chain = None
         self.results : dict = {}
         '''Dictionary of results after fitting'''
         self.auto_correlation = 0
@@ -275,14 +277,14 @@ class WrappedMCMC(H5Serializable):
             discard = 0
             
         #flat_samples = sampler[0].get_chain(discard=discard, thin=15, flat=True)
-        flat_samples = full_chains[0][discard::15].reshape(-1, ndim)
-        self.flat_samples = flat_samples
+        flat_chain = full_chains[0][discard::15].reshape(-1, ndim)
+        self.flat_chain = flat_chain
         self.full_chain = full_chains[0]
         
         # Takes the median value of each fitted parameter and the 68% confidence interval as errors
         res = []
         for i in range(ndim):
-            percentiles = np.percentile(flat_samples[:, i], [16, 50, 84])
+            percentiles = np.percentile(flat_chain[:, i], [16, 50, 84])
             diffs = np.diff(percentiles)
             res.append([percentiles[1], diffs[0], diffs[1]])
             

@@ -110,7 +110,10 @@ class ErebusRunConfig(BaseModel):
         '''
         Returns a unique hash representing this run config
         '''
-        return hashlib.md5((json.dumps(self.model_dump()) + json.dumps(list(self._custom_parameters.keys()))).encode()).hexdigest()
+        s = json.dumps(self.model_dump())
+        if self._custom_parameters is not None:
+            s += json.dumps(list(self._custom_parameters.keys()))
+        return hashlib.md5(s.encode()).hexdigest()
     
     @staticmethod
     def load(path : str):
