@@ -66,7 +66,7 @@ class IndividualFit(BaseFit):
         mcmc = WrappedMCMC(self._cache_file.replace(".h5", "_mcmc.h5"))
         
         start_time = np.min(photometry_data.time)
-        self.predicted_t_sec = planet.get_predicted_tsec(start_time)
+        self.predicted_t_sec = planet.get_predicted_tsec(start_time).nominal_value + start_time
         
         lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
         
@@ -105,13 +105,14 @@ class IndividualFit(BaseFit):
     
     #override
     def _get_predicted_t_sec_from_x(self, x : List[float]):
-        return self.predicted_t_sec.nominal_value
+        return self.predicted_t_sec
     
     #override
     def _get_transit_model_from_x(self, x : List[float], params : batman.TransitParams):
-        if self.transit_model is None:
-            self.transit_model = batman.TransitModel(params, x, transittype="secondary")
-        return self.transit_model
+        #if self.transit_model is None:
+        #    self.transit_model = batman.TransitModel(params, x, transittype="secondary")
+        #return self.transit_model
+        return batman.TransitModel(params, x, transittype="secondary")
     
     #override
     def _is_joint_fit(self):

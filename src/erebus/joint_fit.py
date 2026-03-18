@@ -243,10 +243,11 @@ class JointFit(BaseFit):
     
     #override
     def _get_transit_model_from_x(self, x : List[float], params : batman.TransitParams):
-        visit_index = self.get_visit_index_from_time(x[0])
-        if visit_index not in self.transit_models or self.transit_models[visit_index] is None:
-            self.transit_models[visit_index] = batman.TransitModel(params, x, transittype="secondary")
-        return self.transit_models[visit_index]
+        #visit_index = self.get_visit_index_from_time(x[0])
+        #if visit_index not in self.transit_models or self.transit_models[visit_index] is None:
+        #    self.transit_models[visit_index] = batman.TransitModel(params, x, transittype="secondary")
+        #return self.transit_models[visit_index]
+        return batman.TransitModel(params, x, transittype="secondary")
     
     #override
     def _is_joint_fit(self):
