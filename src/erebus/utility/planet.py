@@ -169,6 +169,8 @@ class Planet:
         '''
         Given a start time in BJD-2,400,000.5, use the lookup file or t0
         and P to get the next eclipse time relative to obs_start
+        
+        Gives time relative to observation start
         '''
         t0 = self.get_closest_t0(obs_start)
         table_prediction = ((t0 + self.get_next_t0(obs_start)) / 2.0) \

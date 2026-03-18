@@ -144,7 +144,7 @@ class BaseFit(H5Serializable):
         '''
         Model for the lightcurve using batman
         fp is expected written in ppm
-        x is time in BJD
+        x is time in BJD-2,400,000.5
         '''
         if self.params is None:
             params = batman.TransitParams()
@@ -188,7 +188,7 @@ class BaseFit(H5Serializable):
         *extra_params
     ) -> List[float]:
         '''
-        x is time in BJD
+        x is time in BJD-2,400,000.5
         Assumes all x are from the same visit
         '''
         

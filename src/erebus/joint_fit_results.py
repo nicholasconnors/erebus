@@ -47,11 +47,11 @@ class JointFitResults(H5Serializable):
             self.raw_flux_per_visit = []
             '''A list containing the raw flux of each visit'''
             
+            self.starting_times = fit.starting_times
+            
             # Time relative to predicted t_sec and used to run the physical model
             self.model_flux_per_visit = []
             '''The best fit detrended lightcurves per visit.'''
-            self.model_time_per_visit = []
-            '''A list containing the time values corresponding to model_flux_per_visit'''
 
             args = [x.nominal_value for x in list(fit.results.values())]
 
@@ -59,9 +59,8 @@ class JointFitResults(H5Serializable):
             number_of_systematic_args = fit.get_number_of_systematic_args()
 
             physical_args = args[0:number_of_physical_args]
-            visit_indices = np.array([fit.get_visit_index_from_time(xi) for xi in fit.time])
             for i, visit_index in enumerate(fit.visit_indices):
-                filt = visit_indices == visit_index
+                filt = fit.visit_index_filter[visit_index]
                 time = fit.time[filt]
                 flux = fit.raw_flux[filt]
                 

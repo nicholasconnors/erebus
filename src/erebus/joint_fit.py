@@ -36,7 +36,7 @@ class JointFit(BaseFit):
     def get_predicted_t_sec_of_visit(self, index : int) -> float:
         '''
         Predicted t_sec given a perfectly circular orbit, for a given visit
-        In BJD
+        In BJD-2,400,000.5
         '''
         if index in self.predicted_t_secs:
             return self.predicted_t_secs[index]
@@ -55,7 +55,7 @@ class JointFit(BaseFit):
         if time in self.__visit_index_lookup:
             return self.__visit_index_lookup[time]
         
-        # Starting times are in descending order
+        # Starting times are in acending order
         for i in range(0, len(self.starting_times)):
             if time >= self.starting_times[i] and (i == len(self.starting_times) - 1 or time < self.starting_times[i + 1]):
                 self.__visit_index_lookup[time] = i
@@ -91,16 +91,21 @@ class JointFit(BaseFit):
         
         self.planet = planet
         
+        # Make sure visits are in order
+        photometry_data_list = sorted(photometry_data_list, key=lambda data: np.min(data.time))      
+        
         # Maps the saved photometry data index to the visit index
         self.visit_indices = np.arange(0, len(photometry_data_list))
         self.photometry_data_list = photometry_data_list
         
         self.config = config
         
-        # Remove visits we're skipping
+        self.starting_times = np.array([np.min(data.time) for data in photometry_data_list])
+        
+        # Track visits we're skipping
         if self.config.skip_visits is not None and len(self.config.skip_visits) > 0:
             self.visit_indices = np.delete(self.visit_indices, self.config.skip_visits)
-            self.photometry_data_list = np.delete(self.photometry_data_list, self.config.skip_visits)
+            # self.photometry_data_list = np.delete(self.photometry_data_list, self.config.skip_visits)
         
         self.start_trim = [config.get_trim_integrations(i)[0] for i in np.arange(len(photometry_data_list))]
         self.end_trim = [config.get_trim_integrations(i)[1] for i in np.arange(len(photometry_data_list))]
@@ -124,8 +129,11 @@ class JointFit(BaseFit):
             self.joint_eigenvalues.append(binned_eigenvalues)
             self.joint_eigenvectors.append(eigenvectors)
             self.pca_variance_ratios.append(variance_ratios)
-            if config.skip_visits is not None and i in config.skip_visits:
+
+            # If we are not fitting on this visit do not add it to the combined lists
+            if i not in self.visit_indices:
                 continue
+
             binned_time = bin_data(data.time[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0]
             self.time.append(binned_time)
             binned_flux = bin_data(data.raw_flux[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0]
@@ -135,15 +143,8 @@ class JointFit(BaseFit):
         # time per visit used to interpolate FNPCA systematic
         self.time = np.concatenate(self.time)
         self.all_eigenvalues = np.concatenate(self.joint_eigenvalues, axis=1)
-        self.starting_times = np.sort(np.array([np.min(data.time) for data in photometry_data_list]))
-        self.raw_flux = np.concatenate(self.raw_flux)
+        self.raw_flux = np.concatenate(self.raw_flux)              
         
-        # Orders might be wrong, assumes each visit was in order
-        sort = np.argsort(self.time)
-        self.time = self.time[sort]
-        self.all_eigenvalues = self.all_eigenvalues[:,sort]
-        self.raw_flux = self.raw_flux[sort]
-                    
         # If visits have different lengths (number of integrations) then these arrays can't be saved (inhomogenous)
         # Pad with NaN in this case
         n_visits = len(self.joint_eigenvalues)
@@ -161,19 +162,20 @@ class JointFit(BaseFit):
         print(f"Eigenvectors shape: {self.joint_eigenvectors.shape}")
                 
         # Get the predicted eclipse times in advance
+        # Calling early to memoize them already
         for n in range(0, len(photometry_data_list)):
             self.get_predicted_t_sec_of_visit(n)
             
         # Map all times to a visit
         visit_index_map = np.array([self.get_visit_index_from_time(xi) for xi in self.time])
         self.visit_index_filter = {}
-        for visit in self.visit_indices:
-            self.visit_index_filter[visit] = visit_index_map == visit
+        for i in range(0, len(self.photometry_data_list)):
+            self.visit_index_filter[i] = visit_index_map == i
             
         # Get eigenvalues per visit
         self.eigenvalue_map = {}
-        for visit in self.visit_indices:
-            self.eigenvalue_map[visit] = self.all_eigenvalues.T[self.visit_index_filter[visit]].T
+        for i in range(0, len(self.photometry_data_list)):
+            self.eigenvalue_map[i] = self.all_eigenvalues.T[i].T
                 
         # 
         # MCMC setup
@@ -260,16 +262,16 @@ class JointFit(BaseFit):
     
     #override
     def _get_visit_starting_time_from_x(self, x : List[float]):
-        visit_index = self._get_visit_index_from_x(x)
-        return self.starting_times[visit_index]
+        i = self._get_visit_index_from_x(x)
+        return self.starting_times[i]
     
     #override
     def _get_eigenvalues_from_x(self, x : List[float]):
         '''
         Assumes all x are from same visit
         '''
-        visit_index = self.get_visit_index_from_time(x[0])
-        return self.eigenvalue_map[visit_index]
+        i = self.get_visit_index_from_time(x[0])
+        return self.eigenvalue_map[i]
         
     def get_systematic_index_start(self, i):
         num_visits = len(self.visit_indices)
@@ -302,6 +304,7 @@ class JointFit(BaseFit):
         # x is a list of times
         results = np.zeros_like(x)
         for i, visit_index in enumerate(self.visit_indices):
+            # Use visit_index to get filter, i elsewhere
             filt = self.visit_index_filter[visit_index]
             time = x[filt]
                         
