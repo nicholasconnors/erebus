@@ -9,7 +9,7 @@ class IndividualFitResults(H5Serializable):
     
     def __init__(self, fit : IndividualFit):
         if fit is not None:
-            self.time = fit.time - fit.start_time
+            self.time = fit.time
             '''The time values that the model was fit on. Starts at 0.'''
             self.start_time = fit.start_time
             '''The BJD date the observation started on.'''

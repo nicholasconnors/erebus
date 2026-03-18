@@ -41,9 +41,9 @@ class WrappedMCMC(H5Serializable):
         self.model_function : Callable[[Any], float] = None
         '''The function to be fit'''
         
+        self.__free_params = None
+        
         # Values set once it is done running
-        self.sampler : emcee.EnsembleSampler | emcee.backends.HDFBackend = None
-        '''The emcee EnsembleSampler or HDFBackend which this class wrapped'''
         self.results : dict = {}
         '''Dictionary of results after fitting'''
         self.auto_correlation = 0
@@ -53,9 +53,9 @@ class WrappedMCMC(H5Serializable):
         
         self._cache_file = cache_file
         
-        if self._cache_file is not None and os.path.exists(self._cache_file):
-            self.load_from_path(self._cache_file)
-            self.sampler = emcee.backends.HDFBackend(self._cache_file.replace(".h5", "_chain0.h5"), read_only=True)
+        # if self._cache_file is not None and os.path.exists(self._cache_file):
+        #    self.load_from_path(self._cache_file)
+        #    self.sampler = emcee.backends.HDFBackend(self._cache_file.replace(".h5", "_chain0.h5"), read_only = True)
 
     def add_parameter(self, name : str, param : Parameter):
         '''
@@ -82,30 +82,29 @@ class WrappedMCMC(H5Serializable):
         '''
         Returns the keys of any parameter that isn't fixed i.e., will be fitted for
         '''
-        return [p for p in self.params if self.params[p].type != "fixed"]
+        if self.__free_params is None:
+            self.__free_params = [p for p in self.params if self.params[p].type != "fixed"]
+        return self.__free_params
 
     def evaluate_model(self, x : np.ndarray, *params : list[Parameter]) -> float:
         '''
         Evaluates the model with the given x input and parameters
         '''
-        # Params is a list of free parameters, last one is always the error
-        free_params = self.get_free_params()
-        if len(free_params) != len(params):
-            raise Exception(f"Number of free parameters ({len(free_params)}) doesn't match number of inputs ({len(params)})")
-        for i, param in enumerate(free_params):
-            self.params[param].set_value(params[i])
-        all_params = [self.params[p].value for p in self.params]
         # Excluding the error from the function call
-        return self.model_function(x, *all_params[:-1])
+        return self.model_function(x, *params[:-1])
 
     def log_likelihood(self, theta : list[float], x : float, y : float):
-        '''Given the parameters theta and the x and y values, calculates the Bayesian log likelihood.'''
+        '''Given the free parameters theta and the x and y values, calculates the Bayesian log likelihood.'''
         # y_err is a gaussian noise parameter
-        model = self.evaluate_model(x, *theta)
-        y_err = self.params["y_err"].value
+        
+        iter_theta = iter(theta)
+        all_params = [next(iter_theta) if self.params[p].type != "fixed" else self.params[p].value for p in self.params]
+        
+        model = self.evaluate_model(x, *all_params)
+        y_err = theta[-1]
         
         # Function taken from https://colab.research.google.com/drive/15EsEFbbLiU2NFaNrfiCTlF_i65ShDlmS?usp=sharingw#scrollTo=Qkwg2fcNL-26
-        return np.sum(norm.logpdf(y, loc=model, scale=y_err))
+        return -0.5 * np.sum(((y - model) / y_err) ** 2 + np.log(2 * np.pi * y_err ** 2))
         
     def __log_prior(self, theta : list[float]):
         free_params = self.get_free_params()
@@ -140,9 +139,12 @@ class WrappedMCMC(H5Serializable):
         sampler = [None] * nchains
         for i in range(0, nchains):
             # Must be separate files to prevent saving race conditions
-            backends[i] = emcee.backends.HDFBackend(self._cache_file.replace(".h5", "_chain%d.h5" % i))
-            if force_clear_cache:
-                backends[i].reset(walkers, ndim)
+            #backends[i] = emcee.backends.HDFBackend(self._cache_file.replace(".h5", "_chain%d.h5" % i))
+            #if force_clear_cache:
+            #    backends[i].reset(walkers, ndim)
+            backends[i] = emcee.backends.Backend()
+            backends[i].reset(walkers, ndim)
+            
             sampler[i] = emcee.EnsembleSampler(walkers, ndim, self.__log_probability, 
                                 args=(x, y), backend=backends[i])
 
@@ -224,21 +226,24 @@ class WrappedMCMC(H5Serializable):
                 result_pos = result[0]
                 result_rstate = result[2]
             chain_length_per_walker = int(sampler[jj].get_chain().shape[1])
+            chain = sampler[jj].get_chain(flat = False)
             chainsamples = sampler[jj].chain[:, int(chain_length_per_walker/2):, :]\
                                     .reshape((-1, ndim))
-            return result_pos, result_rstate, chainsamples
+            return result_pos, result_rstate, chainsamples, chain
 
         # Run chain until the chain has converged
+        full_chains = [np.empty((0, walkers, ndim))] * nchains
         while loopcriteria:
             with mp.Pool(processes=nchains) as pool:
                 run_chain_res = pool.map(run_chain, np.arange(0, nchains))
             for jj in range(0, nchains):
-                pos[jj], rstate[jj], chainsamples = run_chain_res[jj]
+                pos[jj], rstate[jj], chainsamples, chain = run_chain_res[jj]
                 chain_length = len(chainsamples)
                 # Variance for each parameter within one chain
                 withinchainvar[jj] = np.var(chainsamples, axis=0)
                 # Mean for each parameter within one chain
                 meanchain[jj] = np.mean(chainsamples, axis=0)
+                full_chains[jj] = np.concatenate([full_chains[jj], chain], axis=0)
             
             R = gelman_rubin_convergence(withinchainvar, meanchain, chain_length, nchains)
             try:
@@ -260,7 +265,8 @@ class WrappedMCMC(H5Serializable):
             print("Continue looping?", loopcriteria)
         
         try:
-            auto_correlation_time = np.mean(sampler[0].get_autocorr_time())
+            #auto_correlation_time = np.mean(sampler[0].get_autocorr_time())
+            emcee.autocorr.integrated_time(full_chains[0])
             print("Autocorr time:", auto_correlation_time)
             discard = int(auto_correlation_time) * 3 if np.isfinite(auto_correlation_time) else 0
         except:
@@ -268,7 +274,10 @@ class WrappedMCMC(H5Serializable):
             auto_correlation_time = np.inf
             discard = 0
             
-        flat_samples = sampler[0].get_chain(discard=discard, thin=15, flat=True)
+        #flat_samples = sampler[0].get_chain(discard=discard, thin=15, flat=True)
+        flat_samples = full_chains[0][discard::15].reshape(-1, ndim)
+        self.flat_samples = flat_samples
+        self.full_chain = full_chains[0]
         
         # Takes the median value of each fitted parameter and the 68% confidence interval as errors
         res = []
@@ -285,7 +294,6 @@ class WrappedMCMC(H5Serializable):
             else:
                 self.results[key] = ufloat(res[res_index][0], np.mean([res[res_index][1], res[res_index][2]])) 
                 res_index += 1
-        self.sampler = sampler[0]
         self.auto_correlation = auto_correlation_time
         self.iterations = iteration_counter
         self.final_log_likelihood = self.log_likelihood([r[0] for r in res], x, y)

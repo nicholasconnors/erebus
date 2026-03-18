@@ -285,7 +285,7 @@ def corner_plot(mcmc : WrappedMCMC, save_to_path : str = None, show : bool = Fal
     
     labels = mcmc.get_free_params()
     corner.corner(
-        mcmc.sampler.get_chain(discard=200, thin=15, flat=True), labels=labels
+        mcmc.flat_samples, labels=labels
     )
     
     if save_to_path is not None:
@@ -304,7 +304,7 @@ def chain_plot(mcmc : WrappedMCMC, save_to_path : str = None, show : bool = Fals
     if mcmc.sampler is None:
         print("Cannot make chain plot: MCMC run data isn't cached yet")
         return
-    samples = mcmc.sampler.get_chain()
+    samples = mcmc.full_chain
     labels = mcmc.get_free_params()
     ndim = len(labels)
     fig, axes = plt.subplots(ndim, figsize=(10, 7), sharex = True)

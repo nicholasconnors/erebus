@@ -236,7 +236,6 @@ class BaseFit(H5Serializable):
                       max_steps = self.config.max_steps if self.config.max_steps is not None else 2000000)
         
         self.results = self.mcmc.results
-        self.chain = self.mcmc.sampler.get_chain(discard=200, thin=15, flat=True)
         print(self.mcmc.results)
         
         self.auto_correlation = self.mcmc.auto_correlation
