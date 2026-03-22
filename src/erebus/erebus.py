@@ -168,6 +168,8 @@ class Erebus(H5Serializable):
         # Save inputs that were used
         self.config.save(output_folder + self.planet.name + "_run_config.yaml")
         self.planet.save(output_folder + self.planet.name + "_planet_config.yaml")
+        for i, photo in enumerate(self.photometry):
+            photo.save_to_path(output_folder + self.planet.name + f"_photometry_{i}.h5")
         
         if self.config.perform_individual_fits:
             for i, fit in enumerate(self.individual_fits):
@@ -181,14 +183,8 @@ class Erebus(H5Serializable):
                 else:
                     print("Skipping " + fit.visit_name + ": already ran")
                 
-                try:
-                    plotting.plot_fnpca_individual_fit(fit, figure_folder)
-                    plotting.plot_eigenvectors(fit, eigenvec_folder)        
-                    plotting.corner_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_corner.png")
-                    plotting.chain_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_chain.png")
-                except Exception as e:
-                    print(f"Plotting routine failed: {e}")
-    
+                print("Done individual fit, saving results")
+                
                 path = output_folder + self.planet.name + "_visit_" + str(fit.order_label) + "_" + fit.visit_name
                 IndividualFitResults(fit).save_to_path(path + ".h5")
                 
@@ -197,6 +193,14 @@ class Erebus(H5Serializable):
                 dict['auto_corr'] = fit.auto_correlation
                 dict['BIC'] = fit.BIC
                 utils.save_dict_to_json(dict, path + ".json")
+                
+                try:
+                    plotting.plot_fnpca_individual_fit(fit, figure_folder)
+                    plotting.plot_eigenvectors(fit, eigenvec_folder)        
+                    plotting.corner_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_corner.png")
+                    plotting.chain_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_chain.png")
+                except Exception as e:
+                    print(f"Plotting routine failed: {e}")
 
         if self.config.perform_joint_fit:           
             has_run = self.joint_fit.has_converged()
@@ -204,14 +208,8 @@ class Erebus(H5Serializable):
                 self.joint_fit.run()
             else:
                 print("Skipping joint fit: already ran")
-            
-            try:
-                plotting.plot_joint_fit(self.joint_fit, figure_folder)
-                plotting.corner_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_corner.png")
-                plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.png")
-            except Exception as e:
-                print(f"Plotting routine failed: {e}")
-    
+                
+            print("Done joint fit, saving results")
             path = output_folder + self.planet.name + "_joint_fit"
             JointFitResults(self.joint_fit).save_to_path(path + ".h5")
             
@@ -220,5 +218,11 @@ class Erebus(H5Serializable):
             dict['auto_corr'] = self.joint_fit.auto_correlation
             dict['BIC'] = self.joint_fit.BIC
             utils.save_dict_to_json(dict, path + ".json")
-        
+            
+            try:
+                plotting.plot_joint_fit(self.joint_fit, figure_folder)
+                plotting.corner_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_corner.png")
+                plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.png")
+            except Exception as e:
+                print(f"Plotting routine failed: {e}")        
         
