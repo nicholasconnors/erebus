@@ -195,8 +195,8 @@ class JointFit(BaseFit):
         
         # If not fitting eclipse, don't fit timing
         # If fitting a separate timing per eclipse, don't set those global offset
-        should_fit_individual_t_sec_offset = not config.fit_no_eclipse and config.fit_eclipse_depth_per_visit
-        should_fit_global_t_sec_offset = not config.fit_no_eclipse and not config.fit_eclipse_depth_per_visit
+        should_fit_individual_t_sec_offset = not config.fit_no_eclipse and config.fit_eclipse_timing_offset_per_visit
+        should_fit_global_t_sec_offset = not config.fit_no_eclipse and not config.fit_eclipse_timing_offset_per_visit
         should_fit_individual_eclipse_depths = not config.fit_no_eclipse and config.fit_eclipse_depth_per_visit
         
         flag_global_t_sec_set = False
