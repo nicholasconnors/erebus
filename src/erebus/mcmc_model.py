@@ -233,6 +233,8 @@ class WrappedMCMC(H5Serializable):
                                     .reshape((-1, ndim))
             return result_pos, result_rstate, chainsamples, chain
 
+        thin = 10
+
         # Run chain until the chain has converged
         full_chains = [np.empty((0, walkers, ndim))] * nchains
         while loopcriteria:
@@ -245,12 +247,12 @@ class WrappedMCMC(H5Serializable):
                 withinchainvar[jj] = np.var(chainsamples, axis=0)
                 # Mean for each parameter within one chain
                 meanchain[jj] = np.mean(chainsamples, axis=0)
-                full_chains[jj] = np.concatenate([full_chains[jj], chain], axis=0)
+                full_chains[jj] = np.concatenate([full_chains[jj], chain[::thin]], axis=0)
             
             R = gelman_rubin_convergence(withinchainvar, meanchain, chain_length, nchains)
             try:
                 #auto_correlation_time = np.mean(sampler[0].get_autocorr_time())
-                auto_correlation_time = np.mean(emcee.autocorr.integrated_time(full_chains[0]))
+                auto_correlation_time = np.mean(emcee.autocorr.integrated_time(full_chains[0])) * thin
 
             except Exception as e:
                 print(e)
@@ -270,16 +272,16 @@ class WrappedMCMC(H5Serializable):
         
         try:
             #auto_correlation_time = np.mean(sampler[0].get_autocorr_time())
-            auto_correlation_time = np.mean(emcee.autocorr.integrated_time(full_chains[0]))
+            auto_correlation_time = np.mean(emcee.autocorr.integrated_time(full_chains[0])) * thin
             print("Autocorr time:", auto_correlation_time)
-            discard = int(auto_correlation_time) * 3 if np.isfinite(auto_correlation_time) else 0
+            discard = int(auto_correlation_time) * 3 / thin if np.isfinite(auto_correlation_time) else 0
         except:
             print("Autocorr time was really bad")
             auto_correlation_time = np.inf
             discard = 0
             
         #flat_samples = sampler[0].get_chain(discard=discard, thin=15, flat=True)
-        flat_chain = full_chains[0][discard::15].reshape(-1, ndim)
+        flat_chain = full_chains[0][discard:].reshape(-1, ndim)
         self.flat_chain = flat_chain
         self.full_chain = full_chains[0]
         
