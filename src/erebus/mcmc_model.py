@@ -15,6 +15,8 @@ from scipy.stats import norm
 from uncertainties import ufloat
 import os
 
+import time
+
 from erebus.utility.h5_serializable_file import H5Serializable
 from erebus.utility.bayesian_parameter import Parameter
 
@@ -214,16 +216,17 @@ class WrappedMCMC(H5Serializable):
         withinchainvar = np.zeros((nchains, ndim), dtype=np.float64)
         meanchain = np.zeros((nchains, ndim), dtype=np.float64)
 
-        minlength = np.min([10000, max_steps])
-        ichaincheck = 10000
-        chainstep = minlength
+        min_length = np.min([10000, max_steps])
         iteration_counter = burn_in if backends[0] is None else np.min([backends[0].iteration, backends[1].iteration])
         loopcriteria = True
         epsilon = 0.04
         
+        thin = 50
+        chain_step = min_length
+        
         def run_chain(jj):
             print("Processing chain #%d" % jj)
-            for result in sampler[jj].sample(pos[jj], iterations=chainstep, rstate0=rstate[jj],
+            for result in sampler[jj].sample(pos[jj], iterations=chain_step, rstate0=rstate[jj],
                                              progress=True, store=True, skip_initial_state_check=True):
                 result_pos = result[0]
                 result_rstate = result[2]
@@ -233,11 +236,10 @@ class WrappedMCMC(H5Serializable):
                                     .reshape((-1, ndim))
             return result_pos, result_rstate, chainsamples, chain
 
-        thin = 10
-
         # Run chain until the chain has converged
         full_chains = [np.empty((0, walkers, ndim))] * nchains
         while loopcriteria:
+            start = time.time()
             with mp.Pool(processes=nchains) as pool:
                 run_chain_res = pool.map(run_chain, np.arange(0, nchains))
             for jj in range(0, nchains):
@@ -247,36 +249,64 @@ class WrappedMCMC(H5Serializable):
                 withinchainvar[jj] = np.var(chainsamples, axis=0)
                 # Mean for each parameter within one chain
                 meanchain[jj] = np.mean(chainsamples, axis=0)
+                concat_start = time.time()
+                print("Concatenating chains")
                 full_chains[jj] = np.concatenate([full_chains[jj], chain[::thin]], axis=0)
+                concat_time = time.time() - concat_start
+                print(f"Chain concatenation took {concat_time} seconds")
             
+            print("Checking Rubin-Gelman convergence")
+            gelman_rubin_start = time.time()
             R = gelman_rubin_convergence(withinchainvar, meanchain, chain_length, nchains)
+            gelman_rubin_time = time.time() - gelman_rubin_start
+            print(f"Checking Rubin-Gelman convergence took {gelman_rubin_time} seconds")
+            
             try:
+                #works only when saving backend
                 #auto_correlation_time = np.mean(sampler[0].get_autocorr_time())
-                auto_correlation_time = np.mean(emcee.autocorr.integrated_time(full_chains[0])) * thin
-
-            except Exception as e:
+                taus = emcee.autocorr.integrated_time(full_chains[0]) * thin
+                auto_correlation_time = np.mean(taus)
+            except emcee.autocorr.AutocorrError as e:
                 print(e)
+                taus = e.tau * thin
                 auto_correlation_time = np.inf
+            
             all_within_epsilon = all(np.abs(1 - R) < epsilon)
             all_converged = np.isfinite(auto_correlation_time)
             
-            chainstep = ichaincheck
-            iteration_counter += chainstep
+            iteration_counter += chain_step
+            previous_chain_step = chain_step
             
+            # Adjust length of chain step depending on estimated autocorrelation time
+            estimated_time_to_converge = np.max(taus) * 50
+            remaining_steps = np.inf
+            if np.isfinite(estimated_time_to_converge):
+                remaining_steps = int(estimated_time_to_converge) - iteration_counter
+                # Set a min and max chain step in case
+                chain_step = np.clip(remaining_steps, min_length, min_length * 10)
+            else:
+                chain_step = min_length
+                        
             loopcriteria = (not all_within_epsilon or not all_converged) and iteration_counter < max_steps
             
-            print("Rubin gelman convergence:", R, "converged?", all_within_epsilon)
-            print("Autocorr time:", auto_correlation_time, "converged?", all_converged)
-            print("Iterations:", iteration_counter, "Max steps:", max_steps)
-            print("Continue looping?", loopcriteria)
+            duration = (time.time() - start) / 60 # minutes
+            duration_per_integration = duration / previous_chain_step
+            remaining_time = remaining_steps * duration_per_integration
+            
+            print(f"Previous chunk took {duration} minutes - estimated {remaining_time} minutes until convergence")
+            print(f"Rubin-Gelman convergence: {R}, converged? {all_within_epsilon}")
+            print(f"Autocorr time: {auto_correlation_time}, converged? {all_converged}")
+            print(f"Iterations: {iteration_counter}, Max steps:, {max_steps}")
+            print(f"Continue looping? {loopcriteria}")
         
         try:
             #auto_correlation_time = np.mean(sampler[0].get_autocorr_time())
             auto_correlation_time = np.mean(emcee.autocorr.integrated_time(full_chains[0])) * thin
             print("Autocorr time:", auto_correlation_time)
-            discard = int(auto_correlation_time) * 3 / thin if np.isfinite(auto_correlation_time) else 0
-        except:
+            discard = int(auto_correlation_time) * 3 // thin if np.isfinite(auto_correlation_time) else 0
+        except emcee.autocorr.AutocorrError as e:
             print("Autocorr time was really bad")
+            print(e)
             auto_correlation_time = np.inf
             discard = 0
             
