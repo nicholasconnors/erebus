@@ -18,8 +18,6 @@ from erebus.utility.run_cfg import ErebusRunConfig
 from erebus.utility.bayesian_parameter import Parameter
 from erebus.systematics.frame_normalized_pca import perform_fn_pca_on_aperture
 from erebus.utility.utils import bin_data
-from erebus.utility.utils import create_method_signature
-from erebus.individual_fit import IndividualFit
 
 class State:
     def __init__(self):
@@ -43,7 +41,7 @@ state = State()
 def custom_systematic(x, visit_index, is_joint_fit, 
                       obs1_pc1, obs1_pc2, obs1_pc3, obs1_pc4, obs1_pc5, 
                       obs2_pc1, obs2_pc2, obs2_pc3, obs2_pc4, obs2_pc5, 
-                      #obs2_exp1, obs2_exp2, 
+                      obs2_exp1, obs2_exp2, 
                       obs2_b
     ):        
     # Final visit
@@ -63,13 +61,13 @@ def custom_systematic(x, visit_index, is_joint_fit,
         
         systematic += pca
         
-        #exp_term = (obs2_exp1 * np.exp(obs2_exp2 * (x[cutoff:] - state.cutoff_time))) + obs2_b
-        #exp_term = np.where(np.isfinite(exp_term), exp_term, 0.0)
-        #exp_term = np.clip(exp_term, 0, 10)
+        exp_term = (obs2_exp1 * np.exp(obs2_exp2 * (x[cutoff:] - state.cutoff_time))) + obs2_b
+        exp_term = np.where(np.isfinite(exp_term), exp_term, 0.0)
+        exp_term = np.clip(exp_term, 0, 10)
         
         systematic[cutoff:] += obs2_b
         
-        #systematic[cutoff:] += exp_term
+        systematic[cutoff:] += exp_term
 
         return systematic
     else:
@@ -89,7 +87,7 @@ def custom_systematic(x, visit_index, is_joint_fit,
             systematic += coeffs[i] * ev[i]
                 
         return systematic
-    
+
 visit4_params = {
     "obs1_pc1": Parameter.uniform_prior(0.1, -10, 10),
     "obs1_pc2": Parameter.uniform_prior(0.1, -10, 10),
@@ -101,9 +99,9 @@ visit4_params = {
     "obs2_pc3": Parameter.uniform_prior(0.1, -10, 10),
     "obs2_pc4": Parameter.uniform_prior(0.1, -10, 10),
     "obs2_pc5": Parameter.uniform_prior(0.1, -10, 10),
-    #"obs2_exp1": Parameter.uniform_prior(1e-6, 0.01e-6, 100e-6),
-    #"obs2_exp2": Parameter.uniform_prior(-300.0, -400.0, -200.0),
-    "obs2_b": Parameter.uniform_prior(1e-6, -50e-6, 50e-6)
+    "obs2_exp1": Parameter.uniform_prior(1e-6, 0.01e-6, 100e-6),
+    "obs2_exp2": Parameter.uniform_prior(-300.0, -5000.0, -1.0),
+    "obs2_b": Parameter.uniform_prior(1e-6, -500e-6, 500e-6)
 }
 
 params = {
@@ -117,17 +115,29 @@ params = {
     "obs2_pc3": Parameter.fixed(0),
     "obs2_pc4": Parameter.fixed(0),
     "obs2_pc5": Parameter.fixed(0),
-    #"obs2_exp1": Parameter.fixed(0),
-    #"obs2_exp2": Parameter.fixed(0),
+    "obs2_exp1": Parameter.fixed(0),
+    "obs2_exp2": Parameter.fixed(0),
     "obs2_b": Parameter.fixed(0),
 }
 
 if __name__ == "__main__":    
     config = "gj3929b"
     
-    aperture_size = int(sys.argv[1])
-    shared_t_sec = sys.argv[2].lower() == 'true'
-    shared_fp = sys.argv[3].lower() == 'true'
+    try:
+        aperture_size = int(sys.argv[1])
+        shared_t_sec = sys.argv[2].lower() == 'true'
+        shared_fp = sys.argv[3].lower() == 'true'
+        fit_fnpca = sys.argv[4].lower() == 'true'
+    except Exception as e:
+        print("Input must be: Aperture size (int), shared t_sec (bool), shared fp (bool), fit_fnpca (bool)")
+        raise e
+    
+    if not fit_fnpca:
+        print("Fixing PCA priors to 0")
+        for i in range(1, 6):
+            params[f'obs1_pc{i}'] = Parameter.fixed(0)
+            visit4_params[f'obs1_pc{i}'] = Parameter.fixed(0)
+            visit4_params[f'obs2_pc{i}'] = Parameter.fixed(0)
     
     joint_fit = shared_fp or shared_t_sec
         
@@ -143,8 +153,8 @@ if __name__ == "__main__":
     cfg.fit_eclipse_timing_offset_per_visit = not shared_t_sec
     cfg.fit_eclipse_depth_per_visit = not shared_fp
     cfg.fit_linear = True
-    cfg.fit_fnpca = False
-    cfg.fit_no_eclipse = True
+    cfg.fit_fnpca = fit_fnpca
+    cfg.fit_no_eclipse = False
     
     # Testing
     #cfg.max_steps = 1000
@@ -280,7 +290,7 @@ if __name__ == "__main__":
         jf_str = "variable_t_sec"
     elif not shared_fp and shared_t_sec:
         jf_str = "variable_fp"
-    sys_str = "fnpca"
+    sys_str = "fnpca" if fit_fnpca else "linear"
     folder_name = f"./output_final_{{NAME}}_{aperture_size}_{sys_str}_{jf_str}_{{DATE}}/"
     
     erebus._Erebus__setup_fits()
