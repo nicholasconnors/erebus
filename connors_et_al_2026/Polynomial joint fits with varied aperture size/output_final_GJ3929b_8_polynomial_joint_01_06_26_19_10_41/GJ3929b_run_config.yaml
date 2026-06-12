@@ -1,0 +1,30 @@
+annulus_end: 20
+annulus_start: 12
+aperture_radius: 8
+calints_path: /home/nconnors/Research/GJ3929b_combined/
+fit_eclipse_depth_per_visit: false
+fit_eclipse_timing_offset_per_visit: false
+fit_exponential: false
+fit_fnpca: false
+fit_gaussian_eclipse_timing_offset: null
+fit_lightcurve_phase: false
+fit_linear: false
+fit_no_eclipse: false
+fit_uniform_eclipse_timing_offset:
+- -0.0625
+- 0.02083
+fix_eclipse_timing: true
+joint_fit_bin_size: 4
+max_steps: null
+perform_individual_fits: false
+perform_joint_fit: true
+planet_path: ../planets/gj3929b.yaml
+prevent_negative_eclipse_depth: true
+skip_visits: null
+star_position:
+- 69
+- 61
+trim_integrations:
+- 500
+- null
+uncal_path: null

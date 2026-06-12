@@ -1,0 +1,124 @@
+{
+    "fp": {
+        "__ufloat__": true,
+        "nominal_value": 0.0001832947764481314,
+        "std_dev": 3.9659763208082474e-05
+    },
+    "rp_rstar": {
+        "__ufloat__": true,
+        "nominal_value": 0.031794341748800796,
+        "std_dev": 0.0007117824114418747
+    },
+    "a_rstar": {
+        "__ufloat__": true,
+        "nominal_value": 16.79487070395767,
+        "std_dev": 0.40977467561963543
+    },
+    "p": {
+        "__ufloat__": true,
+        "nominal_value": 2.6162644,
+        "std_dev": 0.0
+    },
+    "inc": {
+        "__ufloat__": true,
+        "nominal_value": 89.58536194194281,
+        "std_dev": 0.4662949944985755
+    },
+    "esinw": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "ecosw": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "t_sec_offset": {
+        "__ufloat__": true,
+        "nominal_value": -0.03853733326864697,
+        "std_dev": 0.0012457220858596296
+    },
+    "pc1": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc4": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc5": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "exp1": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "exp2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "a": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "b": {
+        "__ufloat__": true,
+        "nominal_value": -0.00014777113504493757,
+        "std_dev": 7.121825184851013e-05
+    },
+    "pl_a": {
+        "__ufloat__": true,
+        "nominal_value": 0.030699965264310368,
+        "std_dev": 0.06415130980699203
+    },
+    "pl_b": {
+        "__ufloat__": true,
+        "nominal_value": -0.008640521258730674,
+        "std_dev": 0.02174148984586495
+    },
+    "pl_c": {
+        "__ufloat__": true,
+        "nominal_value": -0.00010794412078819933,
+        "std_dev": 0.002103468053584103
+    },
+    "obs2_exp1": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_exp2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_b": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "y_err": {
+        "__ufloat__": true,
+        "nominal_value": 0.000765331547648669,
+        "std_dev": 9.243045444251477e-06
+    },
+    "auto_corr": 136.87261052619445,
+    "BIC": -38643.184585337316
+}

@@ -38,6 +38,48 @@ class State:
 
 state = State()
 
+def polynomial_systematic(x, visit_index, is_joint_fit, 
+                          pl_a, pl_b, pl_c, pl_d,
+                          obs2_exp1, obs2_exp2,
+                          obs2_b
+    ):
+    t = x - np.min(x)
+    systematic = np.poly1d([pl_a, pl_b, pl_c, pl_d])(t) - 1
+
+    # Final visit
+    if visit_index == 3:
+        cutoff = state.visit4_cutoff_index_binned if is_joint_fit else state.visit4_cutoff_index
+
+        exp_term = (obs2_exp1 * np.exp(obs2_exp2 * (x[cutoff:] - x[cutoff]))) + obs2_b
+        exp_term = np.where(np.isfinite(exp_term), exp_term, 0.0)
+        exp_term = np.clip(exp_term, 0, 10)
+                
+        systematic[cutoff:] += exp_term
+
+        return systematic
+    else:
+        return systematic
+
+visit4_polynomial_params = {
+    "pl_a": Parameter.uniform_prior(0.1, -1, 1),
+    "pl_b": Parameter.uniform_prior(0.1, -1, 1),
+    "pl_c": Parameter.uniform_prior(0.01, -0.1, 0.1),
+    "pl_d": Parameter.uniform_prior(1, 0.99, 1.01),
+    "obs2_exp1": Parameter.uniform_prior(10e-6, 1e-6, 0.1),
+    "obs2_exp2": Parameter.uniform_prior(-80.0, -500.0, -1.0),
+    "obs2_b": Parameter.uniform_prior(1e-6, -1000e-6, 1000e-6)
+}
+
+polynomial_params = {
+    "pl_a": Parameter.uniform_prior(0.1, -1, 1),
+    "pl_b": Parameter.uniform_prior(0.1, -1, 1),
+    "pl_c": Parameter.uniform_prior(0.01, -0.1, 0.1),
+    "pl_d": Parameter.uniform_prior(1, 0.99, 1.01),
+    "obs2_exp1": Parameter.fixed(0),
+    "obs2_exp2": Parameter.fixed(0),
+    "obs2_b": Parameter.fixed(0),
+}
+
 def custom_systematic(x, visit_index, is_joint_fit, 
                       obs1_pc1, obs1_pc2, obs1_pc3, obs1_pc4, obs1_pc5, 
                       obs2_pc1, obs2_pc2, obs2_pc3, obs2_pc4, obs2_pc5, 
@@ -61,7 +103,7 @@ def custom_systematic(x, visit_index, is_joint_fit,
         
         systematic += pca
         
-        exp_term = (obs2_exp1 * np.exp(obs2_exp2 * (x[cutoff:] - state.cutoff_time))) + obs2_b
+        exp_term = (obs2_exp1 * np.exp(obs2_exp2 * (x[cutoff:] - x[cutoff]))) + obs2_b
         exp_term = np.where(np.isfinite(exp_term), exp_term, 0.0)
         exp_term = np.clip(exp_term, 0, 10)
         
@@ -99,9 +141,9 @@ visit4_params = {
     "obs2_pc3": Parameter.uniform_prior(0.1, -10, 10),
     "obs2_pc4": Parameter.uniform_prior(0.1, -10, 10),
     "obs2_pc5": Parameter.uniform_prior(0.1, -10, 10),
-    "obs2_exp1": Parameter.uniform_prior(1e-6, 0.01e-6, 100e-6),
-    "obs2_exp2": Parameter.uniform_prior(-300.0, -5000.0, -1.0),
-    "obs2_b": Parameter.uniform_prior(1e-6, -500e-6, 500e-6)
+    "obs2_exp1": Parameter.uniform_prior(10e-6, 1e-6, 0.1),
+    "obs2_exp2": Parameter.uniform_prior(-80.0, -500.0, -1.0),
+    "obs2_b": Parameter.uniform_prior(1e-6, -1000e-6, 1000e-6)
 }
 
 params = {
@@ -127,12 +169,14 @@ if __name__ == "__main__":
         aperture_size = int(sys.argv[1])
         shared_t_sec = sys.argv[2].lower() == 'true'
         shared_fp = sys.argv[3].lower() == 'true'
-        fit_fnpca = sys.argv[4].lower() == 'true'
+        fit_fnpca = sys.argv[4].lower() == 'fnpca'
+        fit_linear = sys.argv[4].lower() == 'linear'
+        fit_polynomial = sys.argv[4].lower() == 'polynomial'
     except Exception as e:
         print("Input must be: Aperture size (int), shared t_sec (bool), shared fp (bool), fit_fnpca (bool)")
         raise e
     
-    if not fit_fnpca:
+    if not fit_fnpca and not fit_polynomial:
         print("Fixing PCA priors to 0")
         for i in range(1, 6):
             params[f'obs1_pc{i}'] = Parameter.fixed(0)
@@ -143,18 +187,30 @@ if __name__ == "__main__":
         
     cfg = ErebusRunConfig.load("./run_cfgs/" + config + ".yaml")   
     
-    cfg.set_custom_systematic_model(custom_systematic, params)
-    cfg.set_custom_systematic_model_prior_for_visit_index(3, visit4_params)
+    if fit_polynomial:
+        cfg.set_custom_systematic_model(polynomial_systematic, polynomial_params)
+        cfg.set_custom_systematic_model_prior_for_visit_index(3, visit4_polynomial_params)
+    else:
+        cfg.set_custom_systematic_model(custom_systematic, params)
+        cfg.set_custom_systematic_model_prior_for_visit_index(3, visit4_params)
     
     cfg.perform_individual_fits = not joint_fit
     cfg.perform_joint_fit = joint_fit
-    cfg.joint_fit_bin_size = 1
+    cfg.joint_fit_bin_size = 4
     cfg.aperture_radius = aperture_size
     cfg.fit_eclipse_timing_offset_per_visit = not shared_t_sec
     cfg.fit_eclipse_depth_per_visit = not shared_fp
-    cfg.fit_linear = True
+    cfg.fit_linear = not fit_polynomial
     cfg.fit_fnpca = fit_fnpca
     cfg.fit_no_eclipse = False
+    
+    # Value previously found from joint fits
+    #cfg.fit_uniform_eclipse_timing_offset = None
+    #cfg.fit_gaussian_eclipse_timing_offset = [-0.0375, 0.00167]
+    #cfg.prevent_negative_eclipse_depth = False
+    
+    # Leave one out
+    #cfg.skip_visits = [3]
     
     # Testing
     #cfg.max_steps = 1000
@@ -291,6 +347,8 @@ if __name__ == "__main__":
     elif not shared_fp and shared_t_sec:
         jf_str = "variable_fp"
     sys_str = "fnpca" if fit_fnpca else "linear"
+    if fit_polynomial:
+        sys_str = "polynomial"
     folder_name = f"./output_final_{{NAME}}_{aperture_size}_{sys_str}_{jf_str}_{{DATE}}/"
     
     erebus._Erebus__setup_fits()
