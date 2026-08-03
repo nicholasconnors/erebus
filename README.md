@@ -5,25 +5,27 @@ Erebus is a rocky-exoplanet secondary eclipse aperture-photometry lightcurve fit
 
 For issue reporting or feedback suggestions click [here](https://github.com/nicholasconnors/erebus/issues).
 
-For the setup used when writing Connors et al. (in prep) click [here](https://github.com/nicholasconnors/erebus/tree/main/connors_et_al_2025).
+For the setup used when writing Connors et al. (2025) click [here](https://github.com/nicholasconnors/erebus/tree/main/connors_et_al_2025).
 
 If you use Erebus in a scientific publication we will ask you cite our paper:
 
 ```
-@ARTICLE{2025arXiv250702052C,
+@ARTICLE{2025ApJ...989L..11C,
        author = {{Connors}, Nicholas J. and {Monaghan}, Christopher and {Benneke}, Bj{\"o}rn and {Dang}, Lisa},
-        title = "{Uniform Reanalysis of JWST MIRI 15{\ensuremath{\mu}}m Exoplanet Eclipse Observations using Frame-Normalized Principal Component Analysis}",
-      journal = {arXiv e-prints},
-     keywords = {Earth and Planetary Astrophysics, Instrumentation and Methods for Astrophysics},
+        title = "{Uniform Reanalysis of JWST MIRI 15 {\ensuremath{\mu}}m Exoplanet Eclipse Observations Using Frame-normalized Principal Component Analysis}",
+      journal = {\apjl},
+     keywords = {Exoplanets, Exoplanet atmospheres, Planetary atmospheres, 498, 487, 1244, Earth and Planetary Astrophysics, Instrumentation and Methods for Astrophysics},
          year = 2025,
-        month = jul,
-          eid = {arXiv:2507.02052},
-        pages = {arXiv:2507.02052},
-          doi = {10.48550/arXiv.2507.02052},
+        month = aug,
+       volume = {989},
+       number = {1},
+          eid = {L11},
+        pages = {L11},
+          doi = {10.3847/2041-8213/adee0d},
 archivePrefix = {arXiv},
        eprint = {2507.02052},
  primaryClass = {astro-ph.EP},
-       adsurl = {https://ui.adsabs.harvard.edu/abs/2025arXiv250702052C},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2025ApJ...989L..11C},
       adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 ```
