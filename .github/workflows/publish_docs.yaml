@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERSION: ${{ needs.get-version.outputs.version }}
-    if: ${{ needs.get-version.outputs.skip }} != 'true'
+    if: needs.get-version.outputs.skip != 'true'
     steps:
       - name: Log
         run: |
