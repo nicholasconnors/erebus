@@ -45,9 +45,10 @@ class H5Serializable:
                         value = ufloat(float(nominal_value), float(std_dev))
                     elif value.startswith("PYDANTIC"):
                         value = from_json(value[len("PYDANTIC"):])
-                    elif isinstance(value, Planet):
+                    elif value.startswith("PLANET"):
                         value = from_json(value[len("PLANET"):])    
-                        value = Planet.__load_from_yaml(value)                
+                    elif value.startswith("JAGGED_LIST"):
+                        value = json.loads(value[len("JAGGED_LIST"):], cls=_JSONDecoder)
                     
                 self.__setattr__(name, value)
             for name, value in hf.items():
@@ -67,6 +68,9 @@ class H5Serializable:
         return self
     
     def save_to_path(self, file_path : str):
+        if file_path is None:
+            return
+        
         folder = os.path.dirname(os.path.abspath(file_path))
         if not os.path.isdir(folder):
             os.makedirs(folder)
@@ -92,15 +96,20 @@ class H5Serializable:
                         value = "JSON" + json.dumps(value, cls=_JSONEncoder)
                     elif isinstance(value, UFloat):
                         value = f"UFLOAT{value.nominal_value}+/-{value.std_dev}"
-
-                    if isinstance(value, list) or isinstance(value, np.ndarray):
+                    elif isinstance(value, list) or isinstance(value, np.ndarray):
                         value = [str(v) if isinstance(v, np.str_) else v for v in value]
-                        hf.create_dataset(name, data = value)
+                        try:
+                            hf.create_dataset(name, data = value)
+                            # Break loop early since it was saved as a dataset instead
+                            continue
+                        except ValueError:
+                            value = "JAGGED_LIST" + json.dumps(value, cls=_JSONEncoder)
                     elif isinstance(value, BaseModel):
                         value = "PYDANTIC" + json.dumps(value.model_dump(mode='json'), cls=_JSONEncoder)
                     elif isinstance(value, Planet):
                         value = "PLANET" + json.dumps(value._yaml.model_dump(mode='json'), cls=_JSONEncoder)
-                    elif not inspect.ismethod(value):
+                    
+                    if not inspect.ismethod(value):
                         hf.attrs[name] = value
                 except Exception:
                     print(f"Couldn't save [{name}]")

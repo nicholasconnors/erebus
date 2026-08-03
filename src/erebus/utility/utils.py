@@ -41,7 +41,7 @@ def bin_data(array: np.ndarray, bin_size : int):
     '''
     Returns the means and standard error of each bin
     '''
-    if len(array) < bin_size:
+    if len(array) < bin_size or bin_size == 1:
         return array, np.zeros_like(array)
     
     # Get length which is divisible by bin_size
@@ -98,6 +98,13 @@ class _JSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, UFloat):
             return {'__ufloat__': True, 'nominal_value': obj.nominal_value, 'std_dev': obj.std_dev}
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+
         return super().default(obj)
 
 class _JSONDecoder(json.JSONDecoder):

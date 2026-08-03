@@ -1,0 +1,409 @@
+{
+    "fp": {
+        "__ufloat__": true,
+        "nominal_value": 0.0001111334454749877,
+        "std_dev": 2.8691575723210933e-05
+    },
+    "rp_rstar": {
+        "__ufloat__": true,
+        "nominal_value": 0.031794166724964365,
+        "std_dev": 0.0007019715396156274
+    },
+    "a_rstar": {
+        "__ufloat__": true,
+        "nominal_value": 17.141359523411822,
+        "std_dev": 0.40547039147712205
+    },
+    "p": {
+        "__ufloat__": true,
+        "nominal_value": 2.6162644,
+        "std_dev": 0.0
+    },
+    "inc": {
+        "__ufloat__": true,
+        "nominal_value": 89.11271001097401,
+        "std_dev": 0.6846865478357032
+    },
+    "esinw": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "ecosw": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "t_sec_offset": {
+        "__ufloat__": true,
+        "nominal_value": -0.026313128506617184,
+        "std_dev": 0.005932725280976764
+    },
+    "t_sec_offset_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "t_sec_offset_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "t_sec_offset_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "fp_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "fp_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "fp_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc1_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc2_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc3_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc4_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc5_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "exp1_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "exp2_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "a_0": {
+        "__ufloat__": true,
+        "nominal_value": -0.00999132316005124,
+        "std_dev": 0.0006864527347699009
+    },
+    "b_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0012708485227221572,
+        "std_dev": 8.782330510933049e-05
+    },
+    "obs1_pc1_0": {
+        "__ufloat__": true,
+        "nominal_value": -0.5375952819989794,
+        "std_dev": 0.08421821677553032
+    },
+    "obs1_pc2_0": {
+        "__ufloat__": true,
+        "nominal_value": -0.8632401014434541,
+        "std_dev": 0.1960496500030946
+    },
+    "obs1_pc3_0": {
+        "__ufloat__": true,
+        "nominal_value": -0.8455550134416719,
+        "std_dev": 0.19479681389610137
+    },
+    "obs1_pc4_0": {
+        "__ufloat__": true,
+        "nominal_value": -0.010720049918344916,
+        "std_dev": 0.19319998058511234
+    },
+    "obs1_pc5_0": {
+        "__ufloat__": true,
+        "nominal_value": -0.6598608724246374,
+        "std_dev": 0.17626264894993152
+    },
+    "obs2_pc1_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_pc2_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_pc3_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_pc4_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_pc5_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_exp1_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_exp2_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_b_0": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc1_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc2_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc3_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc4_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc5_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "exp1_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "exp2_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "a_2": {
+        "__ufloat__": true,
+        "nominal_value": -0.001999836305688656,
+        "std_dev": 0.00030904423440286687
+    },
+    "b_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0001141062988696413,
+        "std_dev": 5.163504396986223e-05
+    },
+    "obs1_pc1_2": {
+        "__ufloat__": true,
+        "nominal_value": -1.103867722353285,
+        "std_dev": 0.07192162068702868
+    },
+    "obs1_pc2_2": {
+        "__ufloat__": true,
+        "nominal_value": -0.2614395325145944,
+        "std_dev": 0.1888083345283432
+    },
+    "obs1_pc3_2": {
+        "__ufloat__": true,
+        "nominal_value": -0.29946884645656263,
+        "std_dev": 0.172689151900275
+    },
+    "obs1_pc4_2": {
+        "__ufloat__": true,
+        "nominal_value": -0.5857786612272913,
+        "std_dev": 0.150127468301172
+    },
+    "obs1_pc5_2": {
+        "__ufloat__": true,
+        "nominal_value": -0.5090025392455966,
+        "std_dev": 0.1669431342860407
+    },
+    "obs2_pc1_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_pc2_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_pc3_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_pc4_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_pc5_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_exp1_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_exp2_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "obs2_b_2": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc1_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc2_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc3_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc4_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "pc5_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "exp1_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "exp2_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0,
+        "std_dev": 0.0
+    },
+    "a_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0039912067285935125,
+        "std_dev": 0.0017176462732212577
+    },
+    "b_3": {
+        "__ufloat__": true,
+        "nominal_value": -0.0003616190680269212,
+        "std_dev": 0.00011908282595621324
+    },
+    "obs1_pc1_3": {
+        "__ufloat__": true,
+        "nominal_value": -1.2947978076993332,
+        "std_dev": 0.07694981658775535
+    },
+    "obs1_pc2_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.20686120277751863,
+        "std_dev": 0.2521474125538723
+    },
+    "obs1_pc3_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.12844248429918687,
+        "std_dev": 0.2531514646312659
+    },
+    "obs1_pc4_3": {
+        "__ufloat__": true,
+        "nominal_value": -0.5525702580556295,
+        "std_dev": 0.23495565755118794
+    },
+    "obs1_pc5_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.10819968290315748,
+        "std_dev": 0.23325090838121704
+    },
+    "obs2_pc1_3": {
+        "__ufloat__": true,
+        "nominal_value": -1.1975799495041175,
+        "std_dev": 0.07936806127493501
+    },
+    "obs2_pc2_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.19459086317819974,
+        "std_dev": 0.27537666026664875
+    },
+    "obs2_pc3_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.3925271348763255,
+        "std_dev": 0.2880406635464091
+    },
+    "obs2_pc4_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.276435759672773,
+        "std_dev": 0.23950412058708703
+    },
+    "obs2_pc5_3": {
+        "__ufloat__": true,
+        "nominal_value": -0.30771360937815173,
+        "std_dev": 0.2891322856125939
+    },
+    "obs2_exp1_3": {
+        "__ufloat__": true,
+        "nominal_value": 0.0014907487201552922,
+        "std_dev": 0.0002632712148548541
+    },
+    "obs2_exp2_3": {
+        "__ufloat__": true,
+        "nominal_value": -78.863641592524,
+        "std_dev": 22.098330046879024
+    },
+    "obs2_b_3": {
+        "__ufloat__": true,
+        "nominal_value": -0.0005650450358943934,
+        "std_dev": 0.00021389472805282764
+    },
+    "y_err": {
+        "__ufloat__": true,
+        "nominal_value": 0.00037024136387965654,
+        "std_dev": 5.617055481750783e-06
+    },
+    "auto_corr": 2562.2129459707544,
+    "BIC": -28464.634871402017
+}

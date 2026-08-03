@@ -50,7 +50,6 @@ class PhotometryData(H5Serializable):
 
             self.normalized_frames = []
             '''Normalized and background subtracted frames used for performing FN-PCA.'''
-
             
             self.radius = radius
             '''Pixel radius used for aperture photometry.'''
@@ -64,6 +63,13 @@ class PhotometryData(H5Serializable):
             
             self.__do_aperture_photometry(fits_file)
             self.__get_normalized_frames(fits_file)
+            
+            # Outlier removal after photometry
+            valid_inds = np.array([np.abs(f - np.median(self.raw_flux)) < 5 * np.std(self.raw_flux) for f in self.raw_flux])
+            self.raw_flux = self.raw_flux[valid_inds]
+            self.time = self.time[valid_inds]
+            self.normalized_frames = self.normalized_frames[valid_inds]
+            
             self.save_to_path(self._cache_file)
     
     def __do_aperture_photometry(self, fits_file : WrappedFits):

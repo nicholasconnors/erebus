@@ -1,12 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "erebus_exoplanet"
-version = "0.7.1"
+version = "0.8.0"
 authors = [
   { name="Nicholas Connors", email="nicholas.connors@umontreal.ca" },
 ]
 description = "An exoplanet eclipse depth tool"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3"
 ]
@@ -15,6 +19,10 @@ license-files = ["LICENSE*"]
 dynamic = ["dependencies"]
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
+[tool.setuptools]
+include-package-data = true
+[tool.setuptools.package-data]
+"erebus" = ["**/*.ecf"]
 
 [project.urls]
 Homepage = "https://github.com/nicholasconnors/erebus"

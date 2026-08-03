@@ -59,8 +59,8 @@ class Planet:
             p               Orbital period in days
             rp_rstar        Radius of the exoplanet in units of stellar radii
             inc             Inclination in degrees
-            ecc             Eccentricity
-            w               Argument of periastron in degrees   
+            ecc             Eccentricity (Optional: if not provided it will be fit with a uniform prior)
+            w               Argument of periastron in degrees (Optional: if not provided it will be fit with a uniform prior)
         '''
         def __make_title(field_name: str, _: FieldInfo) -> str:
             return field_name
@@ -72,12 +72,14 @@ class Planet:
         p: Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
         rp_rstar: Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
         inc: Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
-        ecc: Annotated[List[float], Field(max_length=3, field_title_generator=__make_title)]
-        w: Annotated[List[Optional[float]], Field(max_length=3, field_title_generator=__make_title)]
+        ecc: Optional[Annotated[List[float], Field(default=None, max_length=3, field_title_generator=__make_title)]] = None
+        w: Optional[Annotated[List[float], Field(default=None, max_length=3, field_title_generator=__make_title)]] = None
         cache: Optional[dict] = Field(include_in_schema=False, default=None)
 
     def __ufloat_from_list(self, list: List[float]) -> UFloat | float:
         if list is None:
+            return None
+        elif len(list) == 0:
             return None
         elif len(list) == 1:
             return list[0]
@@ -129,7 +131,7 @@ class Planet:
         with open(path, "w") as f:
             f.write(planet_schema_json)
             
-    def get_closest_t0(self, obs_start):
+    def get_closest_t0(self, obs_start : float):
         '''
         Given a start time in BJD-2,400,000.5, use the lookup file to get
         the closest t0
@@ -166,7 +168,9 @@ class Planet:
     def get_predicted_tsec(self, obs_start):
         '''
         Given a start time in BJD-2,400,000.5, use the lookup file or t0
-        and P to get the next eclipse time
+        and P to get the next eclipse time relative to obs_start
+        
+        Gives time relative to observation start
         '''
         t0 = self.get_closest_t0(obs_start)
         table_prediction = ((t0 + self.get_next_t0(obs_start)) / 2.0) \

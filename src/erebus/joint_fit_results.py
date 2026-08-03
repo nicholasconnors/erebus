@@ -34,18 +34,24 @@ class JointFitResults(H5Serializable):
             '''The unique hash of the config file. Used for naming cache files.'''
             self.predicted_t_secs = fit.predicted_t_secs
             '''Predicted 0.5 eclipse time for each visit'''
+            self.bin_size = fit.bin_size
+            '''Joint fits are binned to speed up convergence'''
 
             # Time given relative to the predicted t_sec for that visit
             self.detrended_flux_per_visit = []
             '''A list containing the detrended lightcurves of each visit.'''
-            self.relative_time_per_visit = []
+            self.time_per_visit = []
             '''A list containing the time values corresponding to detrended_flux_per_visit'''
+            self.systematic_per_visit = []
+            '''A list containing the systematic model corresponding to detrended_flux_per_visit'''
+            self.raw_flux_per_visit = []
+            '''A list containing the raw flux of each visit'''
+            
+            self.starting_times = fit.starting_times
             
             # Time relative to predicted t_sec and used to run the physical model
             self.model_flux_per_visit = []
             '''The best fit detrended lightcurves per visit.'''
-            self.model_time_per_visit = []
-            '''A list containing the time values corresponding to model_flux_per_visit'''
 
             args = [x.nominal_value for x in list(fit.results.values())]
 
@@ -53,25 +59,45 @@ class JointFitResults(H5Serializable):
             number_of_systematic_args = fit.get_number_of_systematic_args()
 
             physical_args = args[0:number_of_physical_args]
-            visit_indices = np.array([fit.get_visit_index_from_time(xi) for xi in fit.time])
-            for visit_index in range(0, len(fit.photometry_data_list)):
-                filt = visit_indices == visit_index
+            for i, visit_index in enumerate(fit.visit_indices):
+                filt = fit.visit_index_filter[visit_index]
                 time = fit.time[filt]
                 flux = fit.raw_flux[filt]
-                            
-                systematic_index_start = (number_of_physical_args) + (visit_index * number_of_systematic_args)
+                
+                # Only add visits that were included
+                systematic_index_start = fit.get_systematic_index_start(i)
                 systematic_args = args[systematic_index_start:systematic_index_start + number_of_systematic_args]
             
                 systematic = fit.systematic_model(time, *systematic_args)
-                physical_time = np.linspace(np.min(time), np.max(time), 1000)
-                physical = fit.physical_model(physical_time, *physical_args)
+                physical = fit.physical_model(time, *physical_args)
                 
                 self.detrended_flux_per_visit.append(flux / systematic)
-                time_offset = fit.get_predicted_t_sec_of_visit(visit_index).nominal_value + fit.starting_times[visit_index]
-                self.relative_time_per_visit.append((time - time_offset) * 24)
-                self.model_time_per_visit.append((physical_time - time_offset) * 24)
+                self.systematic_per_visit.append(systematic)
+                self.raw_flux_per_visit.append(flux)
+                time_offset = fit.get_predicted_t_sec_of_visit(visit_index)
+                self.time_per_visit.append((time - time_offset) * 24)
                 self.model_flux_per_visit.append(physical)
+                        
+            # To be serialized 2D arrays cannot be jagged
+            self.detrended_flux_per_visit = JointFitResults.__pad_2d_array(self.detrended_flux_per_visit)
+            self.systematic_per_visit = JointFitResults.__pad_2d_array(self.systematic_per_visit)
+            self.raw_flux_per_visit = JointFitResults.__pad_2d_array(self.systematic_per_visit)
+            self.time_per_visit = JointFitResults.__pad_2d_array(self.time_per_visit)
+            self.model_flux_per_visit = JointFitResults.__pad_2d_array(self.model_flux_per_visit)
+            
+            self.final_log_likelihood = fit.final_log_likelihood
+            self.BIC = fit.BIC
     
+    @staticmethod
+    def __pad_2d_array(array_2d):
+        max_length = max([len(array) for array in array_2d])
+        n_arrays = len(array_2d)
+        padded_array_2d = np.full((n_arrays, max_length), np.nan)
+        for i in range(n_arrays):
+            array = array_2d[i]
+            padded_array_2d[i, :len(array)] = array
+        return np.array(padded_array_2d)
+
     @staticmethod
     def load(path : str):
         '''After running an Erebus instance, the results file can be loaded later using this method.'''

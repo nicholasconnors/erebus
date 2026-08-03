@@ -1,0 +1,1 @@
+These light curves are generated from the Hot Rocks Survey, for targets where the previous filter was P750L. We use these to measure the settling slopes and to compare them to those of GJ3929b.

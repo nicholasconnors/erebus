@@ -21,7 +21,7 @@ class IndividualFitResults(H5Serializable):
             '''For each principal component, this is its eigenimage.'''
             self.pca_variance_ratios = fit.pca_variance_ratios
             '''For each principal component, how much of the variance does it explain.'''
-            self.order = fit.order
+            self.order = fit.order_label
             '''If there were other visits observed, this is the numerical ordering they occuring in.'''
             self.results = fit.results
             '''A dictionary of results for the fit parameters (e.g., eclipse depth)'''
@@ -35,18 +35,22 @@ class IndividualFitResults(H5Serializable):
             '''The planet config file used to create this run'''
             self.config_hash = fit.config_hash
             '''The unique hash of the config file. Used for naming cache files.'''
-            self.frames = fit.photometry_data.normalized_frames
+            trim = fit.config.get_trim_integrations(fit.index)
+            self.frames = fit.photometry_data.normalized_frames[trim[0]:trim[1]]
             '''The frames which aperture photometry was performed on for the fit.'''
             self.predicted_t_sec = fit.predicted_t_sec
             '''The predicted 0.5 phase eclipse time'''
-            
+
             res_nominal_values = [fit.results[k].nominal_value for k in fit.results][:-1]
-            systematic_params = res_nominal_values[8:]
+            systematic_params = res_nominal_values[fit.get_number_of_physical_args():]
             
             self.flux_model = fit.fit_method(fit.time, *res_nominal_values)
             '''The best fit detrended lightcurve.'''
             self.systematic_factor = fit.systematic_model(fit.time, *systematic_params)
             '''The systematic factor which was divided out of the raw lightcurve to get the detrended one.'''
+            
+            self.final_log_likelihood = fit.final_log_likelihood if hasattr(fit, "final_log_likelihood") else 0
+            self.BIC = fit.BIC if hasattr(fit, "BIC") else 0
     
     @staticmethod
     def load(path : str):

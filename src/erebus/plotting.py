@@ -22,7 +22,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
         individual_fit = IndividualFitResults(individual_fit)
     
     yerr = individual_fit.results['y_err'].nominal_value
-    t_sec = individual_fit.predicted_t_sec.nominal_value
+    t_sec = individual_fit.predicted_t_sec
     rp = individual_fit.results['rp_rstar'].nominal_value
     inc = individual_fit.results['inc'].nominal_value
     a = individual_fit.results['a_rstar'].nominal_value
@@ -53,14 +53,14 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     eclipse_end = t_sec_offset * 24 + duration / 2
     
     fig = plt.figure(figsize=(9, 5.5))
-    grid = fig.add_gridspec(4, 2)
+    grid = fig.add_gridspec(4, 5)
     
     ############################################################################## Layout
-    flux_subfigure = fig.add_subfigure(grid[0:3,0])
-    allan_deviation_subfigure = fig.add_subfigure(grid[3,0])
-    pca_subfig = fig.add_subfigure(grid[:,1:])
+    flux_subfigure = fig.add_subfigure(grid[0:3,0:2])
+    allan_deviation_subfigure = fig.add_subfigure(grid[3,0:2])
+    pca_subfig = fig.add_subfigure(grid[:,2:])
     
-    flux_gridspec = flux_subfigure.add_gridspec(3, 1, wspace=0, hspace=0.1)
+    flux_gridspec = flux_subfigure.add_gridspec(3, 1, wspace=0, hspace=0.0)
     flux_gridspec.update(top=1.0, right=0.85)
     flux_axs = flux_gridspec.subplots(sharex=True, sharey=True)
     flux_axs[0].set_title("Eclipse depth fitting")
@@ -69,14 +69,17 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     allan_gs = allan_deviation_subfigure.add_gridspec(1, 1)
     allan_gs.update(bottom=0.0, top=0.8, right=0.85)
     allan_ax = allan_gs.subplots()
-    
-    eigenvalue_gs = pca_subfig.add_gridspec(6,1, hspace=0.0, wspace=0.1)
-    eigenvalue_axs = eigenvalue_gs.subplots(sharex=True, sharey=False)
+
+    pca_grid = pca_subfig.add_gridspec(6, 6)
+    eigenvalue_subfigure = pca_subfig.add_subfigure(pca_grid[:,0:4])
+    eigenvalue_gs = eigenvalue_subfigure.add_gridspec(6,1, hspace=0.0, wspace=0.1)
     eigenvalue_gs.update(left=0.1, right=0.74, top=1.0, bottom=0)
-    eigenvalue_axs[0].set_title("FN-PCA decomposition of lightcurve")
+    eigenvalue_axs = eigenvalue_gs.subplots(sharex=True, sharey=False)
+    pca_subfig.suptitle("FN-PCA decomposition of lightcurve")
     eigenvalue_axs[-1].set_xlabel("Time from 0.5 phase (hours)")
     
-    eigenimage_gs = pca_subfig.add_gridspec(6,1, hspace=0.0, wspace=0)
+    eigenimage_subfigure = pca_subfig.add_subfigure(pca_grid[:,4])
+    eigenimage_gs = eigenimage_subfigure.add_gridspec(6,1, hspace=0.0, wspace=0)
     eigenimage_gs.update(left=0.74, right=0.96, top=1.0, bottom=0)
     eigenimage_axs = eigenimage_gs.subplots(sharex=True, sharey=False)
 
@@ -86,7 +89,7 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     flux_axs[0].errorbar(time, flux, yerr, linestyle='', marker='.', alpha = 0.2, color='gray')
     flux_axs[0].errorbar(bin_time, bin_flux, bin_yerr, linestyle='', marker='.', color='black', zorder=3)
     flux_axs[0].axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
-    flux_axs[0].plot(time, flux_model, color='red')
+    flux_axs[0].plot(time, flux_model, color='red', zorder=3)
     flux_axs[0].set_ylabel("Raw flux\n(ppm)")
 
     # Detrended flux
@@ -95,14 +98,14 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     flux_axs[1].errorbar(time, detrended_flux, yerr, linestyle='', marker='.', alpha = 0.2, color='gray')
     flux_axs[1].errorbar(bin_time, bin_detrended_flux, bin_yerr, linestyle='', marker='.', color='black', zorder=3)
     flux_axs[1].axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
-    flux_axs[1].plot(time, flux_model / systematic_factor, color='red')
+    flux_axs[1].plot(time, flux_model / systematic_factor, color='red', zorder=3)
     flux_axs[1].set_ylabel("Detrended flux\n(ppm)")
     flux_axs[1].text(0.5, 0.95, f"Eclipse depth: {fp*1e6:0.0f}+/-{fp_err*1e6:0.0f}ppm", horizontalalignment='center', verticalalignment='top', transform=flux_axs[1].transAxes)
 
     # Systematic factor
     linear_component = individual_fit.results['a'].nominal_value * raw_time + individual_fit.results['b'].nominal_value + 1
-    flux_axs[2].plot(time, systematic_factor, color='red')
-    flux_axs[2].plot(time, linear_component, color='black', linestyle='--', label='Linear component')
+    flux_axs[2].plot(time, systematic_factor / np.median(systematic_factor), color='red')
+    flux_axs[2].plot(time, linear_component / np.median(linear_component), color='black', linestyle='--', label='Linear component')
     flux_axs[2].axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
     flux_axs[2].legend()
     flux_axs[2].set_ylabel("Systematc factor\n(ppm)")
@@ -166,13 +169,24 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
     for ax in eigenimage_axs:
         ax.set_yticks([])
         ax.set_xticks([])
+    # Hack to get the alignment right
+    eigenimage_axs[-1].set_xticks([0])
+    eigenimage_axs[-1].set_xticklabels([" "])
+    eigenimage_axs[-1].set_xlabel(" ")
 
-    cbar_gs = pca_subfig.add_gridspec(1,1, hspace=0.0, wspace=0.1)
+    #gs.update just stopped working one day so now we have to do this mess, will need to improve later
+    cbar_subfigure = pca_subfig.add_subfigure(pca_grid[1:,5])
+    cbar_gs = cbar_subfigure.add_gridspec(1,1, hspace=0.5, wspace=0.5)
+    #cbar_gs.update(left=0.96, right=0.98, top=1, bottom=0)
     cbar_ax = cbar_gs.subplots(sharex=True, sharey=False)
-    cbar_gs.update(left=0.96, right=0.98, top=1.0-1*(1.0/(6)), bottom=0)
     fig.colorbar(im, cax=cbar_ax, ticks=[-1, 0, 1])
     cbar_ax.set_yticklabels([-1, 0, 1])
     cbar_ax.set_ylabel("Scale (symlog)")
+
+    # Adjust position of colour bar
+    pos = cbar_ax.get_position()
+    new_pos = [pos.x0, pos.y0, pos.width / 6, pos.height * 1.15]
+    cbar_ax.set_position(new_pos)
 
     if save_to_directory is not None:
         path = f"{save_to_directory}/{individual_fit.config.fit_fnpca}_{individual_fit.planet_name}_{individual_fit.visit_name}_{individual_fit.config_hash}"
@@ -211,45 +225,39 @@ def plot_joint_fit(joint_fit : JointFit | JointFitResults, save_to_directory : s
     
     fp = joint_fit.results['fp'].nominal_value
     fp_err = joint_fit.results['fp'].std_dev
-    inc = joint_fit.results["inc"].nominal_value
-    a = joint_fit.results["a_rstar"].nominal_value
-    rp = joint_fit.results["rp_rstar"].nominal_value
-    per = joint_fit.results["p"].nominal_value
-    ecosw = joint_fit.results["ecosw"].nominal_value if "ecosw" in joint_fit.results else 0
+    #inc = joint_fit.results["inc"].nominal_value
+    #a = joint_fit.results["a_rstar"].nominal_value
+    #rp = joint_fit.results["rp_rstar"].nominal_value
+    #per = joint_fit.results["p"].nominal_value
+    #ecosw = joint_fit.results["ecosw"].nominal_value if "ecosw" in joint_fit.results else 0
     #esinw = joint_fit.results["esinw"].nominal_value if "esinw" in joint_fit.results else 0
     
-    if "e" in joint_fit.results and "w" in joint_fit.results:
-        ecosw = joint_fit.results["e"].nominal_value * np.cos(joint_fit.results["w"].nominal_value * np.pi / 180)
-    
-    offset = (2 * per * ecosw / np.pi) * 24
-    duration = get_eclipse_duration(inc, a, rp, per) * 24
-    print("Offset: ", offset, "hours")
-    eclipse_start = offset - duration/2
-    eclipse_end = offset + duration/2
-    
-    detrended_flux_per_visit = joint_fit.detrended_flux_per_visit
-    relative_time_per_visit = joint_fit.relative_time_per_visit
-    model_time_per_visit = joint_fit.model_time_per_visit
-    model_flux_per_visit = joint_fit.model_flux_per_visit
-    
-    for i in range(0, np.shape(relative_time_per_visit)[0]):
-        plt.plot(relative_time_per_visit[i], detrended_flux_per_visit[i], linestyle='', marker='.', color='grey', alpha=0.2)
-    
-    combined_times = np.concatenate(relative_time_per_visit)
-    combined_flux = np.concatenate(detrended_flux_per_visit)
-    sort = np.argsort(combined_times)
-    combined_times = combined_times[sort]
-    combined_flux = combined_flux[sort]
-    
-    bin_size = len(combined_times) // 30
-    bin_time, _ = bin_data(combined_times, bin_size)
-    bin_flux, _ = bin_data(combined_flux, bin_size)
-    yerr = joint_fit.results['y_err'].nominal_value
-    
-    plt.errorbar(bin_time, bin_flux, yerr/np.sqrt(bin_size), color='black', linestyle='', marker='.')
-    
-    plt.plot(model_time_per_visit[0], model_flux_per_visit[0], color='red')
-    plt.axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
+    #if "e" in joint_fit.results and "w" in joint_fit.results:
+    #    ecosw = joint_fit.results["e"].nominal_value * np.cos(joint_fit.results["w"].nominal_value * np.pi / 180)
+
+    def phase_fold_light_curve(time, flux):
+        all_time = np.concatenate(time)
+        all_time = all_time[np.where(np.isfinite(all_time))]
+
+        all_flux = np.concatenate(flux)
+        all_flux = all_flux[np.where(np.isfinite(all_flux))]
+        
+        s = np.argsort(all_time)
+        all_time = all_time[s]
+        all_flux = all_flux[s]
+
+        return all_time, all_flux
+
+    all_time, all_flux = phase_fold_light_curve(joint_fit.time_per_visit, joint_fit.detrended_flux_per_visit)
+    bin_size = len(all_time) // 20
+    bin_time, _ = bin_data(all_time, bin_size)
+    bin_flux, _ = bin_data(all_flux, bin_size)
+    model_time, model_flux = phase_fold_light_curve(joint_fit.time_per_visit, joint_fit.model_flux_per_visit)
+
+    plt.plot(all_time, all_flux, color='grey', alpha=0.5)
+    plt.plot(model_time, model_flux, color='red')
+    plt.errorbar(bin_time, bin_flux, yerr=joint_fit.results['y_err'].nominal_value, color='black', linestyle='', marker='o')
+
     plt.ylabel("Normalized flux")
     plt.xlabel("Time from 0.5 phase (hours)")
     plt.title("Phase folded light curve")
@@ -271,13 +279,13 @@ def corner_plot(mcmc : WrappedMCMC, save_to_path : str = None, show : bool = Fal
     Call this on an MCMC model after it has run in order to show and optionally save a corner plot.
     '''
     
-    if mcmc.sampler is None:
+    if mcmc.flat_chain is None:
         print("Cannot make corner plot: MCMC run data isn't cached yet")
         return
     
     labels = mcmc.get_free_params()
     corner.corner(
-        mcmc.sampler.get_chain(discard=200, thin=15, flat=True), labels=labels
+        mcmc.flat_chain, labels=labels
     )
     
     if save_to_path is not None:
@@ -293,16 +301,16 @@ def chain_plot(mcmc : WrappedMCMC, save_to_path : str = None, show : bool = Fals
     Call this on an MCMC model after it has run in order to show and optionally save a chain plot.
 
     '''
-    if mcmc.sampler is None:
+    if mcmc.full_chain is None:
         print("Cannot make chain plot: MCMC run data isn't cached yet")
         return
-    samples = mcmc.sampler.get_chain()
+    samples = mcmc.full_chain
     labels = mcmc.get_free_params()
     ndim = len(labels)
     fig, axes = plt.subplots(ndim, figsize=(10, 7), sharex = True)
     if ndim == 1:
         axes = [axes]
-    for i in range(ndim):
+    for i in range(samples.shape[2]):
         ax = axes[i]
         ax.plot(samples[:, :, i], "k", alpha=0.3)
         ax.set_xlim(0, len(samples))
