@@ -500,6 +500,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#erebus.Erebus.force_clear_cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      force_clear_cache
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#erebus.Erebus.individual_fits" class="md-nav__link">
     <span class="md-ellipsis">
       individual_fits
@@ -761,6 +770,24 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.flat_chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      flat_chain
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.full_chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      full_chain
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#mcmc_model.WrappedMCMC.iterations" class="md-nav__link">
     <span class="md-ellipsis">
       iterations
@@ -791,15 +818,6 @@
   <a href="#mcmc_model.WrappedMCMC.results" class="md-nav__link">
     <span class="md-ellipsis">
       results
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#mcmc_model.WrappedMCMC.sampler" class="md-nav__link">
-    <span class="md-ellipsis">
-      sampler
     </span>
   </a>
   
@@ -1016,6 +1034,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#erebus.Erebus.force_clear_cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      force_clear_cache
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#erebus.Erebus.individual_fits" class="md-nav__link">
     <span class="md-ellipsis">
       individual_fits
@@ -1277,6 +1304,24 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.flat_chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      flat_chain
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcmc_model.WrappedMCMC.full_chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      full_chain
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#mcmc_model.WrappedMCMC.iterations" class="md-nav__link">
     <span class="md-ellipsis">
       iterations
@@ -1307,15 +1352,6 @@
   <a href="#mcmc_model.WrappedMCMC.results" class="md-nav__link">
     <span class="md-ellipsis">
       results
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#mcmc_model.WrappedMCMC.sampler" class="md-nav__link">
-    <span class="md-ellipsis">
-      sampler
     </span>
   </a>
   
@@ -1466,6 +1502,26 @@
 
 
 
+<h3 id="erebus.Erebus.force_clear_cache" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">force_clear_cache</span> <span class="o">=</span> <span class="n">force_clear_cache</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h3 id="erebus.Erebus.individual_fits" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">individual_fits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">IndividualFit</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span></code>
 
@@ -1600,7 +1656,7 @@
 
 
 <h3 id="erebus.Erebus.run" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">force_clear_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">output_folder</span><span class="o">=</span><span class="s1">&#39;./output_</span><span class="si">{DATE}</span><span class="s1">/&#39;</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">force_clear_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">output_folder</span><span class="o">=</span><span class="s1">&#39;./output_</span><span class="si">{DATE}</span><span class="s1">_</span><span class="si">{NAME}</span><span class="s1">/&#39;</span><span class="p">)</span></code>
 
 </h3>
 
@@ -1608,7 +1664,7 @@
     <div class="doc doc-contents ">
 
         <p>Performs all individual and joint fits. Results and plots are saved to the given folder.
-Output folder can optionally include the current time by writing {DATE}</p>
+Output folder can optionally include the current time by writing {DATE}, or the planet name by including {NAME}</p>
 
 
     </div>
@@ -2147,6 +2203,46 @@ The model will always fit for a Gaussian noise parameter "y_err"</p>
 
 
 
+<h3 id="mcmc_model.WrappedMCMC.flat_chain" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">flat_chain</span> <span class="o">=</span> <span class="kc">None</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="mcmc_model.WrappedMCMC.full_chain" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">full_chain</span> <span class="o">=</span> <span class="kc">None</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h3 id="mcmc_model.WrappedMCMC.iterations" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span></code>
 
@@ -2231,28 +2327,6 @@ The model will always fit for a Gaussian noise parameter "y_err"</p>
 
 </div>
 
-<div class="doc doc-object doc-attribute">
-
-
-
-<h3 id="mcmc_model.WrappedMCMC.sampler" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">sampler</span><span class="p">:</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span> <span class="o">|</span> <span class="n">emcee</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">HDFBackend</span> <span class="o">=</span> <span class="kc">None</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>The emcee EnsembleSampler or HDFBackend which this class wrapped</p>
-
-    </div>
-
-</div>
-
 
 
 <div class="doc doc-object doc-function">
@@ -2320,7 +2394,7 @@ The model will always fit for a Gaussian noise parameter "y_err"</p>
 
     <div class="doc doc-contents ">
 
-        <p>Given the parameters theta and the x and y values, calculates the Bayesian log likelihood.</p>
+        <p>Given the free parameters theta and the x and y values, calculates the Bayesian log likelihood.</p>
 
 
     </div>

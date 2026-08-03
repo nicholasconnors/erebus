@@ -1522,7 +1522,7 @@ fits = WrappedFits(folder, visits[0])</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">erebus.frame_normalized_pca</span><span class="w"> </span><span class="kn">import</span> <span class="n">perform_fnpca_on_full_frame</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">erebus.systematics.frame_normalized_pca</span><span class="w"> </span><span class="kn">import</span> <span class="n">perform_fnpca_on_full_frame</span>
 
 <span class="c1"># Using a radius of 5 pixels and an annulus spanning 10 to 20 pixels</span>
 <span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">,</span> <span class="n">variance_ratio</span> <span class="o">=</span> <span class="n">perform_fnpca_on_full_frame</span><span class="p">(</span><span class="n">fits</span><span class="o">.</span><span class="n">frames</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
@@ -1530,7 +1530,7 @@ fits = WrappedFits(folder, visits[0])</div>
 <span class="c1"># For a given principal component, the each number in the eigenvalues corresponds to a time</span>
 <span class="n">time</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">t</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-3">from erebus.frame_normalized_pca import perform_fnpca_on_full_frame
+<div class="clipboard-copy-txt" id="cell-3">from erebus.systematics.frame_normalized_pca import perform_fnpca_on_full_frame
 
 # Using a radius of 5 pixels and an annulus spanning 10 to 20 pixels
 eigenvalues, eigenvectors, variance_ratio = perform_fnpca_on_full_frame(fits.frames, 5, 10, 20)
@@ -1698,12 +1698,12 @@ plot_principal_component(eigenvalues, eigenvectors, variance_ratio, time, 2)</di
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">erebus.frame_normalized_pca</span><span class="w"> </span><span class="kn">import</span> <span class="n">perform_fnpca_on_full_frame</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">erebus.systematics.frame_normalized_pca</span><span class="w"> </span><span class="kn">import</span> <span class="n">perform_fnpca_on_full_frame</span>
 
 <span class="n">trimmed_eigenvalues</span><span class="p">,</span> <span class="n">trimmed_eigenvectors</span><span class="p">,</span> <span class="n">trimmed_variance_ratio</span> <span class="o">=</span> <span class="n">perform_fnpca_on_full_frame</span><span class="p">(</span><span class="n">fits</span><span class="o">.</span><span class="n">frames</span><span class="p">[:</span><span class="o">-</span><span class="mi">40</span><span class="p">],</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
 <span class="n">trimmed_time</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">t</span><span class="p">[:</span><span class="o">-</span><span class="mi">40</span><span class="p">]</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-5">from erebus.frame_normalized_pca import perform_fnpca_on_full_frame
+<div class="clipboard-copy-txt" id="cell-5">from erebus.systematics.frame_normalized_pca import perform_fnpca_on_full_frame
 
 trimmed_eigenvalues, trimmed_eigenvectors, trimmed_variance_ratio = perform_fnpca_on_full_frame(fits.frames[:-40], 5, 10, 20)
 trimmed_time = fits.t[:-40]</div>

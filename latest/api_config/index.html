@@ -503,6 +503,33 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#utility.run_cfg.ErebusRunConfig.get_hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_hash
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility.run_cfg.ErebusRunConfig.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility.run_cfg.ErebusRunConfig.save" class="md-nav__link">
+    <span class="md-ellipsis">
+      save
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#utility.run_cfg.ErebusRunConfig.set_custom_systematic_model" class="md-nav__link">
     <span class="md-ellipsis">
       set_custom_systematic_model
@@ -787,6 +814,33 @@
   <a href="#utility.run_cfg.ErebusRunConfig" class="md-nav__link">
     <span class="md-ellipsis">
       ErebusRunConfig
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility.run_cfg.ErebusRunConfig.get_hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_hash
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility.run_cfg.ErebusRunConfig.load" class="md-nav__link">
+    <span class="md-ellipsis">
+      load
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility.run_cfg.ErebusRunConfig.save" class="md-nav__link">
+    <span class="md-ellipsis">
+      save
     </span>
   </a>
   
@@ -1150,7 +1204,8 @@ the following t0</p>
     <div class="doc doc-contents ">
 
         <p>Given a start time in BJD-2,400,000.5, use the lookup file or t0
-and P to get the next eclipse time</p>
+and P to get the next eclipse time relative to obs_start</p>
+<p>Gives time relative to observation start</p>
 
 
     </div>
@@ -1257,7 +1312,18 @@ be true else the run will not do anything.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Relative path from the folder containing this file to where the .fits files are.</p>
+                <p>Relative path from the folder containing this file to where the calints.fits files are.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="utility.run_cfg.ErebusRunConfig.uncal_path">uncal_path</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Relative path from the folder containing this file to where the uncal.fits files are. One of uncal_path or calints_path must be set.</p>
               </div>
             </td>
           </tr>
@@ -1360,6 +1426,72 @@ be true else the run will not do anything.</p>
               </div>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="utility.run_cfg.ErebusRunConfig.fit_uniform_eclipse_timing_offset">fit_uniform_eclipse_timing_offset</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional float (days) to fit t_sec offset as a uniform prior. First value is start, second value is end, relative to 0.5 phase</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="utility.run_cfg.ErebusRunConfig.fit_gaussian_eclipse_timing_offset">fit_gaussian_eclipse_timing_offset</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional float (days) to fit t_sec offset as a gaussian prior. First value is time from 0.5 phase, second value is std dev</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="utility.run_cfg.ErebusRunConfig.fit_eclipse_timing_offset_per_visit">fit_eclipse_timing_offset_per_visit</span></code></td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional bool to use a different eclipse timing offset for each visit during a joint fit.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="utility.run_cfg.ErebusRunConfig.fit_eclipse_depth_per_visit">fit_eclipse_depth_per_visit</span></code></td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional bool to use a different eclipse depth for each visit during a joint fit.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="utility.run_cfg.ErebusRunConfig.joint_fit_bin_size">joint_fit_bin_size</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional bin size for joint fit, if performed. Defaults to 4.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="utility.run_cfg.ErebusRunConfig.fit_no_eclipse">fit_no_eclipse</span></code></td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optionally fit only systematic (as in, eclipse depth is 0).</p>
+              </div>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -1381,6 +1513,34 @@ be true else the run will not do anything.</p>
         </tr>
       </thead>
       <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="get_hash() (utility.run_cfg.ErebusRunConfig.get_hash)" href="#utility.run_cfg.ErebusRunConfig.get_hash">get_hash</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Returns a unique hash representing this run config</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="load(path)
+
+  
+      staticmethod
+   (utility.run_cfg.ErebusRunConfig.load)" href="#utility.run_cfg.ErebusRunConfig.load">load</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Loads EreusRunConfig from a yaml file</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="save(path) (utility.run_cfg.ErebusRunConfig.save)" href="#utility.run_cfg.ErebusRunConfig.save">save</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Saves this ErebusRunConfig instance to the path as a yaml file</p>
+                </div>
+              </td>
+            </tr>
             <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="set_custom_systematic_model(model, params) (utility.run_cfg.ErebusRunConfig.set_custom_systematic_model)" href="#utility.run_cfg.ErebusRunConfig.set_custom_systematic_model">set_custom_systematic_model</a></code></td>
               <td>
@@ -1414,6 +1574,64 @@ be true else the run will not do anything.</p>
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="utility.run_cfg.ErebusRunConfig.get_hash" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_hash</span><span class="p">()</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns a unique hash representing this run config</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="utility.run_cfg.ErebusRunConfig.load" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Loads EreusRunConfig from a yaml file</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="utility.run_cfg.ErebusRunConfig.save" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Saves this ErebusRunConfig instance to the path as a yaml file</p>
+
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 

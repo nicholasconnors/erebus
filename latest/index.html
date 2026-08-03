@@ -615,18 +615,28 @@ archivePrefix = {arXiv},
 </code></pre>
 <hr />
 <h1 id="changelog">Changelog</h1>
+<h2 id="080">0.8.0</h2>
+<ul>
+<li>Added helper methods to run Eureka stage 1 and 2 when starting from uncal files before using Erebus.</li>
+<li>Added setting to fit no eclipse</li>
+<li>Added settings for gaussian/uniform prior on eclipse timing</li>
+<li>Record log likelihood and BIC</li>
+<li>Allow setting custom systematic model for Erebus to detrend with</li>
+<li>Numerous bug fixes</li>
+<li>Version used in Connors et al. 2026</li>
+</ul>
 <h2 id="071">0.7.1</h2>
 <ul>
 <li>Now uses ecosw and esinw instead of e and w</li>
 <li>Add optional setting to fix eclipse timing</li>
 <li>Improved convergence checking</li>
+<li>Version used in Connors et al. 2025</li>
 </ul>
 <h2 id="070">0.7.0</h2>
 <ul>
 <li>Pre-processing of <code>calints</code> data for NaN and outlier rejection.</li>
 <li>Light curve fitting using FN-PCA, exponential ramp, or custom systematic model</li>
 <li>Fits for orbital parameters within provided errors. Support for <code>t0</code> predictions from lookup file.</li>
-<li>Version used in Connors et al (in prep)</li>
 </ul>
 
 
