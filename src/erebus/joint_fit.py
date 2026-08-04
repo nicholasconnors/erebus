@@ -175,8 +175,7 @@ class JointFit(BaseFit):
         # Get eigenvalues per visit
         self.eigenvalue_map = {}
         for i in range(0, len(self.photometry_data_list)):
-            self.eigenvalue_map[i] = self.all_eigenvalues.T[i].T
-                
+            self.eigenvalue_map[i] = self.all_eigenvalues.T[self.visit_index_filter[i]].T
         # 
         # MCMC setup
         # 

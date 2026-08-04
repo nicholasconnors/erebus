@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.1
+
+- Hotfix: FNPCA joint fit was broken.
+
 ## 0.8.0
 
 - Added helper methods to run Eureka stage 1 and 2 when starting from uncal files before using Erebus.
