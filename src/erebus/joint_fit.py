@@ -119,6 +119,7 @@ class JointFit(BaseFit):
         self.transit_models = {}
         
         self.joint_eigenvalues = []
+        self.joint_eigenvalues_for_fit = [] # Only has the visits we are running on
         self.joint_eigenvectors = []
         self.pca_variance_ratios = []
         self.time = []
@@ -134,6 +135,7 @@ class JointFit(BaseFit):
             if i not in self.visit_indices:
                 continue
 
+            self.joint_eigenvalues_for_fit.append(binned_eigenvalues)
             binned_time = bin_data(data.time[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0]
             self.time.append(binned_time)
             binned_flux = bin_data(data.raw_flux[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0]
@@ -142,7 +144,7 @@ class JointFit(BaseFit):
             
         # time per visit used to interpolate FNPCA systematic
         self.time = np.concatenate(self.time)
-        self.all_eigenvalues = np.concatenate(self.joint_eigenvalues, axis=1)
+        self.all_eigenvalues = np.concatenate(self.joint_eigenvalues_for_fit, axis=1)
         self.raw_flux = np.concatenate(self.raw_flux)              
         
         # If visits have different lengths (number of integrations) then these arrays can't be saved (inhomogenous)
