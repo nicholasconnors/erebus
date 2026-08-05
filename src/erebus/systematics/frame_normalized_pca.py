@@ -44,7 +44,6 @@ def perform_fn_pca_on_aperture(aperture_frames : np.ndarray) -> Tuple[np.ndarray
     length, width, height = aperture_frames.shape
     flat_frames = aperture_frames.reshape(length, width * height)
     pca = NormalPCA()
-    pca.fit(flat_frames)
     eigenvalues = pca.fit_transform(flat_frames).T
     eigenvectors = np.array([image.reshape((width, height)) for image in pca.components_])
     
