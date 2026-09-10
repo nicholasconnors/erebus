@@ -9,6 +9,7 @@ import uncertainties.umath as umath
 from erebus.systematics.frame_normalized_pca import perform_fn_pca_on_aperture
 from erebus.mcmc_model import WrappedMCMC
 from erebus.photometry_data import PhotometryData
+from erebus.spectroscopy.spectroscopy_data import SpectroscopyData
 from erebus.utility.bayesian_parameter import Parameter
 from erebus.utility.h5_serializable_file import H5Serializable
 from erebus.utility.planet import Planet
@@ -27,19 +28,19 @@ class IndividualFit(BaseFit):
         Excluded from serialization
         '''
         return ['config', 'time', 'raw_flux', 'params', 'transit_model', 'mcmc', '__instance', 
-                'photometry_data', '_force_clear_cache', 'predicted_t_sec', 'start_trim', 'end_trim', 'planet']
+                'lightcurve_data', '_force_clear_cache', 'predicted_t_sec', 'start_trim', 'end_trim', 'planet']
     
-    def __init__(self, photometry_data : PhotometryData, planet : Planet, config : ErebusRunConfig,
+    def __init__(self, lightcurve_data : PhotometryData | SpectroscopyData, planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None, index = None):
         super().__init__()
         
-        self.visit_name = photometry_data.visit_name
+        self.visit_name = lightcurve_data.visit_name
         self.config_hash = config.get_hash()
         self.planet_name = planet.name
         self.planet = planet
         self.order_label = 'X'
         self.index = index
-        self.photometry_data = photometry_data
+        self.lightcurve_data = lightcurve_data
 
         self._cache_file = f"{EREBUS_CACHE_DIR}/{self.visit_name}_{self.config_hash}_individual_fit.h5"
         
@@ -50,9 +51,9 @@ class IndividualFit(BaseFit):
         self.start_trim = trim[0]
         self.end_trim = trim[1]
         
-        self.start_time = np.min(photometry_data.time)
-        self.time = photometry_data.time[self.start_trim:self.end_trim]
-        self.raw_flux = photometry_data.raw_flux[self.start_trim:self.end_trim]
+        self.start_time = np.min(lightcurve_data.time)
+        self.time = lightcurve_data.time[self.start_trim:self.end_trim]
+        self.raw_flux = lightcurve_data.raw_flux[self.start_trim:self.end_trim]
         self.config = config
         
         self.results = {}
@@ -61,11 +62,17 @@ class IndividualFit(BaseFit):
         self.params = None
         self.transit_model = None
         
-        self.eigenvalues, self.eigenvectors, self.pca_variance_ratios = perform_fn_pca_on_aperture(photometry_data.normalized_frames[self.start_trim:self.end_trim])
+        if isinstance(self.lightcurve_data, PhotometryData):
+            self.eigenvalues, self.eigenvectors, self.pca_variance_ratios = perform_fn_pca_on_aperture(lightcurve_data.normalized_frames[self.start_trim:self.end_trim])
+        else:
+            #TODO: Also get FNPCA for spectroscopy
+            self.eigenvalues = np.ones_like(lightcurve_data.raw_flux[self.start_trim:self.end_trim])
+            self.eigenvectors = np.ones_like(lightcurve_data.raw_flux[self.start_trim:self.end_trim])
+            self.pca_variance_ratios = np.ones_like(lightcurve_data.raw_flux[self.start_trim:self.end_trim])
                 
         mcmc = WrappedMCMC(self._cache_file.replace(".h5", "_mcmc.h5"))
         
-        start_time = np.min(photometry_data.time)
+        start_time = np.min(lightcurve_data.time)
         self.predicted_t_sec = planet.get_predicted_tsec(start_time).nominal_value + start_time
         
         lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
@@ -98,6 +105,10 @@ class IndividualFit(BaseFit):
                                 
         if os.path.isfile(self._cache_file) and not force_clear_cache:
             self.load_from_path(self._cache_file)
+            
+            # Backwards compatibility for when only photoemtry was supported
+            if hasattr(self, "photometry_data"):
+                self.lightcurve_data = self.photometry_data
         else:
             self.save_to_path(self._cache_file)
         
@@ -137,7 +148,7 @@ class IndividualFit(BaseFit):
                        exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
         systematic = IndividualFit.__instance.systematic_model(x, pc1, pc2, pc3, pc4, pc5, exp1, exp2, a, b, *extra_params)
         physical = IndividualFit.__instance.physical_model(x, fp, rp_rstar, a_rstar, p, inc, esinw, ecosw, t_sec_offset)
-        return physical * systematic 
+        return physical * systematic
     
     #override
     def fit_method(self, x : List[float], *args) -> List[float]:

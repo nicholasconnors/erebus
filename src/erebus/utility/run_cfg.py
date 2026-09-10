@@ -20,12 +20,19 @@ class ErebusRunConfig(BaseModel):
         calints_path (str): Relative path from the folder containing this file to where the calints.fits files are.
         uncal_path (str): Relative path from the folder containing this file to where the uncal.fits files are. One of uncal_path or calints_path must be set.
         planet_path (str): Relative path from the folder containing this file to where the planet config is.
+        instrument (str): The instrument being used. Accepted values: miri_photometry, miri_lrs. Optional, defaults to photometry.
+        
+        star_position (list[int]): X and y pixel coordinates of the star when doing aperture photometry. Optional (will search for the star or assume its centered).
         aperture_radius (int): Pixel radius for aperture photometry.
-        annulus_start (int): Inner pixel radius of disk used for background subtraction.
-        annulus_end (int): Outer pixel radius of disk used for background subtraction.
+        annulus_start (int): Inner pixel radius of disk used for background subtraction when doing aperture photometry.
+        annulus_end (int): Outer pixel radius of disk used for background subtraction when doing aperture photometry.
+        
+        do_optimal_extraction (bool): Whether to perform optimal extraction instead of aperture extraction. Currently only supported for spectroscopy. Defaults to false.
+        wl_start (float): The start of the wavelength bin when doing spectroscopy.
+        wl_end (float): The end of the wavelength bin when doing spectroscopy.
+        
         skip_visits (list[int]): Optional list of indices to skip when doing individual fits. Index based on visit ID.
         trim_integrations (list[int]): Length-two list with the number of integrations to clip from the start and end. Optional.
-        star_position (list[int]): X and y pixel coordinates of the star. Optional (will search for the star or assume its centered).
         prevent_negative_eclipse_depth (bool): Optional bool to force eclipse depth to be positive.
         fix_eclipse_timing (bool): Optional bool to force t0, period, ecosw to be fixed
         fit_uniform_eclipse_timing_offset (float): Optional float (days) to fit t_sec offset as a uniform prior. First value is start, second value is end, relative to 0.5 phase
@@ -43,12 +50,21 @@ class ErebusRunConfig(BaseModel):
     calints_path : Optional[str] = None
     uncal_path : Optional[str] = None
     planet_path : str
-    aperture_radius : int
-    annulus_start : int
-    annulus_end : int
+    instrument : Optional[str] = "miri_photometry"
+    
+    # FOR APERTURE PHOTOMETRY ONLY
+    aperture_radius : Optional[int]
+    annulus_start : Optional[int]
+    annulus_end : Optional[int]
+    star_position : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
+
+    # FOR SPECTROSCOPY ONLY
+    do_optimal_extraction : Optional[bool] = False
+    wl_start : Optional[float] = None
+    wl_end : Optional[float] = None
+    
     skip_visits : Optional[List[int]] = None
     trim_integrations : Optional[Union[List[int], List[List[int]]]] = None
-    star_position : Annotated[Optional[List[int]], Field(max_length=2, min_length=2)] = None
     path : Optional[str] = Field(None, exclude=True)
     prevent_negative_eclipse_depth: Optional[bool] = False
     fix_eclipse_timing: Optional[bool] = False

@@ -15,6 +15,8 @@ from erebus.utility.h5_serializable_file import H5Serializable
 from erebus.utility.planet import Planet
 from erebus.utility.run_cfg import ErebusRunConfig
 from erebus.wrapped_fits import WrappedFits
+from erebus.spectroscopy.spectroscopy_wrapped_fits import SpectroscopyWrappedFits
+from erebus.spectroscopy.spectroscopy_data import SpectroscopyData
 import erebus.eureka_util as eureka_util
 
 EREBUS_CACHE_DIR = "erebus_cache"
@@ -28,7 +30,7 @@ class Erebus(H5Serializable):
         '''
         Excluded from serialization
         '''
-        return ['individual_fits', 'joint_fit', 'photometry', 'planet', 'force_clear_cache']
+        return ['individual_fits', 'joint_fit', 'photometry', 'spectroscopy', 'light_curves', 'planet', 'force_clear_cache']
     
     @staticmethod
     def load(path : str):
@@ -36,7 +38,7 @@ class Erebus(H5Serializable):
         return Erebus(None, override_cache_path=path)
     
     def __init__(self, run_cfg : ErebusRunConfig | str, force_clear_cache : bool = False,
-                 override_cache_path : str = None, override_wrapped_fits : list[WrappedFits] = None):    
+                 override_cache_path : str = None, override_wrapped_fits : list[WrappedFits|SpectroscopyWrappedFits] = None):    
                 
         self.force_clear_cache = force_clear_cache        
         
@@ -54,6 +56,9 @@ class Erebus(H5Serializable):
         
         self.photometry : list[PhotometryData] = []
         '''The photometry data of each visit.'''
+        
+        self.spectroscopy : list[SpectroscopyData] = []
+        '''The spectroscopy data of each visit.'''
         
         self.individual_fits : list[IndividualFit] = []
         '''The individual fit instances of each visit.'''
@@ -74,6 +79,9 @@ class Erebus(H5Serializable):
         self.visit_names : list[str] = []
         '''The unique names of each visit.'''
         
+        self.is_phase_curve = False
+        '''If this data represents a phase curve. Currently only supported for spectroscopy'''
+        
         # Load from file if needed
         if override_wrapped_fits is None:
             if force_clear_cache or not os.path.isfile(self._cache_file):
@@ -85,32 +93,71 @@ class Erebus(H5Serializable):
                 self.load_from_path(self._cache_file)
                 if run_cfg is not None:
                     self.config = run_cfg
-                
-        if override_wrapped_fits is not None:
-            self.visit_names = [fits.visit_name for fits in override_wrapped_fits]
-            star_pos = None if run_cfg.star_position is None else (tuple)(run_cfg.star_position)
-            for fits in override_wrapped_fits:
-                self.photometry.append(PhotometryData(fits, run_cfg.aperture_radius,
-                                        (run_cfg.annulus_start, run_cfg.annulus_end),
-                                        force_clear_cache))
-        else:
-            for i in range(0, len(self.visit_names)):
-                star_pos = None if run_cfg.star_position is None else (tuple)(run_cfg.star_position)
-                fit = WrappedFits(self._calints_abs_path, self.visit_names[i], 
-                                force_clear_cache=force_clear_cache,
-                                star_pixel_position=star_pos)
-                self.photometry.append(PhotometryData(fit, run_cfg.aperture_radius,
-                                                    (run_cfg.annulus_start, run_cfg.annulus_end),
-                                                    force_clear_cache))
-                # Improve memory usage
-                del fit
-            
+                    
         # Planet path is relative to the config file
         planet_path = run_cfg.planet_path
         if not os.path.isabs(planet_path): 
             planet_path = os.path.join(os.path.dirname(run_cfg.path), planet_path)
         self.planet = Planet(planet_path)
         '''The planet configuration file used for this instance of the pipeline'''
+                
+        if override_wrapped_fits is not None:
+            self.visit_names = [fits.visit_name for fits in override_wrapped_fits]
+            # Photometry
+            if isinstance(override_wrapped_fits[0], WrappedFits):
+                star_pos = None if run_cfg.star_position is None else (tuple)(run_cfg.star_position)
+                for fits in override_wrapped_fits:
+                    self.photometry.append(PhotometryData(fits, run_cfg.aperture_radius,
+                                            (run_cfg.annulus_start, run_cfg.annulus_end),
+                                            force_clear_cache))
+            # Spectroscopy
+            elif isinstance(override_wrapped_fits[0], SpectroscopyWrappedFits):
+                for fit in override_wrapped_fits:
+                    self.spectroscopy.append(SpectroscopyData(fit, run_cfg.do_optimal_extraction, 
+                                                              run_cfg.wl_start, run_cfg.wl_end, force_clear_cache))
+        else:
+            if run_cfg.instrument == "miri_photometry":
+                for i, visit in enumerate(self.visit_names):
+                    star_pos = None if run_cfg.star_position is None else (tuple)(run_cfg.star_position)
+                    fit = WrappedFits(self._calints_abs_path, visit, 
+                                    force_clear_cache=force_clear_cache,
+                                    star_pixel_position=star_pos)
+                    self.photometry.append(PhotometryData(fit, run_cfg.aperture_radius,
+                                                        (run_cfg.annulus_start, run_cfg.annulus_end),
+                                                        force_clear_cache))
+                    # Improve memory usage, I don't trust the GC
+                    del fit
+            elif run_cfg.instrument == "miri_lrs":
+                # Currently only spectroscopy supports phase curves
+                is_phase_curve = False
+                if len(self.visit_names) == 1:
+                    print("Checking if this is a phase curve")
+                    num_eclipses = 1
+                    for i in range(10):
+                        #TODO: This is redundant and we end up loading the fits files twice.
+                        files = SpectroscopyWrappedFits.get_files_for_eclipse_index(self._calints_abs_path, self.planet, i)
+                        file_count = len(files)
+                        for file in files:
+                            del file
+                        if file_count == 0:
+                            num_eclipses = i
+                            print(f"Counted {num_eclipses} in the data")
+                            break
+                    is_phase_curve = num_eclipses > 1
+                    if is_phase_curve:
+                        print("It is a phase curve")
+                        self.visit_names = [f"{self.visit_names[0]}_eclipse_{i}" for i in range(num_eclipses)]
+                        
+                for i, visit in enumerate(self.visit_names):
+                    fit = SpectroscopyWrappedFits(self.planet, self._calints_abs_path, i,
+                                                  is_phase_curve, force_clear_cache)
+                    self.spectroscopy.append(SpectroscopyData(fit, run_cfg.do_optimal_extraction, 
+                                                              run_cfg.wl_start, run_cfg.wl_end, force_clear_cache))     
+                    del fit
+                self.is_phase_curve = is_phase_curve
+        
+        self.light_curves = self.photometry if len(self.photometry) > 0 else self.spectroscopy
+        '''A list of either photometry or spectroscopy light curves'''
         
         self.__setup_fits()
         
@@ -118,26 +165,27 @@ class Erebus(H5Serializable):
         
     def __setup_fits(self):
         print("Setting up fit objects")
+        print(f"{len(self.visit_names)} visits and {len(self.light_curves)} light curves")
         
         self.individual_fits : list[IndividualFit] = []        
         
-        indices = np.argsort([np.min(photo.time) for photo in self.photometry])
+        indices = np.argsort([np.min(lc.time) for lc in self.light_curves])
 
         if self.config.perform_individual_fits:
-            for i in range(0, len(self.visit_names)):
-                individual_fit = IndividualFit(self.photometry[i], 
+            for i, visit in enumerate(self.visit_names):
+                individual_fit = IndividualFit(self.light_curves[i],
                                                          self.planet, self.config,
                                                          self.force_clear_cache, index = indices[i])
                 self.individual_fits.append(individual_fit)
-                print(f"Visit {self.visit_names[i]} " + ("already ran" if 'fp' in individual_fit.results else "wasn't run yet"))
+                print(f"Visit {visit} " + ("already ran" if 'fp' in individual_fit.results else "wasn't run yet"))
             
             # Label the visits by the order they were observed
-            individual_fit_order = np.argsort([fit.start_time for fit in self.individual_fits]) + 1           
+            individual_fit_order = np.argsort([fit.start_time for fit in self.individual_fits]) + 1
             for i, fit in enumerate(self.individual_fits):
                 fit.order_label = individual_fit_order[i]
 
         if self.config.perform_joint_fit:
-            self.joint_fit = JointFit(self.photometry, self.planet, self.config, self.force_clear_cache)
+            self.joint_fit = JointFit(self.light_curves, self.planet, self.config, self.force_clear_cache)
             print("Joint fit " + ("already ran" if 'fp' in self.joint_fit.results else "wasn't run yet"))
     
     def run(self, force_clear_cache : bool = False, output_folder="./output_{DATE}_{NAME}/"):
@@ -170,6 +218,8 @@ class Erebus(H5Serializable):
         self.planet.save(output_folder + self.planet.name + "_planet_config.yaml")
         for i, photo in enumerate(self.photometry):
             photo.save_to_path(output_folder + self.planet.name + f"_photometry_{i}.h5")
+        for i, spectro in enumerate(self.spectroscopy):
+            spectro.save_to_path(output_folder + self.planet.name + f"_spectroscopy_{i}.h5")
         
         if self.config.perform_individual_fits:
             for i, fit in enumerate(self.individual_fits):

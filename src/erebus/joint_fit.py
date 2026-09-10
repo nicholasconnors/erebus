@@ -10,6 +10,7 @@ import uncertainties.umath as umath
 from erebus.systematics.frame_normalized_pca import perform_fn_pca_on_aperture
 from erebus.mcmc_model import WrappedMCMC
 from erebus.photometry_data import PhotometryData
+from erebus.spectroscopy.spectroscopy_data import SpectroscopyData
 from erebus.utility.bayesian_parameter import Parameter
 from erebus.utility.h5_serializable_file import H5Serializable
 from erebus.utility.planet import Planet
@@ -28,7 +29,7 @@ class JointFit(BaseFit):
         '''
         Excluded from serialization
         '''
-        return ['config', 'photometry_data_list', 'time', 'raw_flux', 'params',
+        return ['config', 'light_curve_data_list', 'time', 'raw_flux', 'params',
                 'transit_models', 'mcmc', "starting_times", "_force_clear_cache",
                 'predicted_t_secs', 'time_per_visit', 'all_eigenvalues', 'start_trim',
                 'end_trim', 'eigenvalue_map', 'visit_index_filter', 'planet']
@@ -56,13 +57,13 @@ class JointFit(BaseFit):
             return self.__visit_index_lookup[time]
         
         # Starting times are in acending order
-        for i in range(0, len(self.starting_times)):
-            if time >= self.starting_times[i] and (i == len(self.starting_times) - 1 or time < self.starting_times[i + 1]):
+        for i, start_time in enumerate(self.starting_times):
+            if time >= start_time and (i == len(self.starting_times) - 1 or time < self.starting_times[i + 1]):
                 self.__visit_index_lookup[time] = i
                 return i
         raise Exception(f"Time {time} was outside of the range of possible times ({self.starting_times})")
     
-    def __init__(self, photometry_data_list : List[PhotometryData], planet : Planet, config : ErebusRunConfig,
+    def __init__(self, light_curve_data_list : List[PhotometryData|SpectroscopyData], planet : Planet, config : ErebusRunConfig,
                  force_clear_cache : bool = False, override_cache_path : str = None):
         super().__init__()
 
@@ -92,23 +93,22 @@ class JointFit(BaseFit):
         self.planet = planet
         
         # Make sure visits are in order
-        photometry_data_list = sorted(photometry_data_list, key=lambda data: np.min(data.time))      
+        light_curve_data_list = sorted(light_curve_data_list, key=lambda data: np.min(data.time))      
         
-        # Maps the saved photometry data index to the visit index
-        self.visit_indices = np.arange(0, len(photometry_data_list))
-        self.photometry_data_list = photometry_data_list
+        # Maps the saved lightcurve data index to the visit index
+        self.visit_indices = np.arange(0, len(light_curve_data_list))
+        self.light_curve_data_list = light_curve_data_list
         
         self.config = config
         
-        self.starting_times = np.array([np.min(data.time) for data in photometry_data_list])
+        self.starting_times = np.array([np.min(data.time) for data in light_curve_data_list])
         
         # Track visits we're skipping
         if self.config.skip_visits is not None and len(self.config.skip_visits) > 0:
             self.visit_indices = np.delete(self.visit_indices, self.config.skip_visits)
-            # self.photometry_data_list = np.delete(self.photometry_data_list, self.config.skip_visits)
         
-        self.start_trim = [config.get_trim_integrations(i)[0] for i in np.arange(len(photometry_data_list))]
-        self.end_trim = [config.get_trim_integrations(i)[1] for i in np.arange(len(photometry_data_list))]
+        self.start_trim = [config.get_trim_integrations(i)[0] for i in np.arange(len(light_curve_data_list))]
+        self.end_trim = [config.get_trim_integrations(i)[1] for i in np.arange(len(light_curve_data_list))]
         
         # For the joint fit we bin the data to speed up convergence
         self.bin_size = config.joint_fit_bin_size
@@ -123,8 +123,15 @@ class JointFit(BaseFit):
         self.pca_variance_ratios = []
         self.time = []
         self.raw_flux = []
-        for i, data in enumerate(photometry_data_list):
-            eigenvalues, eigenvectors, variance_ratios = perform_fn_pca_on_aperture(data.normalized_frames[self.start_trim[i]:self.end_trim[i]])
+        for i, data in enumerate(light_curve_data_list):
+            if isinstance(light_curve_data_list[0], PhotometryData): 
+                eigenvalues, eigenvectors, variance_ratios = perform_fn_pca_on_aperture(data.normalized_frames[self.start_trim[i]:self.end_trim[i]])
+            else:
+                #TODO: Make spectroscopy support PCA
+                eigenvalues = np.ones_like(data.raw_flux[self.start_trim[i]:self.end_trim[i]])
+                eigenvectors = np.ones_like(data.raw_flux[self.start_trim[i]:self.end_trim[i]])
+                variance_ratios = np.ones_like(data.raw_flux[self.start_trim[i]:self.end_trim[i]])
+            
             binned_eigenvalues = np.array([bin_data(ev, self.bin_size)[0] for ev in eigenvalues])
             self.joint_eigenvalues.append(binned_eigenvalues)
             self.joint_eigenvectors.append(eigenvectors)
@@ -177,23 +184,23 @@ class JointFit(BaseFit):
                 
         # Get the predicted eclipse times in advance
         # Calling early to memoize them already
-        for n in range(0, len(photometry_data_list)):
+        for n in range(0, len(light_curve_data_list)):
             self.get_predicted_t_sec_of_visit(n)
             
         # Map all times to a visit
         visit_index_map = np.array([self.get_visit_index_from_time(xi) for xi in self.time])
         self.visit_index_filter = {}
-        for i in range(0, len(self.photometry_data_list)):
+        for i in range(0, len(self.light_curve_data_list)):
             self.visit_index_filter[i] = visit_index_map == i
             
-        for i, data in enumerate(photometry_data_list):
-            print("Photometry data: ", i, len(data.normalized_frames), len(data.time))
+        for i, data in enumerate(light_curve_data_list):
+            print("Lightcurve data: ", i, len(data.raw_flux), len(data.time))
             print("Post-binning shapes: ", i, binned_eigenvalues.shape[1], len(binned_time), len(binned_flux))            
             print("Per-visit filter: ", i, np.sum(self.visit_index_filter[i]))
         
         # Get eigenvalues per visit
         self.eigenvalue_map = {}
-        for i in range(0, len(self.photometry_data_list)):
+        for i in range(0, len(self.light_curve_data_list)):
             if i not in self.visit_indices:
                 continue
             self.eigenvalue_map[i] = raw_joint_eigenvalues[i]
