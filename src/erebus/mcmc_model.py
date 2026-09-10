@@ -121,8 +121,10 @@ class WrappedMCMC(H5Serializable):
         lp = self.__log_prior(theta)
         if not np.isfinite(lp):
             return -np.inf
-        # Value should always be negative
-        return lp + self.log_likelihood(theta, x, y)
+        ll = self.log_likelihood(theta, x, y)
+        if not np.isfinite(ll):
+            return -np.inf
+        return lp + ll
 
     def run(self, x, y, max_steps = 2000000, walkers = 64, force_clear_cache = False) -> tuple[np.ndarray, emcee.EnsembleSampler, float, int]:         
         '''
