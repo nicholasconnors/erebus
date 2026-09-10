@@ -140,53 +140,56 @@ def plot_fnpca_individual_fit(individual_fit : IndividualFit | IndividualFitResu
 
     ############################################################################## Eigenvalues
     # First row is the raw lightcurve and a single frame image
-    eigenvalue_axs[0].plot(time, flux, marker='.',linestyle='', color='grey', alpha=0.3)
-    eigenvalue_axs[0].plot(bin_time, bin_flux, marker='.', linestyle='', color='black')
-    eigenvalue_axs[0].set_ylabel("Raw flux\n(ppm)")
-    
-    eigenimage_axs[0].imshow(individual_fit.frames[0])
-
-    for i in range(0, 5):
-        eigenvalue = individual_fit.eigenvalues[i]
-        eigenvalue = eigenvalue / np.max(np.abs(eigenvalue))
-        eigenvalue_ax = eigenvalue_axs[i+1]
-        eigenvalue_ax.plot(time, eigenvalue, marker='.', linestyle='', alpha=0.3, color='cornflowerblue')
-        eigenvalue_ax.plot(time, uniform_filter1d(eigenvalue, size=30), color='blue')
-        eigenvalue_ax.axhline(0, color='black', linestyle='--')
-        eigenvalue_ax.set_ylabel(f"PC{(i+1)}")
-        eigenvalue_ax.set_yticks([])
-        eigenvalue_ax.set_ylim([-1, 1])
+    try:
+        eigenvalue_axs[0].plot(time, flux, marker='.',linestyle='', color='grey', alpha=0.3)
+        eigenvalue_axs[0].plot(bin_time, bin_flux, marker='.', linestyle='', color='black')
+        eigenvalue_axs[0].set_ylabel("Raw flux\n(ppm)")
         
-        eigenvalue_ax.text(0.9, 0.95, f"{individual_fit.pca_variance_ratios[i]*100:0.1f}%", horizontalalignment='center', verticalalignment='top', transform=eigenvalue_ax.transAxes)
+        eigenimage_axs[0].imshow(individual_fit.frames[0])
 
-        eigenimage = individual_fit.eigenvectors[i]
-        eigenimage /= np.max(eigenimage)
-        im = eigenimage_axs[i+1].imshow(eigenimage, cmap='bwr', interpolation='nearest', norm = colors.SymLogNorm(0.5, vmin=-1, vmax=1))
+        for i in range(0, 5):
+            eigenvalue = individual_fit.eigenvalues[i]
+            eigenvalue = eigenvalue / np.max(np.abs(eigenvalue))
+            eigenvalue_ax = eigenvalue_axs[i+1]
+            eigenvalue_ax.plot(time, eigenvalue, marker='.', linestyle='', alpha=0.3, color='cornflowerblue')
+            eigenvalue_ax.plot(time, uniform_filter1d(eigenvalue, size=30), color='blue')
+            eigenvalue_ax.axhline(0, color='black', linestyle='--')
+            eigenvalue_ax.set_ylabel(f"PC{(i+1)}")
+            eigenvalue_ax.set_yticks([])
+            eigenvalue_ax.set_ylim([-1, 1])
+            
+            eigenvalue_ax.text(0.9, 0.95, f"{individual_fit.pca_variance_ratios[i]*100:0.1f}%", horizontalalignment='center', verticalalignment='top', transform=eigenvalue_ax.transAxes)
 
-    for ax in eigenvalue_axs:
-        ax.axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
-    
-    for ax in eigenimage_axs:
-        ax.set_yticks([])
-        ax.set_xticks([])
-    # Hack to get the alignment right
-    eigenimage_axs[-1].set_xticks([0])
-    eigenimage_axs[-1].set_xticklabels([" "])
-    eigenimage_axs[-1].set_xlabel(" ")
+            eigenimage = individual_fit.eigenvectors[i]
+            eigenimage /= np.max(eigenimage)
+            im = eigenimage_axs[i+1].imshow(eigenimage, cmap='bwr', interpolation='nearest', norm = colors.SymLogNorm(0.5, vmin=-1, vmax=1))
 
-    #gs.update just stopped working one day so now we have to do this mess, will need to improve later
-    cbar_subfigure = pca_subfig.add_subfigure(pca_grid[1:,5])
-    cbar_gs = cbar_subfigure.add_gridspec(1,1, hspace=0.5, wspace=0.5)
-    #cbar_gs.update(left=0.96, right=0.98, top=1, bottom=0)
-    cbar_ax = cbar_gs.subplots(sharex=True, sharey=False)
-    fig.colorbar(im, cax=cbar_ax, ticks=[-1, 0, 1])
-    cbar_ax.set_yticklabels([-1, 0, 1])
-    cbar_ax.set_ylabel("Scale (symlog)")
+        for ax in eigenvalue_axs:
+            ax.axvspan(eclipse_start, eclipse_end, color='red', alpha=0.2)
+        
+        for ax in eigenimage_axs:
+            ax.set_yticks([])
+            ax.set_xticks([])
+        # Hack to get the alignment right
+        eigenimage_axs[-1].set_xticks([0])
+        eigenimage_axs[-1].set_xticklabels([" "])
+        eigenimage_axs[-1].set_xlabel(" ")
 
-    # Adjust position of colour bar
-    pos = cbar_ax.get_position()
-    new_pos = [pos.x0, pos.y0, pos.width / 6, pos.height * 1.15]
-    cbar_ax.set_position(new_pos)
+        #gs.update just stopped working one day so now we have to do this mess, will need to improve later
+        cbar_subfigure = pca_subfig.add_subfigure(pca_grid[1:,5])
+        cbar_gs = cbar_subfigure.add_gridspec(1,1, hspace=0.5, wspace=0.5)
+        #cbar_gs.update(left=0.96, right=0.98, top=1, bottom=0)
+        cbar_ax = cbar_gs.subplots(sharex=True, sharey=False)
+        fig.colorbar(im, cax=cbar_ax, ticks=[-1, 0, 1])
+        cbar_ax.set_yticklabels([-1, 0, 1])
+        cbar_ax.set_ylabel("Scale (symlog)")
+
+        # Adjust position of colour bar
+        pos = cbar_ax.get_position()
+        new_pos = [pos.x0, pos.y0, pos.width / 6, pos.height * 1.15]
+        cbar_ax.set_position(new_pos)
+    except Exception as e:
+        print(f"Something went wrong when plotting eigenvalues: {e}")
 
     if save_to_directory is not None:
         path = f"{save_to_directory}/{individual_fit.config.fit_fnpca}_{individual_fit.planet_name}_{individual_fit.visit_name}_{individual_fit.config_hash}"
