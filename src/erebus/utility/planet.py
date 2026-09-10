@@ -177,12 +177,18 @@ class Planet:
             - obs_start
         
         if table_prediction < 0 or t0 > obs_start:
+            p_val = (self.p.nominal_value if hasattr(self.p, 'nominal_value') else self.p)
+            t0_val = (t0.nominal_value if hasattr(t0, 'nominal_value') else t0)
+            
+            p_std = (self.p.std_dev if hasattr(self.p, 'std_dev') else 0)
+            t0_std = (t0.std_dev if hasattr(t0, 'std_dev') else 0)
+            
             # Use P and propagate errors
-            predicted_t_sec = (t0 - obs_start + self.p / 2.0) \
-                % self.p.nominal_value
-            number_of_periods = np.abs(t0.nominal_value - obs_start + self.p.nominal_value / 2.0) / self.p.nominal_value
-            std_dev = np.sqrt(t0.std_dev**2 + (number_of_periods * self.p.std_dev)**2)
-            return ufloat(predicted_t_sec.nominal_value, std_dev)
+            predicted_t_sec = (t0_val - obs_start + p_val / 2.0) % p_val
+            number_of_periods = np.abs(t0_val - obs_start + p_val / 2.0) / p_val
+            
+            std_dev = np.sqrt(t0_std**2 + (number_of_periods * p_std)**2)
+            return ufloat(predicted_t_sec, std_dev)
         else:
             # For some reason it thinks this isn't a ufloat when it is
             return ufloat(table_prediction.nominal_value, table_prediction.std_dev)

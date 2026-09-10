@@ -18,6 +18,7 @@ from erebus.wrapped_fits import WrappedFits
 from erebus.spectroscopy.spectroscopy_wrapped_fits import SpectroscopyWrappedFits
 from erebus.spectroscopy.spectroscopy_data import SpectroscopyData
 import erebus.eureka_util as eureka_util
+import copy
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -30,7 +31,7 @@ class Erebus(H5Serializable):
         '''
         Excluded from serialization
         '''
-        return ['individual_fits', 'joint_fit', 'photometry', 'spectroscopy', 'light_curves', 'planet', 'force_clear_cache']
+        return ['individual_fits', 'joint_fit', 'photometry', 'spectroscopy', 'light_curves', 'planet', 'force_clear_cache', 'output_folder']
     
     @staticmethod
     def load(path : str):
@@ -65,6 +66,9 @@ class Erebus(H5Serializable):
         
         self.joint_fit : JointFit = None
         '''The joint fit instance.'''
+        
+        self.output_folder = None
+        '''The folder which the results were output to if this instance just ran'''
         
         if run_cfg.uncal_path is not None:
             run_cfg.calints_path = eureka_util.process_uncal(run_cfg.uncal_path)
@@ -188,6 +192,10 @@ class Erebus(H5Serializable):
             self.joint_fit = JointFit(self.light_curves, self.planet, self.config, self.force_clear_cache)
             print("Joint fit " + ("already ran" if 'fp' in self.joint_fit.results else "wasn't run yet"))
     
+    def reset_fits(self):
+        '''If you manually change the run or planet config after creating the instance you have to call this'''
+        self.__setup_fits()
+    
     def run(self, force_clear_cache : bool = False, output_folder="./output_{DATE}_{NAME}/"):
         '''
         Performs all individual and joint fits. Results and plots are saved to the given folder.
@@ -196,6 +204,7 @@ class Erebus(H5Serializable):
         time = datetime.now().strftime("%d_%m_%y_%H_%M_%S")
         output_folder = output_folder.replace("{DATE}", time)
         output_folder = output_folder.replace("{NAME}", self.planet.name)
+        self.output_folder = output_folder
         
         # Clearing the cache here should reset fits but not photometry data
         if force_clear_cache:
@@ -275,4 +284,33 @@ class Erebus(H5Serializable):
                 plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.png")
             except Exception as e:
                 print(f"Plotting routine failed: {e}")        
+
+    def run_spectroscopic_bins(self, num_bins, wl_start_override = None, wl_end_override = None):
+        '''Fits binned spectroscopic light curves. Can only be called after a wlc run has completed. By default will bin across the wlc range'''
         
+        num_bins = 5
+        cfg = copy.deepcopy(self.config)
+        wl_start = wl_start_override if wl_start_override is not None else cfg.wl_start
+        wl_end = wl_end_override if wl_end_override is not None else cfg.wl_end
+        step = (wl_end - wl_start) / num_bins
+        bins = [(wl_start + i * step, wl_start + (i + 1) * step) for i in range(num_bins)]
+        
+        print("Reducing binned spectroscopic light curves with bins", bins)
+        # TODO: Can parallellize this (How do you spell parallelize paralellize)
+        for i, wlc_fit in enumerate(self.individual_fits):
+            for bin_start, bin_end in bins:
+                cfg.wl_start = bin_start
+                cfg.wl_end = bin_end
+                binned_erebus = Erebus(cfg)
+                # Use the results of the WLC planet parameters as fixed inputs here
+                for key in ['a_rstar', 'ecc', 'inc', 'p', 'rp_rstar', 't0', 'w']:
+                    if key in wlc_fit.results:
+                        print("Fixing", key, "to", wlc_fit.results[key].nominal_value)
+                        setattr(binned_erebus.planet, key, wlc_fit.results[key].nominal_value)
+                if 't_sec_offset' in wlc_fit.results:
+                    cfg.fit_uniform_eclipse_timing_offset = None
+                    cfg.fit_gaussian_eclipse_timing_offset = [wlc_fit.results['t_sec_offset'].nominal_value, 1e-6]
+                binned_erebus.reset_fits()
+                binned_erebus.run(output_folder=self.output_folder + f"spectroscopic_bins_{(i+1)}/{int(bin_start*1000)}_{int(bin_end*1000)}/")
+                
+                # TODO: Save the extracted spectrum somewhere or make a helper method to get it from this file structure
