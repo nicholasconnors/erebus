@@ -95,7 +95,7 @@ class SpectroscopyWrappedFits(H5Serializable):
                     frame[row_mask, :] = 0
                     frame[:, col_mask] = 0
         
-                    for k in range(len(frame)):
+                    for k, _ in enumerate(frame):
                         background_left = frame[k, 10:25]
                         background_right = frame[k, -25:-10]
                         background_y = np.concatenate((background_left, background_right))
