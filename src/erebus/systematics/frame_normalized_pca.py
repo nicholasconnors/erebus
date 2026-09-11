@@ -33,7 +33,7 @@ def perform_fnpca_on_full_frame(frames : np.ndarray, radius : int,
     
     return perform_fn_pca_on_aperture(normalized_frames)
 
-def perform_fn_pca_on_aperture(aperture_frames : np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def perform_fn_pca_on_aperture(aperture_frames : np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     '''
     Performs Frame-Normalized PCA on a photometric time series data set. Expects the star to be centered
     on each frame. Expects each frame to already be normalized and background subtracted, with pixels outside
@@ -46,5 +46,12 @@ def perform_fn_pca_on_aperture(aperture_frames : np.ndarray) -> Tuple[np.ndarray
     pca = NormalPCA()
     eigenvalues = pca.fit_transform(flat_frames).T
     eigenvectors = np.array([image.reshape((width, height)) for image in pca.components_])
+    
+    return eigenvalues, eigenvectors, pca.explained_variance_ratio_
+
+def perform_fn_pca_on_spatial_profile(spatial_profile : np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    pca = NormalPCA()
+    eigenvalues = pca.fit_transform(spatial_profile).T
+    eigenvectors = pca.components_
     
     return eigenvalues, eigenvectors, pca.explained_variance_ratio_

@@ -284,6 +284,8 @@ class Erebus(H5Serializable):
                 plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.png")
             except Exception as e:
                 print(f"Plotting routine failed: {e}")        
+        if self.config.spectroscopic_bins is not None and self.config.spectroscopic_bins > 0:
+            self.run_spectroscopic_bins(self.config.spectroscopic_bins)
 
     def run_spectroscopic_bins(self, num_bins, wl_start_override = None, wl_end_override = None):
         '''Fits binned spectroscopic light curves. Can only be called after a wlc run has completed. By default will bin across the wlc range'''
@@ -294,23 +296,36 @@ class Erebus(H5Serializable):
         wl_end = wl_end_override if wl_end_override is not None else cfg.wl_end
         step = (wl_end - wl_start) / num_bins
         bins = [(wl_start + i * step, wl_start + (i + 1) * step) for i in range(num_bins)]
+        skip_visits = copy.deepcopy(self.config.skip_visits)
         
         print("Reducing binned spectroscopic light curves with bins", bins)
         # TODO: Can parallellize this (How do you spell parallelize paralellize)
-        for i, wlc_fit in enumerate(self.individual_fits):
-            for bin_start, bin_end in bins:
-                cfg.wl_start = bin_start
-                cfg.wl_end = bin_end
-                binned_erebus = Erebus(cfg)
-                # Use the results of the WLC planet parameters as fixed inputs here
-                for key in ['a_rstar', 'ecc', 'inc', 'p', 'rp_rstar', 't0', 'w']:
-                    if key in wlc_fit.results:
-                        print("Fixing", key, "to", wlc_fit.results[key].nominal_value)
-                        setattr(binned_erebus.planet, key, wlc_fit.results[key].nominal_value)
-                if 't_sec_offset' in wlc_fit.results:
-                    cfg.fit_uniform_eclipse_timing_offset = None
-                    cfg.fit_gaussian_eclipse_timing_offset = [wlc_fit.results['t_sec_offset'].nominal_value, 1e-6]
-                binned_erebus.reset_fits()
-                binned_erebus.run(output_folder=self.output_folder + f"spectroscopic_bins_{(i+1)}/{int(bin_start*1000)}_{int(bin_end*1000)}/")
-                
-                # TODO: Save the extracted spectrum somewhere or make a helper method to get it from this file structure
+        if cfg.perform_individual_fits:
+            for i, wlc_fit in enumerate(self.individual_fits):
+                if i in skip_visits:
+                    continue
+                cfg.skip_visits = [j for j in range(0, len(self.individual_fits)) if j != i]
+                cfg.perform_joint_fit = False
+                for bin_start, bin_end in bins:
+                    cfg.wl_start = bin_start
+                    cfg.wl_end = bin_end
+                    # Avoid recursively calling this
+                    cfg.spectroscopic_bins = None
+                    
+                    binned_erebus = Erebus(cfg)
+                    # Use the results of the WLC planet parameters as fixed inputs here
+                    for key in ['a_rstar', 'ecc', 'inc', 'p', 'rp_rstar', 't0', 'w']:
+                        if key in wlc_fit.results:
+                            print("Fixing", key, "to", wlc_fit.results[key].nominal_value)
+                            setattr(binned_erebus.planet, key, wlc_fit.results[key].nominal_value)
+                    if 't_sec_offset' in wlc_fit.results:
+                        cfg.fit_uniform_eclipse_timing_offset = None
+                        cfg.fit_gaussian_eclipse_timing_offset = [wlc_fit.results['t_sec_offset'].nominal_value, 1e-6]
+                    binned_erebus.reset_fits()
+                    print(f"Fitting binned light curve from {bin_start} to {bin_end}")
+                    binned_erebus.run(output_folder=self.output_folder + f"spectroscopic_bins_{(i+1)}/{int(bin_start*1000)}_{int(bin_end*1000)}/")
+                    
+                    # TODO: Save the extracted spectrum somewhere or make a helper method to get it from this file structure
+        if cfg.perform_joint_fit:
+            # TODO
+            print("Support for joint fit spectroscopic binned light curves has not been added")

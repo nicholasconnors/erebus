@@ -6,7 +6,7 @@ import batman
 import numpy as np
 import uncertainties.umath as umath
 
-from erebus.systematics.frame_normalized_pca import perform_fn_pca_on_aperture
+from erebus.systematics.frame_normalized_pca import perform_fn_pca_on_aperture, perform_fn_pca_on_spatial_profile
 from erebus.mcmc_model import WrappedMCMC
 from erebus.photometry_data import PhotometryData
 from erebus.spectroscopy.spectroscopy_data import SpectroscopyData
@@ -64,8 +64,10 @@ class IndividualFit(BaseFit):
         
         if isinstance(self.lightcurve_data, PhotometryData):
             self.eigenvalues, self.eigenvectors, self.pca_variance_ratios = perform_fn_pca_on_aperture(lightcurve_data.normalized_frames[self.start_trim:self.end_trim])
+        elif isinstance(self.lightcurve_data, SpectroscopyData):
+            self.eigenvalues, self.eigenvectors, self.pca_variance_ratios = perform_fn_pca_on_spatial_profile(lightcurve_data.spatial_profiles[self.start_trim:self.end_trim])
         else:
-            #TODO: Also get FNPCA for spectroscopy
+            #TODO: Unsupported type
             self.eigenvalues = np.ones_like(lightcurve_data.raw_flux[self.start_trim:self.end_trim])
             self.eigenvectors = np.ones_like(lightcurve_data.raw_flux[self.start_trim:self.end_trim])
             self.pca_variance_ratios = np.ones_like(lightcurve_data.raw_flux[self.start_trim:self.end_trim])

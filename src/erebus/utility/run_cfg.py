@@ -30,6 +30,7 @@ class ErebusRunConfig(BaseModel):
         do_optimal_extraction (bool): Whether to perform optimal extraction instead of aperture extraction. Currently only supported for spectroscopy. Defaults to false.
         wl_start (float): The start of the wavelength bin when doing spectroscopy.
         wl_end (float): The end of the wavelength bin when doing spectroscopy.
+        spectroscopic_bins (int): The number of equal width bins to split the data into when doing spectroscopy. Leave empty to only do the wlc.
         
         skip_visits (list[int]): Optional list of indices to skip when doing individual fits. Index based on visit ID.
         trim_integrations (list[int]): Length-two list with the number of integrations to clip from the start and end. Optional.
@@ -62,6 +63,7 @@ class ErebusRunConfig(BaseModel):
     do_optimal_extraction : Optional[bool] = False
     wl_start : Optional[float] = None
     wl_end : Optional[float] = None
+    spectroscopic_bins : Optional[int] = None
     
     skip_visits : Optional[List[int]] = None
     trim_integrations : Optional[Union[List[int], List[List[int]]]] = None

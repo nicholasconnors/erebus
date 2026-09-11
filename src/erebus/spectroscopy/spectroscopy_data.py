@@ -50,15 +50,18 @@ class SpectroscopyData(H5Serializable):
         
         if not force_clear_cache and os.path.isfile(self._cache_file):
             self.load_from_path(self._cache_file)
+            # back compat check
+            self.__extract_spatial_profiles(fits_file)
         else:
             # Defining all attributes
             self.raw_flux = []
             '''Raw flux from the star after performing background subtraction.'''
             self.time = fits_file.time
             '''The time values loaded from the corresponding fits files.'''
-
             self.fits_file_location = os.path.abspath(fits_file._cache_file)
             '''Absolute path of the cache file for the fits file that aperture photometry was performed on.'''
+            self.spatial_profiles = []
+            '''Spatial profile of each frame (collapsed along wavelength axis)'''
             
             self.wl_start = wl_start
             self.wl_end = wl_end
@@ -68,12 +71,21 @@ class SpectroscopyData(H5Serializable):
             else:
                 self.__do_aperture_photometry(fits_file)
             
+            # Get the spatial profiles for PCA
+            self.__extract_spatial_profiles(fits_file)
+            
             # Outlier removal after photometry
             valid_inds = np.array([np.abs(f - np.median(self.raw_flux)) < 5 * np.std(self.raw_flux) for f in self.raw_flux])
             self.raw_flux = self.raw_flux[valid_inds]
             self.time = self.time[valid_inds]
             
             self.save_to_path(self._cache_file)
+    
+    def __extract_spatial_profiles(self, fits_file : SpectroscopyWrappedFits):
+        mask_wl = (fits_file.wavelengths >= self.wl_start) & (fits_file.wavelengths <= self.wl_end)
+        profile = np.sum(fits_file.frames[:, mask_wl, :], axis=1)
+        print("Profile shape:", profile.shape)
+        self.spatial_profiles = profile
     
     def __do_aperture_photometry(self, fits_file : SpectroscopyWrappedFits):
         '''
