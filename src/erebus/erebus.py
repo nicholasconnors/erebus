@@ -285,9 +285,9 @@ class Erebus(H5Serializable):
             except Exception as e:
                 print(f"Plotting routine failed: {e}")        
         if self.config.spectroscopic_bins is not None and self.config.spectroscopic_bins > 0:
-            self.run_spectroscopic_bins(self.config.spectroscopic_bins)
+            self.run_spectroscopic_bins(self.config.spectroscopic_bins, force_clear_cache=force_clear_cache)
 
-    def run_spectroscopic_bins(self, num_bins, wl_start_override = None, wl_end_override = None):
+    def run_spectroscopic_bins(self, num_bins, wl_start_override = None, wl_end_override = None, force_clear_cache=False):
         '''Fits binned spectroscopic light curves. Can only be called after a wlc run has completed. By default will bin across the wlc range'''
         
         num_bins = 5
@@ -304,6 +304,9 @@ class Erebus(H5Serializable):
             for i, wlc_fit in enumerate(self.individual_fits):
                 if i in skip_visits:
                     continue
+                
+                wlc_results = copy.deepcopy(wlc_fit.results)
+                
                 cfg.skip_visits = [j for j in range(0, len(self.individual_fits)) if j != i]
                 cfg.perform_joint_fit = False
                 for bin_start, bin_end in bins:
@@ -312,18 +315,21 @@ class Erebus(H5Serializable):
                     # Avoid recursively calling this
                     cfg.spectroscopic_bins = None
                     
+                    # Use t_sec fit result as a fixed prior
+                    if 't_sec_offset' in wlc_results:
+                        cfg.fit_uniform_eclipse_timing_offset = None
+                        cfg.fit_gaussian_eclipse_timing_offset = None
+                        cfg.fix_eclipse_timing_offset = wlc_results['t_sec_offset'].nominal_value
+                    
                     binned_erebus = Erebus(cfg)
                     # Use the results of the WLC planet parameters as fixed inputs here
                     for key in ['a_rstar', 'ecc', 'inc', 'p', 'rp_rstar', 't0', 'w']:
-                        if key in wlc_fit.results:
-                            print("Fixing", key, "to", wlc_fit.results[key].nominal_value)
-                            setattr(binned_erebus.planet, key, wlc_fit.results[key].nominal_value)
-                    if 't_sec_offset' in wlc_fit.results:
-                        cfg.fit_uniform_eclipse_timing_offset = None
-                        cfg.fit_gaussian_eclipse_timing_offset = [wlc_fit.results['t_sec_offset'].nominal_value, 1e-6]
+                        if key in wlc_results:
+                            print("Fixing", key, "to", wlc_results[key].nominal_value)
+                            setattr(binned_erebus.planet, key, wlc_results[key].nominal_value)
                     binned_erebus.reset_fits()
                     print(f"Fitting binned light curve from {bin_start} to {bin_end}")
-                    binned_erebus.run(output_folder=self.output_folder + f"spectroscopic_bins_{(i+1)}/{int(bin_start*1000)}_{int(bin_end*1000)}/")
+                    binned_erebus.run(output_folder=self.output_folder + f"spectroscopic_bins_{(i+1)}/{int(bin_start*1000)}_{int(bin_end*1000)}/", force_clear_cache=force_clear_cache)
                     
                     # TODO: Save the extracted spectrum somewhere or make a helper method to get it from this file structure
         if cfg.perform_joint_fit:

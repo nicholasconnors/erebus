@@ -84,6 +84,9 @@ class BaseFit(H5Serializable):
                     mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -1, 1))
     
     def _try_add_eclipse_timing_parameter(self, name : str, mcmc : WrappedMCMC, config : ErebusRunConfig):
+        if config.fix_eclipse_timing_offset is not None:
+            mcmc.add_parameter(name, Parameter.fixed(config.fix_eclipse_timing_offset))
+            return True
         if config.fit_uniform_eclipse_timing_offset is not None:
             start = config.fit_uniform_eclipse_timing_offset[0]
             end = config.fit_uniform_eclipse_timing_offset[1]

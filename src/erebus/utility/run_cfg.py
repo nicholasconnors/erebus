@@ -72,6 +72,7 @@ class ErebusRunConfig(BaseModel):
     fix_eclipse_timing: Optional[bool] = False
     fit_uniform_eclipse_timing_offset : Annotated[Optional[List[float]], Field(max_length=2, min_length=2)] = None
     fit_gaussian_eclipse_timing_offset : Annotated[Optional[List[float]], Field(max_length=2, min_length=2)] = None
+    fix_eclipse_timing_offset : Optional[float] = None
     fit_eclipse_timing_offset_per_visit : Optional[bool] = False
     fit_eclipse_depth_per_visit : Optional[bool] = False
     max_steps : Optional[int] = None
