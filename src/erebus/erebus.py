@@ -289,8 +289,6 @@ class Erebus(H5Serializable):
 
     def run_spectroscopic_bins(self, num_bins, wl_start_override = None, wl_end_override = None, force_clear_cache=False):
         '''Fits binned spectroscopic light curves. Can only be called after a wlc run has completed. By default will bin across the wlc range'''
-        
-        num_bins = 5
         cfg = copy.deepcopy(self.config)
         wl_start = wl_start_override if wl_start_override is not None else cfg.wl_start
         wl_end = wl_end_override if wl_end_override is not None else cfg.wl_end
