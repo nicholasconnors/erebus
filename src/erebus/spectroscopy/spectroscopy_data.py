@@ -17,7 +17,7 @@ class SpectroscopyData(H5Serializable):
     '''
     @staticmethod
     def load(path : str):
-        '''Helper method to directly load a PhotometryData instance cache file.'''
+        '''Helper method to directly load a SpectroscopyData instance cache file.'''
         return SpectroscopyData(None, None, None, None, override_cache_path=path)
     
     @staticmethod
@@ -102,35 +102,46 @@ class SpectroscopyData(H5Serializable):
         Performs optimal extraction following Horne et al
         '''
         mask_wl = (fits_file.wavelengths >= self.wl_start) & (fits_file.wavelengths <= self.wl_end)
-        mask = mask_wl[None, :, None]
+        if not np.any(mask_wl):
+            raise ValueError(f"Wavelength range {self.wl_start} to {self.wl_end} has no values")
+
+        frames = fits_file.frames[:, mask_wl, :]
+        errors = fits_file.errors[:, mask_wl, :]
         
         # Optimal extraction (Horne et al, https://iopscience.iop.org/article/10.1086/131801/pdf)
         # Normalized spatial profile from median frame
-        median_frame = np.median(fits_file.frames, axis = 0)
+        median_frame = np.nanmedian(frames, axis = 0)
         median_frame = np.clip(median_frame, 0, None)
-        P = median_frame / np.sum(median_frame, axis = 1, keepdims = True) # normalizalized spatial profile
-        P = np.median(P, axis = 0)
+        column_sum = np.sum(median_frame, axis=1, keepdims=True)
+        column_sum[column_sum <= 0] = np.nan # avoid div by zero
+        P = median_frame / column_sum # normalizalized spatial profile
+        P = np.nanmedian(P, axis = 0)
+        P = np.nan_to_num(P) # Replaces nans with 0 and infty with large finite numbers
         
         # We perform optimal extraction with a 10 pixel radius aperture
-        spatial_window = slice(32-10, 32+10)
+        peak = int(np.argmax(P))
+        half_width = 10
+        spatial_window = slice(max(peak - half_width, 0), min(peak + half_width, len(P)))
         P = P[spatial_window]
         # Renormalize
+        P = np.clip(P, 0, None)
+        if np.sum(P) <= 0:
+            raise ValueError("Spatial profile is empty")
         P = P / np.sum(P)
         
         # D is the data of the frames within our window (already background subtracted)
-        D = fits_file.frames[:, :, spatial_window] # fit optimal extraction on a 20 pixel width window
+        D = frames[:, :, spatial_window] # fit optimal extraction on a 20 pixel width window
         # V is the variance of the data within our window
-        V = fits_file.errors[:, :, spatial_window] ** 2 # error squared is variance
+        V = errors[:, :, spatial_window] ** 2 # error squared is variance
         # Sometimes the errors are nans or 0 so remove those
-        print("Invalid errors count: ", np.sum(V == 0), "/", np.sum(V != 0))
-        V[~np.isfinite(V) | (V <= 0)] = np.inf # make sure no nans or zeros
-        
-        # Actually using the error as in the original paper gives very bizarre light curves so I am omitting it for now
-        # TODO: revisit this
-        V = np.ones_like(V)
+        good_pixels = np.isfinite(D) & np.isfinite(V) & (V > 0)
+        print(f"Invalid errors count: {np.sum(~good_pixels)} / {len(good_pixels)}")
+        D = np.where(good_pixels, D, 0.0) # bad pixels set to 0
+        V = np.where(good_pixels, V, 1.0) # bad pixels have variance 1
+        M = good_pixels.astype(float) # 1 for good 0 for ba
         
         # According to Table I, Equation 8
-        optimal_flux = np.sum(mask * P * D / V, axis = (1,2)) / np.sum(mask * P**2 / V, axis = (1,2))
+        optimal_flux = np.sum(M * P * D / V, axis=(1, 2)) / np.sum(M * P**2 / V, axis=(1, 2))
         
-        # Report as normalized fux
-        self.raw_flux = optimal_flux / np.median(optimal_flux)
+        # Report as normalized flux
+        self.raw_flux = optimal_flux / np.nanmedian(optimal_flux)
