@@ -119,7 +119,6 @@ class JointFit(BaseFit):
         self.transit_models = {}
         
         self.joint_eigenvalues = []
-        self.joint_eigenvalues_for_fit = [] # Only has the visits we are running on
         self.joint_eigenvectors = []
         self.pca_variance_ratios = []
         self.time = []
@@ -135,7 +134,6 @@ class JointFit(BaseFit):
             if i not in self.visit_indices:
                 continue
 
-            self.joint_eigenvalues_for_fit.append(binned_eigenvalues)
             binned_time = bin_data(data.time[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0]
             self.time.append(binned_time)
             binned_flux = bin_data(data.raw_flux[self.start_trim[i]:self.end_trim[i]], self.bin_size)[0]
@@ -144,22 +142,36 @@ class JointFit(BaseFit):
             
         # time per visit used to interpolate FNPCA systematic
         self.time = np.concatenate(self.time)
-        self.all_eigenvalues = np.concatenate(self.joint_eigenvalues_for_fit, axis=1)
         self.raw_flux = np.concatenate(self.raw_flux)              
         
-        # If visits have different lengths (number of integrations) then these arrays can't be saved (inhomogenous)
-        # Pad with NaN in this case
-        n_visits = len(self.joint_eigenvalues)
-        n_eigenvalues = len(self.joint_eigenvalues[0])
-        max_length = max([len(eigenvalues[0]) for eigenvalues in self.joint_eigenvalues])
+        raw_joint_eigenvalues = self.joint_eigenvalues  # before padding
+
+        n_visits = len(raw_joint_eigenvalues)
+        n_eigenvalues = max(len(ev) for ev in raw_joint_eigenvalues)
+        max_length = max(len(ev[0]) for ev in raw_joint_eigenvalues)
+        print(f"Max eigenvalues length is {max_length}")
+
+        # have to pad with nans else numpy breaks
         padded_joint_eigenvalues = np.full((n_visits, n_eigenvalues, max_length), np.nan)
         for i in range(n_visits):
-            for j in range(n_eigenvalues):
-                v = self.joint_eigenvalues[i][j]
+            for j in range(len(raw_joint_eigenvalues[i])):
+                v = raw_joint_eigenvalues[i][j]
                 padded_joint_eigenvalues[i, j, :len(v)] = v
-        
+
         self.joint_eigenvalues = np.array(padded_joint_eigenvalues)
-        self.joint_eigenvectors = np.array(self.joint_eigenvectors)
+
+        # also have to pad eigenvectors sometimes
+        raw_joint_eigenvectors = self.joint_eigenvectors
+
+        ndim = raw_joint_eigenvectors[0].ndim
+        max_dims = [max(ev.shape[d] for ev in raw_joint_eigenvectors) for d in range(ndim)]
+        padded_joint_eigenvectors = np.full((n_visits, *max_dims), np.nan)
+        for i, ev in enumerate(raw_joint_eigenvectors):
+            slices = tuple(slice(0, s) for s in ev.shape)
+            padded_joint_eigenvectors[(i,) + slices] = ev
+
+        self.joint_eigenvectors = padded_joint_eigenvectors
+
         print(f"Eigenvalues shape: {self.joint_eigenvalues.shape}")
         print(f"Eigenvectors shape: {self.joint_eigenvectors.shape}")
                 
@@ -174,10 +186,18 @@ class JointFit(BaseFit):
         for i in range(0, len(self.photometry_data_list)):
             self.visit_index_filter[i] = visit_index_map == i
             
+        for i, data in enumerate(photometry_data_list):
+            print("Photometry data: ", i, len(data.normalized_frames), len(data.time))
+            print("Post-binning shapes: ", i, binned_eigenvalues.shape[1], len(binned_time), len(binned_flux))            
+            print("Per-visit filter: ", i, np.sum(self.visit_index_filter[i]))
+        
         # Get eigenvalues per visit
         self.eigenvalue_map = {}
         for i in range(0, len(self.photometry_data_list)):
-            self.eigenvalue_map[i] = self.all_eigenvalues.T[self.visit_index_filter[i]].T
+            if i not in self.visit_indices:
+                continue
+            self.eigenvalue_map[i] = raw_joint_eigenvalues[i]
+        
         # 
         # MCMC setup
         # 

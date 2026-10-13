@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.2
+
+- Loosened version requirements
+- Improved PC padding for inhomogenous visit lengths
+
 ## 0.8.1
 
 - Hotfix: FNPCA joint fit was broken.

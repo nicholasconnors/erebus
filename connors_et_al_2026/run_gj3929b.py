@@ -80,6 +80,7 @@ polynomial_params = {
     "obs2_b": Parameter.fixed(0),
 }
 
+# Used for the FNPCA detrending to include the second set of PCA terms for visit 4 + the exponential ramp
 def custom_systematic(x, visit_index, is_joint_fit, 
                       obs1_pc1, obs1_pc2, obs1_pc3, obs1_pc4, obs1_pc5, 
                       obs2_pc1, obs2_pc2, obs2_pc3, obs2_pc4, obs2_pc5, 
@@ -146,6 +147,7 @@ visit4_params = {
     "obs2_b": Parameter.uniform_prior(1e-6, -1000e-6, 1000e-6)
 }
 
+# Outside of visit 4 just fix those parameters to 0
 params = {
     "obs1_pc1": Parameter.uniform_prior(0.1, -10, 10),
     "obs1_pc2": Parameter.uniform_prior(0.1, -10, 10),
@@ -204,51 +206,19 @@ if __name__ == "__main__":
     cfg.fit_fnpca = fit_fnpca
     cfg.fit_no_eclipse = False
     
-    # Value previously found from joint fits
-    #cfg.fit_uniform_eclipse_timing_offset = None
-    #cfg.fit_gaussian_eclipse_timing_offset = [-0.0375, 0.00167]
-    #cfg.prevent_negative_eclipse_depth = False
-    
-    # Leave one out
-    #cfg.skip_visits = [3]
-    
-    # Testing
-    #cfg.max_steps = 1000
-    #cfg.skip_visits = [0, 1, 2]
-    
     erebus = Erebus(cfg, force_clear_cache = False)
     
-    # Correct photometry for visit 4
+    # Correct photometry for visit 4 (separately normalize the two light curves that we stitched together)
     visit4 = erebus.photometry[3]
-    
-    '''
-    plt.plot(visit4.time, visit4.raw_flux)
-    plt.savefig("debug_figures/gj3929b_visit4_uncorrected_flux.png")
-    plt.close()
-
-    data = np.column_stack((visit4.time, visit4.raw_flux))
-    np.savetxt('debug_figures/gj3929b_visit4_uncorrected_flux.csv', data, delimiter=',', header='time, flux')
-    
-    #cutoff = np.where(visit4.raw_flux < 0.9950)[0][0]
-    '''
     
     cutoff = np.where(np.diff(visit4.time) > 0.01)[0][0] + 1
 
     visit4.raw_flux[:cutoff] = visit4.raw_flux[:cutoff] / np.median(visit4.raw_flux[:cutoff])
     visit4.raw_flux[cutoff:] = visit4.raw_flux[cutoff:] / np.median(visit4.raw_flux[cutoff:])   
-
-    '''    
-    plt.plot(visit4.time, visit4.raw_flux)
-    plt.savefig("debug_figures/gj3929b_visit4_corrected_flux.png")
-    plt.close()
-    
-    data = np.column_stack((visit4.time, visit4.raw_flux))
-    np.savetxt('debug_figures/gj3929b_visit4_corrected_flux.csv', data, delimiter=',', header='time, flux')
-    '''
     
     print("Fixed flux for visit 4")
     
-    # Cut first 2000 integrations
+    # Cut first 2000 integrations (500 were already cut when removing the ramp)
     s = np.argsort(visit4.time)
     visit4.raw_flux = visit4.raw_flux[s]
     visit4.time = visit4.time[s]
@@ -261,26 +231,9 @@ if __name__ == "__main__":
     
     cutoff_time = visit4.time[cutoff]
     
-    # Correct again because of the tilt event
+    # Correct again because of the possible tilt event
     visit4.raw_flux[:cutoff] = visit4.raw_flux[:cutoff] / np.median(visit4.raw_flux[:cutoff])
     visit4.raw_flux[cutoff:] = visit4.raw_flux[cutoff:] / np.median(visit4.raw_flux[cutoff:])   
-    
-    # Cut first 500 from visit 1
-    visit1 = erebus.photometry[0]
-    
-    #s = np.argsort(visit1.time)
-    #visit1.raw_flux = visit1.raw_flux[s]
-    #visit1.time = visit1.time[s]
-    #visit1.normalized_frames = visit1.normalized_frames[s]
-    
-    #visit1.raw_flux = visit1.raw_flux[500:]
-    #visit1.time = visit1.time[500:]
-    #visit1.normalized_frames = visit1.normalized_frames[500:]
-    
-    plt.plot(visit4.time, visit4.raw_flux)
-    plt.axvline(cutoff_time)
-    #plt.savefig("./debug_figures/gj3929b_visit4_cutoff.png")
-    plt.close()
     
     start_trim = 500
     
@@ -352,48 +305,5 @@ if __name__ == "__main__":
     folder_name = f"./output_final_{{NAME}}_{aperture_size}_{sys_str}_{jf_str}_{{DATE}}/"
     
     erebus._Erebus__setup_fits()
-
-    '''
-    if not joint_fit:
-        visit4_fit = erebus.individual_fits[3]
-        values = [visit4_fit.mcmc.params[v].value for v in visit4_fit.mcmc.get_free_params()]
-        print(values)
-        
-        print(cutoff_time)
-        print(visit4_fit.time[0])
-        
-        cutoff_time = visit4_fit.time[cutoff]
-        
-        args = ["x"] + [key for key in visit4_fit.mcmc.params][:-1]
-        fit_method = create_method_signature(IndividualFit._IndividualFit__fit_method, args)
-        visit4_fit.mcmc.set_method(fit_method)
-        IndividualFit._IndividualFit__instance = visit4_fit
-        
-        obs1_indices = np.where(visit4_fit.time < cutoff_time)[0]
-        obs2_indices = np.where(visit4_fit.time >= cutoff_time)[0]
-        
-        time = visit4_fit.time
-        starting_model = visit4_fit.mcmc.evaluate_model(time, *values)
-        plt.plot(time, visit4_fit.raw_flux)
-        plt.plot(time, starting_model)
-        plt.axvline(cutoff_time, color='black')
-        for i, f in enumerate(erebus.individual_fits):
-            if i != 3:
-                continue
-            plt.plot(f.time, f.raw_flux, label=f"{i}")
-        plt.legend()
-        plt.savefig("./debug_figures/visit_4_start.png")
-        plt.close()
-    else:
-        time = erebus.joint_fit.time
-        flux = erebus.joint_fit.raw_flux
-        plt.plot(time, flux)
-        plt.axvline(cutoff_time, color='black')
-        plt.xlim([erebus.joint_fit.starting_times[-1], np.max(erebus.joint_fit.time)])
-        plt.plot(visit4.time, visit4.raw_flux)
-        plt.savefig("./debug_figures/visit_4_start_joint_fit.png")
-        plt.close()
-        '''
-        
     erebus.run(force_clear_cache = True, output_folder=folder_name)
     
