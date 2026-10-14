@@ -188,9 +188,9 @@ class SpectroscopyWrappedFits(H5Serializable):
     def __load_folder(self):
         visit_names = f_util.get_fits_files_visits_in_folder(f"{self.source_folder}/")
         print("Visits: ", visit_names)
-        print("Is phase curve? ", self.is_phase_curve)
+        print("Should split up phase curve? ", self.split_phase_curve)
 
-        if self.is_phase_curve:
+        if self.split_phase_curve:
             relevant_eclipse_files = SpectroscopyWrappedFits.get_files_for_eclipse_index(self.source_folder, self.planet, self.eclipse_index)
             print("Loading files: ", relevant_eclipse_files)
             self.visit_name = f"{visit_names[0]}_eclipse_{self.eclipse_index}"
@@ -210,7 +210,7 @@ class SpectroscopyWrappedFits(H5Serializable):
         '''
         return SpectroscopyWrappedFits(planet, None, None, None, override_cache_path=cache_file)
     
-    def __init__(self, planet : Planet, source_folder: str, eclipse_index : int, is_phase_curve : bool, force_clear_cache : bool = False, override_cache_path : str = None):
+    def __init__(self, planet : Planet, source_folder: str, eclipse_index : int, split_phase_curve : bool, force_clear_cache : bool = False, override_cache_path : str = None):
         print(f"Initializing spectroscopy wrapped fits from folder [{source_folder}]")
         
         self.planet = planet
@@ -244,8 +244,8 @@ class SpectroscopyWrappedFits(H5Serializable):
             '''The index of the eclipse being observed. Either alphanumerical from visit name, or sequential for phase curves.'''
             self.source_folder : str = source_folder
             '''The directory containing the files this object is based on'''
-            self.is_phase_curve = is_phase_curve
-            '''If the data is from a phase curve (eclipses are extracted individually)'''
+            self.split_phase_curve = split_phase_curve
+            '''If the data is from a phase curve, should eclipses be extracted individually'''
             
             self.__load_folder()
             self.save_to_path(self._cache_file)

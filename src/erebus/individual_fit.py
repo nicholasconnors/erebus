@@ -79,7 +79,7 @@ class IndividualFit(BaseFit):
         
         lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
         
-        if config.fit_no_eclipse:
+        if not config.fit_eclipse:
             mcmc.add_parameter("fp", Parameter.fixed(0))
         else:
             mcmc.add_parameter("fp", Parameter.uniform_prior(400e-6, lower_limit, 2000e-6))
@@ -87,7 +87,7 @@ class IndividualFit(BaseFit):
         self._add_shared_physical_params(mcmc, config, planet)
         
         flag_t_sec_set = False
-        if not config.fit_no_eclipse:
+        if config.fit_eclipse:
             flag_t_sec_set = self._try_add_eclipse_timing_parameter("t_sec_offset", mcmc, config)
         if not flag_t_sec_set:
             mcmc.add_parameter("t_sec_offset", Parameter.fixed(0))
@@ -146,10 +146,11 @@ class IndividualFit(BaseFit):
     @staticmethod
     def __fit_method(x : List[float], fp : float, rp_rstar : float,
                        a_rstar : float, p : float, inc : float, esinw : float, ecosw : float, t_sec_offset : float,
+                       q1 : float, q2: float, A : float, B : float,
                        pc1 : float, pc2 : float, pc3 : float, pc4 : float, pc5 : float,
                        exp1 : float, exp2 : float, a : float, b : float, *extra_params) -> List[float]:
         systematic = IndividualFit.__instance.systematic_model(x, pc1, pc2, pc3, pc4, pc5, exp1, exp2, a, b, *extra_params)
-        physical = IndividualFit.__instance.physical_model(x, fp, rp_rstar, a_rstar, p, inc, esinw, ecosw, t_sec_offset)
+        physical = IndividualFit.__instance.physical_model(x, fp, rp_rstar, a_rstar, p, inc, esinw, ecosw, t_sec_offset, q1, q2, A, B)
         return physical * systematic
     
     #override

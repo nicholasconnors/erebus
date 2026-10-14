@@ -15,6 +15,7 @@ from erebus.utility.planet import Planet
 from erebus.utility.run_cfg import ErebusRunConfig
 from erebus.utility.utils import create_method_signature
 import inspect
+from erebus.utilities.lightcurve_models import model_lightcurve
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -54,8 +55,8 @@ class BaseFit(H5Serializable):
         self.raw_flux = List[float]
     
     def _add_shared_physical_params(self, mcmc : WrappedMCMC, config : ErebusRunConfig, planet : Planet):
-        fixed_timing_params = config.fix_eclipse_timing or config.fit_no_eclipse
-        fixed_planet_params = config.fit_no_eclipse
+        fixed_timing_params = config.fix_eclipse_timing or (not config.fit_eclipse and not config.fit_transit)
+        fixed_planet_params = not config.fit_eclipse and not config.fit_transit
         mcmc.add_parameter("rp_rstar", Parameter.prior_from_ufloat(planet.rp_rstar, positive_only=True, force_fixed=fixed_planet_params))
         mcmc.add_parameter("a_rstar", Parameter.prior_from_ufloat(planet.a_rstar, positive_only=True, force_fixed=fixed_planet_params))
         mcmc.add_parameter("p", Parameter.prior_from_ufloat(planet.p, positive_only=True, force_fixed=fixed_timing_params))
@@ -82,6 +83,20 @@ class BaseFit(H5Serializable):
                     # Uniform prior for esinw/ecosw from -1 to 1
                     mcmc.add_parameter("esinw", Parameter.uniform_prior(0, -1, 1))
                     mcmc.add_parameter("ecosw", Parameter.uniform_prior(0, -1, 1))
+        
+        if config.fit_transit:
+            mcmc.add_parameter("q1", Parameter.uniform_prior(0.1, 0.0, 1.0))
+            mcmc.add_parameter("q2", Parameter.uniform_prior(0.1, 0.0, 1.0))
+        else:
+            mcmc.add_parameter("q1", Parameter.fixed(0))
+            mcmc.add_parameter("q2", Parameter.fixed(0))
+        
+        if config.fit_lightcurve_phase:
+            mcmc.add_parameter("A", Parameter.uniform_prior(0.01, 0.0, 0.1))
+            mcmc.add_parameter("B", Parameter.uniform_prior(0.01, -0.1, 0.1))
+        else:
+            mcmc.add_parameter("A", Parameter.fixed(0))
+            mcmc.add_parameter("B", Parameter.fixed(0))
     
     def _try_add_eclipse_timing_parameter(self, name : str, mcmc : WrappedMCMC, config : ErebusRunConfig):
         if config.fix_eclipse_timing_offset is not None:
@@ -142,45 +157,21 @@ class BaseFit(H5Serializable):
         inc : float,
         esinw : float,
         ecosw : float,
-        t_sec_offset : float
+        t_sec_offset : float,
+        q1 : float = 0.0,
+        q2 : float = 0.0,
+        A : float = 0.0,
+        B : float = 0.0
     ) -> List[float]:
         '''
         Model for the lightcurve using batman
         fp is expected written in ppm
         x is time in BJD-2,400,000.5
         '''
-        if self.params is None:
-            params = batman.TransitParams()
-            params.limb_dark = "quadratic"
-            params.u = [0.3, 0.3]
-        
-        predicted_t_sec = self._get_predicted_t_sec_from_x(x)
-        predicted_t_sec = predicted_t_sec.nominal_value if hasattr(predicted_t_sec, 'nominal_value') else predicted_t_sec
-        
-        t0 = self.planet.get_closest_t0(x[0]) 
-        params.t0 = t0.nominal_value if hasattr(t0, 'nominal_value') else t0
-        params.t_secondary = predicted_t_sec + (2 * p * ecosw / np.pi) + t_sec_offset
-        params.fp = fp
-        params.rp = rp_rstar
-        params.inc = inc
-        params.per = p
-        params.a = a_rstar  
-        
-        ecc = umath.sqrt(ecosw ** 2 + esinw **2)
-        w = (umath.atan2(esinw, ecosw) % (2 * np.pi)) * 180 / np.pi
 
-        params.ecc = ecc
-        params.w = w % 360
-        
-        transit_model = self._get_transit_model_from_x(x, params)
+        t0 = self.planet.get_closest_t0(x[0])
+        return model_lightcurve(x, fp, t_sec_offset, t0, p, rp_rstar, a_rstar, inc, ecosw, esinw, q1, q2, A, B):
 
-        flux_model = transit_model.light_curve(params)
-        
-        # Todo: Implement lightcurve phase
-        # if self.config.fit_lightcurve_phase:
-        #     flux_model = ((flux_model - 1) * ((1 / 2.0) * np.cos(2 * np.pi * x / params.per + np.pi) + (1/2.0))) + 1
-        
-        return flux_model
     
     def systematic_model(
         self, 

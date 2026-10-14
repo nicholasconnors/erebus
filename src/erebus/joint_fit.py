@@ -214,7 +214,7 @@ class JointFit(BaseFit):
         fp_lower_limit = 0 if config.prevent_negative_eclipse_depth else -2000e-6
         fp_upper_limit = 2000e-6
         
-        if config.fit_no_eclipse or config.fit_eclipse_depth_per_visit:
+        if not config.fit_eclipse or config.fit_eclipse_depth_per_visit:
             mcmc.add_parameter("fp", Parameter.fixed(0))
         else:
             mcmc.add_parameter("fp", Parameter.uniform_prior(400e-6, fp_lower_limit, fp_upper_limit))
@@ -223,9 +223,9 @@ class JointFit(BaseFit):
         
         # If not fitting eclipse, don't fit timing
         # If fitting a separate timing per eclipse, don't set those global offset
-        should_fit_individual_t_sec_offset = not config.fit_no_eclipse and config.fit_eclipse_timing_offset_per_visit
-        should_fit_global_t_sec_offset = not config.fit_no_eclipse and not config.fit_eclipse_timing_offset_per_visit
-        should_fit_individual_eclipse_depths = not config.fit_no_eclipse and config.fit_eclipse_depth_per_visit
+        should_fit_individual_t_sec_offset = config.fit_eclipse and config.fit_eclipse_timing_offset_per_visit
+        should_fit_global_t_sec_offset = config.fit_eclipse and not config.fit_eclipse_timing_offset_per_visit
+        should_fit_individual_eclipse_depths = config.fit_eclipse and config.fit_eclipse_depth_per_visit
         
         flag_global_t_sec_set = False
         if should_fit_global_t_sec_offset:

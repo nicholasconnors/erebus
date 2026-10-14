@@ -41,7 +41,6 @@ class ErebusRunConfig(BaseModel):
         fit_eclipse_timing_offset_per_visit (bool): Optional bool to use a different eclipse timing offset for each visit during a joint fit.
         fit_eclipse_depth_per_visit (bool): Optional bool to use a different eclipse depth for each visit during a joint fit.
         joint_fit_bin_size (int): Optional bin size for joint fit, if performed. Defaults to 4.
-        fit_no_eclipse (bool): Optionally fit only systematic (as in, eclipse depth is 0).
     '''    
     fit_fnpca : Optional[bool] = False
     fit_exponential : Optional[bool] = False
@@ -76,9 +75,14 @@ class ErebusRunConfig(BaseModel):
     fit_eclipse_timing_offset_per_visit : Optional[bool] = False
     fit_eclipse_depth_per_visit : Optional[bool] = False
     max_steps : Optional[int] = None
-    fit_lightcurve_phase : Optional[bool] = False
     joint_fit_bin_size : Optional[int] = 4
-    fit_no_eclipse : Optional[bool] = False
+    
+    # More astrophysical fitting options
+    fit_lightcurve_phase : Optional[bool] = False
+    fit_transit : Optional[bool] = False
+    fit_eclipse : Optional[bool] = True
+    split_phase_curve_eclipses : Optional[bool] = True
+    '''Do we individually fit each eclipse within a phase curve observation'''
     
     _custom_systematic_model = None
     _custom_parameters : dict = None

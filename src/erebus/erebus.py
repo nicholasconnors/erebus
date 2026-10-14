@@ -83,8 +83,8 @@ class Erebus(H5Serializable):
         self.visit_names : list[str] = []
         '''The unique names of each visit.'''
         
-        self.is_phase_curve = False
-        '''If this data represents a phase curve. Currently only supported for spectroscopy'''
+        self.split_phase_curve = False
+        '''If this data represents a phase curve, should we split up and fit each eclipse? Currently only supported for spectroscopy'''
         
         # Load from file if needed
         if override_wrapped_fits is None:
@@ -132,9 +132,10 @@ class Erebus(H5Serializable):
                     # Improve memory usage, I don't trust the GC
                     del fit
             elif run_cfg.instrument == "miri_lrs":
-                # Currently only spectroscopy supports phase curves
-                is_phase_curve = False
-                if len(self.visit_names) == 1:
+                # Currently only spectroscopy supports splitting up phase curves
+                split_phase_curve = False
+                
+                if len(self.visit_names) == 1 and run_cfg.split_phase_curve_eclipses:
                     print("Checking if this is a phase curve")
                     num_eclipses = 1
                     for i in range(10):
@@ -147,18 +148,18 @@ class Erebus(H5Serializable):
                             num_eclipses = i
                             print(f"Counted {num_eclipses} in the data")
                             break
-                    is_phase_curve = num_eclipses > 1
-                    if is_phase_curve:
+                    split_phase_curve = num_eclipses > 1
+                    if split_phase_curve:
                         print("It is a phase curve")
                         self.visit_names = [f"{self.visit_names[0]}_eclipse_{i}" for i in range(num_eclipses)]
                         
                 for i, visit in enumerate(self.visit_names):
                     fit = SpectroscopyWrappedFits(self.planet, self._calints_abs_path, i,
-                                                  is_phase_curve, force_clear_cache)
+                                                  split_phase_curve, force_clear_cache)
                     self.spectroscopy.append(SpectroscopyData(fit, run_cfg.do_optimal_extraction, 
                                                               run_cfg.wl_start, run_cfg.wl_end, force_clear_cache))     
                     del fit
-                self.is_phase_curve = is_phase_curve
+                self.split_phase_curve = split_phase_curve
         
         self.light_curves = self.photometry if len(self.photometry) > 0 else self.spectroscopy
         '''A list of either photometry or spectroscopy light curves'''
