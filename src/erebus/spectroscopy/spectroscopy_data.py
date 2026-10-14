@@ -133,12 +133,22 @@ class SpectroscopyData(H5Serializable):
         D = frames[:, :, spatial_window] # fit optimal extraction on a 20 pixel width window
         # V is the variance of the data within our window
         V = errors[:, :, spatial_window] ** 2 # error squared is variance
+
         # Sometimes the errors are nans or 0 so remove those
         good_pixels = np.isfinite(D) & np.isfinite(V) & (V > 0)
         print(f"Invalid errors count: {np.sum(~good_pixels)} / {len(good_pixels)}")
         D = np.where(good_pixels, D, 0.0) # bad pixels set to 0
         V = np.where(good_pixels, V, 1.0) # bad pixels have variance 1
         M = good_pixels.astype(float) # 1 for good 0 for ba
+        
+        # For debugging
+        self.spatial_profile = P
+        self.variance = V
+        self.data = D
+        self.mask = M
+        
+        # Gives very weird results otherwise, revisit later
+        V = np.ones_like(D) 
         
         # According to Table I, Equation 8
         optimal_flux = np.sum(M * P * D / V, axis=(1, 2)) / np.sum(M * P**2 / V, axis=(1, 2))

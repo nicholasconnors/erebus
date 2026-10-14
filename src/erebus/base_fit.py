@@ -15,7 +15,7 @@ from erebus.utility.planet import Planet
 from erebus.utility.run_cfg import ErebusRunConfig
 from erebus.utility.utils import create_method_signature
 import inspect
-from erebus.utilities.lightcurve_models import model_lightcurve
+from erebus.utility.lightcurve_models import model_lightcurve
 
 EREBUS_CACHE_DIR = "erebus_cache"
 
@@ -169,8 +169,8 @@ class BaseFit(H5Serializable):
         x is time in BJD-2,400,000.5
         '''
 
-        t0 = self.planet.get_closest_t0(x[0])
-        return model_lightcurve(x, fp, t_sec_offset, t0, p, rp_rstar, a_rstar, inc, ecosw, esinw, q1, q2, A, B):
+        t0 = self.planet.get_closest_t0(x[0]).nominal_value
+        return model_lightcurve(x, fp, t_sec_offset, t0, p, rp_rstar, a_rstar, inc, ecosw, esinw, q1, q2, A, B)
 
     
     def systematic_model(
