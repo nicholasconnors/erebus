@@ -261,6 +261,7 @@ class Erebus(H5Serializable):
                     plotting.chain_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_chain.png")
                 except Exception as e:
                     print(f"Plotting routine failed: {e}")
+                np.save(output_folder + f"visit_{i}_full_chain.npy", self.joint_fit.mcmc.full_chain)
 
         if self.config.perform_joint_fit:           
             has_run = self.joint_fit.has_converged()
@@ -284,9 +285,13 @@ class Erebus(H5Serializable):
                 plotting.corner_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_corner.png")
                 plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.png")
             except Exception as e:
-                print(f"Plotting routine failed: {e}")        
+                print(f"Plotting routine failed: {e}")  
+                
+            np.save(output_folder + "jf_full_chain.npy", self.joint_fit.mcmc.full_chain)
+      
         if self.config.spectroscopic_bins is not None and self.config.spectroscopic_bins > 0:
             self.run_spectroscopic_bins(self.config.spectroscopic_bins, force_clear_cache=force_clear_cache)
+        
 
     def run_spectroscopic_bins(self, num_bins, wl_start_override = None, wl_end_override = None, force_clear_cache=False):
         '''Fits binned spectroscopic light curves. Can only be called after a wlc run has completed. By default will bin across the wlc range'''
