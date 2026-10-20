@@ -63,12 +63,13 @@ class WrappedFits(H5Serializable):
             self._star_y = None if star_pixel_position is None else star_pixel_position[1]
             self.frames = []
             self.raw_frames = []
+            self.bad_pixel_mask = []
             
             if custom_timeseries_data is not None:
                 raw_frames, time = custom_timeseries_data
                 self.raw_frames = np.array(raw_frames)
                 self.time = np.array(time)
-                self.frames = ap_utils.clean_frames(self.raw_frames, 5)
+                self.frames, self.bad_pixel_mask = ap_utils.clean_frames(self.raw_frames, 5)
             else:
                 self.__load_from_calints_file()
             
@@ -78,9 +79,10 @@ class WrappedFits(H5Serializable):
         '''
         Loads a calints file and wraps it taking only 127x127 pixels around the star and the time series
         '''
-        frames, time = f_utils.load_all_calints_for_visit(self.source_folder, self.visit_name)
+        frames, time, do_not_use_mask = f_utils.load_all_calints_for_visit(self.source_folder, self.visit_name)
         
         self.time = time
+        self.do_not_use_mask = do_not_use_mask
         
         figures = "./debug_figures"
         
@@ -93,12 +95,15 @@ class WrappedFits(H5Serializable):
         plot_y = frames[0].shape[1]//2 if self._star_y is None else self._star_y
         plt.plot([plot_x], [plot_y], marker="x")
         plt.savefig(figures + "/" + self.visit_name + "_first_frame.png")
+        plt.close()
 
         if self._star_x is None or self._star_y is None:
-            self._star_x, self._star_y = ap_utils.fit_star_position(frames[0])
+            # replace nans with median just to be able to fit for the star position
+            first_frame_no_nan = np.where(np.isnan(frames[0]), np.nanmedian(frames[0]), frames[0])
+            self._star_x, self._star_y = ap_utils.fit_star_position(first_frame_no_nan)
                 
         # Get 127x127 frame
         self.raw_frames = np.array([utils.subarray_2D(frame, self._star_x, self._star_y, 127) for frame in frames])
         
         # Remove nan and 5 sigma outliers
-        self.frames = ap_utils.clean_frames(self.raw_frames, 5)
+        self.frames, self.bad_pixel_mask = ap_utils.clean_frames(self.raw_frames, 5)

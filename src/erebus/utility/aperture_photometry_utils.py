@@ -38,18 +38,20 @@ def clean_frames(raw_frames : np.ndarray, outlier_threshold : float) -> np.ndarr
             pixel_light_curve = raw_frames[:,i,j]
             frames[:,i,j] = pixel_light_curve
 
-            # First reject nan, 0
+            # First reject nan and inf
+            # Do not reject zero because sometimes the stage 2 output can report a negative flux in a pixel
+            # background subtraction will deal with that
             nan = np.isnan(pixel_light_curve)
-            zero = pixel_light_curve <= 0
-            mask = np.logical_or(nan, zero)
+            inf = ~np.isfinite(pixel_light_curve)
+            mask = np.logical_or(nan, inf)
 
             # If more than 75% of the observation was bad just ditch the pixel
             if mask.sum() > frames.shape[0] * 3 / 4:
                 bad_pixel_count+=1
                 bad_pixels.append((i,j))
-                continue		
-            else:
-                good_pixels.append((i,j))
+                continue
+            
+            good_pixels.append((i,j))
 
             if not (~mask).all():
                 frames[:,i,j][mask] = np.interp(np.flatnonzero(mask), np.flatnonzero(~mask), pixel_light_curve[~mask])
@@ -85,7 +87,7 @@ def clean_frames(raw_frames : np.ndarray, outlier_threshold : float) -> np.ndarr
     print(f"{interpolated_pixel_count} values were interpolated out of {total_pixels}")
     print(f"{outlier_count} values were outliers out of {total_pixels}")
     
-    return frames
+    return frames, bad_pixel_mask
 
 def is_point_in_disk(x : int, y : int, center_x : int, center_y : int,
                      inner_radius : int, outer_radius : int) -> bool:
