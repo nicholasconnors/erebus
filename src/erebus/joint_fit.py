@@ -251,7 +251,7 @@ class JointFit(BaseFit):
         for visit_index in self.visit_indices:
             self._add_systematic_parameters(f"_{visit_index}", visit_index, mcmc, config)
 
-        mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))
+        mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 6000e-6))
         
         # All args except for y_err
         args = ["x"] + [key for key in mcmc.params][:-1]

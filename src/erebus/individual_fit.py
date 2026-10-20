@@ -95,7 +95,7 @@ class IndividualFit(BaseFit):
         self._add_systematic_parameters("", self.index, mcmc, config)
 
         # y_err always goes last
-        mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 2000e-6))      
+        mcmc.add_parameter("y_err", Parameter.uniform_prior(400e-6, 0, 6000e-6))      
                   
         args = ["x"] + [key for key in mcmc.params][:-1]
                 
