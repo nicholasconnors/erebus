@@ -51,6 +51,18 @@ class PhotometryData(H5Serializable):
             self.normalized_frames = []
             '''Normalized and background subtracted frames used for performing FN-PCA.'''
             
+            self.median_frame = []
+            '''Median frame (after processing) from the fits files'''
+            
+            self.median_raw_frame = []
+            '''Median frame (raw, unprocessed) from the fits files'''
+            
+            self.do_not_use_mask = []
+            '''DO NOT USE mask'''
+            
+            self.bad_pixel_mask = []
+            '''Rejected pixel mask including those rejected as outliers'''
+            
             self.radius = radius
             '''Pixel radius used for aperture photometry.'''
             self.annulus_start = annulus[0]
@@ -60,6 +72,11 @@ class PhotometryData(H5Serializable):
 
             self.fits_file_location = os.path.abspath(fits_file._cache_file)
             '''Absolute path of the cache file for the fits file that aperture photometry was performed on.'''
+            
+            self.median_raw_frame = np.median(fits_file.raw_frames, axis = 0)
+            self.median_frame = np.median(fits_file.frames, axis = 0)
+            self.bad_pixel_mask = fits_file.bad_pixel_mask
+            self.do_not_use_mask = np.mean(fits_file.do_not_use_mask, axis = 0)
             
             self.__do_aperture_photometry(fits_file)
             self.__get_normalized_frames(fits_file)

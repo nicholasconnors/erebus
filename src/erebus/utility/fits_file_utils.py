@@ -32,7 +32,8 @@ def get_fits_files_in_folder(folder : str, visit_name : str, calibrated : bool):
 def load_all_calints_for_visit(folder : str, visit_name : str):
     '''
     Combines all pixel data into a single 3d array from all calints files in the directory
-    Pixels marked DO_NOT_USE are set to -1
+    Pixels marked DO_NOT_USE are set to nan
+    Also returns the mask used
     '''
 
     print(f"Loading data from calints in {folder}")
@@ -40,6 +41,7 @@ def load_all_calints_for_visit(folder : str, visit_name : str):
     
     combined_data = []
     combined_times = []
+    do_not_use_mask = []
     
     print(f"Loading {len(calints_file_names)} segments")
     
@@ -55,11 +57,16 @@ def load_all_calints_for_visit(folder : str, visit_name : str):
         
         # Rejecting any data points that are flagged as DO NOT USE
         do_not_use = dqflags.interpret_bit_flags('DO_NOT_USE', mnemonic_map = dqflags.pixel)
-        indx=np.where((dq_array & do_not_use) != 0)
-        data[indx] = -1
+        indx = np.where((dq_array & do_not_use) != 0)
+        data[indx] = np.nan
+        
+        bad_pixel_mask_i = np.zeros_like(data)
+        bad_pixel_mask_i[indx] = 1
         
         for d in data:
             combined_data.append(d)
+        for b in bad_pixel_mask_i:
+            do_not_use_mask.append(b)
         for t in int_starts:
             combined_times.append(t)
                 
@@ -68,9 +75,11 @@ def load_all_calints_for_visit(folder : str, visit_name : str):
     
     combined_data = np.array(combined_data)
     combined_times = np.array(combined_times)
+    do_not_use_mask = np.array(do_not_use_mask)
 
     sorted_indices = np.argsort(combined_times)
     sorted_t = combined_times[sorted_indices]
     sorted_data = combined_data[sorted_indices]
+    sorted_do_not_use_mask = do_not_use_mask[sorted_indices]
     
-    return sorted_data, sorted_t
+    return sorted_data, sorted_t, sorted_do_not_use_mask
