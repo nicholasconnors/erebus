@@ -155,3 +155,10 @@ class SpectroscopyData(H5Serializable):
         
         # Report as normalized flux
         self.raw_flux = optimal_flux / np.nanmedian(optimal_flux)
+        
+        # Outlier removal after spectroscopy
+        valid_inds = np.array([np.abs(f - np.median(self.raw_flux)) < 5 * np.std(self.raw_flux) for f in self.raw_flux])
+        self.raw_flux = self.raw_flux[valid_inds]
+        self.time = self.time[valid_inds]
+        self.normalized_frames = self.normalized_frames[valid_inds]
+        self.valid_inds = valid_inds

@@ -86,6 +86,7 @@ class PhotometryData(H5Serializable):
             self.raw_flux = self.raw_flux[valid_inds]
             self.time = self.time[valid_inds]
             self.normalized_frames = self.normalized_frames[valid_inds]
+            self.valid_inds = valid_inds
             
             self.save_to_path(self._cache_file)
     
