@@ -5,7 +5,6 @@ import batman
 Adapted from SPCA https://github.com/lisadang27/SPCA/blob/master/SPCA/astro_models.py
 '''
 
-
 def transit_model(time, t0, per, rp, a, inc, ecosw, esinw, q1, q2):
     ecc = np.sqrt(ecosw ** 2 + esinw ** 2)
     w = (np.arctan2(esinw, ecosw) % (2 * np.pi)) * 180 / np.pi
