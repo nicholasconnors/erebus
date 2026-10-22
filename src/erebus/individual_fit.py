@@ -64,8 +64,10 @@ class IndividualFit(BaseFit):
         
         if isinstance(self.lightcurve_data, PhotometryData):
             self.eigenvalues, self.eigenvectors, self.pca_variance_ratios = perform_fn_pca_on_aperture(lightcurve_data.normalized_frames[self.start_trim:self.end_trim])
+            self.first_frame = lightcurve_data.normalized_frames[self.start_trim]
         elif isinstance(self.lightcurve_data, SpectroscopyData):
             self.eigenvalues, self.eigenvectors, self.pca_variance_ratios = perform_fn_pca_on_spatial_profile(lightcurve_data.spatial_profiles[self.start_trim:self.end_trim])
+            self.first_frame = lightcurve_data.data[self.start_trim]
         else:
             #TODO: Unsupported type
             self.eigenvalues = np.ones_like(lightcurve_data.raw_flux[self.start_trim:self.end_trim])

@@ -20,6 +20,8 @@ from erebus.spectroscopy.spectroscopy_data import SpectroscopyData
 import erebus.eureka_util as eureka_util
 import copy
 
+from concurrent.futures import ProcessPoolExecutor
+
 EREBUS_CACHE_DIR = "erebus_cache"
 
 class Erebus(H5Serializable):   
@@ -257,11 +259,15 @@ class Erebus(H5Serializable):
                 try:
                     plotting.plot_fnpca_individual_fit(fit, figure_folder)
                     plotting.plot_eigenvectors(fit, eigenvec_folder)        
+                except Exception as e:
+                    print(f"Plotting routine failed: {e}")
+                try:
                     plotting.corner_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_corner.png")
                     plotting.chain_plot(fit.mcmc, f"{figure_folder}/{fit.planet_name}_{fit.visit_name}_{fit.config_hash}_chain.png")
                 except Exception as e:
-                    print(f"Plotting routine failed: {e}")
-                np.save(output_folder + f"visit_{i}_full_chain.npy", self.joint_fit.mcmc.full_chain)
+                    print(f"Plotting chain/corner plot failed: {e}")
+                
+                np.save(output_folder + f"visit_{i}_full_chain.npy", fit.mcmc.full_chain)
 
         if self.config.perform_joint_fit:           
             has_run = self.joint_fit.has_converged()
@@ -282,10 +288,13 @@ class Erebus(H5Serializable):
             
             try:
                 plotting.plot_joint_fit(self.joint_fit, figure_folder)
+            except Exception as e:
+                print(f"Plotting routine failed: {e}")  
+            try:
                 plotting.corner_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_corner.png")
                 plotting.chain_plot(self.joint_fit.mcmc, f"{figure_folder}/{self.joint_fit.planet_name}_joint_{self.joint_fit.config_hash}_chain.png")
             except Exception as e:
-                print(f"Plotting routine failed: {e}")  
+                print(f"Plotting chain/corner plot failed: {e}")  
                 
             np.save(output_folder + "jf_full_chain.npy", self.joint_fit.mcmc.full_chain)
       
@@ -303,39 +312,59 @@ class Erebus(H5Serializable):
         skip_visits = copy.deepcopy(self.config.skip_visits)
         
         print("Reducing binned spectroscopic light curves with bins", bins)
-        # TODO: Can parallellize this (How do you spell parallelize paralellize)
         if cfg.perform_individual_fits:
+            task_args = []
             for i, wlc_fit in enumerate(self.individual_fits):
                 if i in skip_visits:
                     continue
-                
+                visit_cfg = copy.deepcopy(cfg)
+                visit_cfg.skip_visits = [j for j in range(0, len(self.individual_fits)) if j != i]
+                visit_cfg.perform_joint_fit = False
                 wlc_results = copy.deepcopy(wlc_fit.results)
-                
-                cfg.skip_visits = [j for j in range(0, len(self.individual_fits)) if j != i]
-                cfg.perform_joint_fit = False
                 for bin_start, bin_end in bins:
-                    cfg.wl_start = bin_start
-                    cfg.wl_end = bin_end
-                    # Avoid recursively calling this
-                    cfg.spectroscopic_bins = None
-                    
-                    # Use t_sec fit result as a fixed prior
-                    if 't_sec_offset' in wlc_results:
-                        cfg.fit_uniform_eclipse_timing_offset = None
-                        cfg.fit_gaussian_eclipse_timing_offset = None
-                        cfg.fix_eclipse_timing_offset = wlc_results['t_sec_offset'].nominal_value
-                    
-                    binned_erebus = Erebus(cfg)
-                    # Use the results of the WLC planet parameters as fixed inputs here
-                    for key in ['a_rstar', 'ecc', 'inc', 'p', 'rp_rstar', 't0', 'w']:
-                        if key in wlc_results:
-                            print("Fixing", key, "to", wlc_results[key].nominal_value)
-                            setattr(binned_erebus.planet, key, wlc_results[key].nominal_value)
-                    binned_erebus.reset_fits()
-                    print(f"Fitting binned light curve from {bin_start} to {bin_end}")
-                    binned_erebus.run(output_folder=self.output_folder + f"spectroscopic_bins_{(i+1)}/{int(bin_start*1000)}_{int(bin_end*1000)}/", force_clear_cache=force_clear_cache)
-                    
-                    # TODO: Save the extracted spectrum somewhere or make a helper method to get it from this file structure
+                    bin_output_folder = self.output_folder + f"spectroscopic_bins_{(i+1)}/{int(bin_start*1000)}_{int(bin_end*1000)}/"
+                    task_args.append((visit_cfg, wlc_results, bin_start, bin_end, bin_output_folder, force_clear_cache))
+            # Each Erebus instance makes 2 threads when fitting
+            n_workers = max(1, get_available_cores() // 2)
+            n_workers = min(n_workers, len(task_args))
+            
+            with ProcessPoolExecutor(max_workers=n_workers) as pool:
+                list(pool.map(_run_single_bin, task_args))
+                
         if cfg.perform_joint_fit:
             # TODO
             print("Support for joint fit spectroscopic binned light curves has not been added")
+
+def get_available_cores():
+    # For now when now running on slurm just treat it as one core
+    slurm_cpus = os.environ.get("SLURM_CPUS_PER_TASK")
+    if slurm_cpus:
+        return int(slurm_cpus)
+    else:
+        return 1
+
+def _run_single_bin(args):
+    # Can't be in the class because itd try to serialize the whole object when putting it on a thread
+    cfg, wlc_results, bin_start, bin_end, output_folder, force_clear_cache = args
+
+    cfg.wl_start = bin_start
+    cfg.wl_end = bin_end
+    # Avoid recursively calling this
+    cfg.spectroscopic_bins = None
+    
+    # Use t_sec fit result as a fixed prior
+    if 't_sec_offset' in wlc_results:
+        cfg.fit_uniform_eclipse_timing_offset = None
+        cfg.fit_gaussian_eclipse_timing_offset = None
+        cfg.fix_eclipse_timing_offset = wlc_results['t_sec_offset'].nominal_value
+    
+    binned_erebus = Erebus(cfg)
+    # Use the results of the WLC planet parameters as fixed inputs here
+    for key in ['a_rstar', 'ecc', 'inc', 'p', 'rp_rstar', 't0', 'w']:
+        if key in wlc_results:
+            print("Fixing", key, "to", wlc_results[key].nominal_value)
+            setattr(binned_erebus.planet, key, wlc_results[key].nominal_value)
+    binned_erebus.reset_fits()
+    print(f"Fitting binned light curve from {bin_start} to {bin_end}")
+    binned_erebus.run(output_folder=output_folder, force_clear_cache=force_clear_cache)
+    

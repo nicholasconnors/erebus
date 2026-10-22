@@ -157,11 +157,11 @@ class BaseFit(H5Serializable):
         inc : float,
         esinw : float,
         ecosw : float,
-        t_sec_offset : float,
         q1 : float = 0.0,
         q2 : float = 0.0,
         A : float = 0.0,
-        B : float = 0.0
+        B : float = 0.0,
+        t_sec_offset : float = 0.0,
     ) -> List[float]:
         '''
         Model for the lightcurve using batman

@@ -82,11 +82,11 @@ class PhotometryData(H5Serializable):
             self.__get_normalized_frames(fits_file)
             
             # Outlier removal after photometry
-            valid_inds = np.array([np.abs(f - np.median(self.raw_flux)) < 5 * np.std(self.raw_flux) for f in self.raw_flux])
-            self.raw_flux = self.raw_flux[valid_inds]
-            self.time = self.time[valid_inds]
-            self.normalized_frames = self.normalized_frames[valid_inds]
-            self.valid_inds = valid_inds
+            for i in range(5):
+                valid_inds = np.array([np.abs(f - np.median(self.raw_flux)) < 5 * np.std(self.raw_flux) for f in self.raw_flux])
+                self.raw_flux = self.raw_flux[valid_inds]
+                self.time = self.time[valid_inds]
+                self.normalized_frames = self.normalized_frames[valid_inds]
             
             self.save_to_path(self._cache_file)
     

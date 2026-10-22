@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "erebus_exoplanet"
-version = "0.8.2"
+version = "0.9.0"
 authors = [
   { name="Nicholas Connors", email="nicholas.connors@umontreal.ca" },
 ]
-description = "An exoplanet eclipse depth tool"
+description = "An exoplanet lightcurve fitting tool"
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
