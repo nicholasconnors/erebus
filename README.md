@@ -1,3 +1,5 @@
+![Erebus logo](erebus_logo.svg)
+
 ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/nicholasconnors/erebus/latest/total)
 ![GitHub Pages Deployment](https://img.shields.io/github/actions/workflow/status/nicholasconnors/erebus/publish_docs.yaml?label=pages)
 
