@@ -92,7 +92,7 @@ class BaseFit(H5Serializable):
             mcmc.add_parameter("q2", Parameter.fixed(0))
         
         if config.fit_lightcurve_phase:
-            mcmc.add_parameter("A", Parameter.uniform_prior(0.01, 0.0, 1))
+            mcmc.add_parameter("A", Parameter.uniform_prior(0.5, 0.0, 1))
             mcmc.add_parameter("B", Parameter.uniform_prior(0.01, -1, 1))
         else:
             mcmc.add_parameter("A", Parameter.fixed(0))
